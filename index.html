@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CRM Ibero">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>CRM La Ibero</title>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -42,17 +43,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;cursor:pointer;color:#888;border-bottom:2px solid transparent}
 .tab.active{color:#C0392B;border-bottom-color:#C0392B;font-weight:500}
 /* TECLADO */
-.display{background:#f8f8f8;border:1px solid #ddd;border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.display{background:#f8f8f8;border:1px solid #ddd;border-radius:8px;padding:7px 12px;margin-bottom:6px}
 .display-mode{font-size:11px;color:#888;margin-bottom:4px}
-.display-val{font-size:32px;font-weight:600;letter-spacing:3px;color:#222;min-height:40px}
+.display-val{font-size:26px;font-weight:600;letter-spacing:2px;color:#222;min-height:30px}
 .display-hint{font-size:12px;color:#C0392B;margin-top:4px}
-.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.tkey{height:60px;font-size:24px;font-weight:500;border:1px solid #ddd;border-radius:10px;background:#fff;color:#222;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px}
+.tkey{height:52px;font-size:22px;font-weight:500;border:1px solid #ddd;border-radius:10px;background:#fff;color:#222;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tkey:active{background:#f0f0f0;transform:scale(.96)}
 .tkey.wide{grid-column:span 2}
 .tkey.del{font-size:18px;background:#f5f5f5}
 /* BOTONES */
-.btn{width:100%;padding:14px;font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:8px}
+.btn{width:100%;padding:11px;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:6px}
 .btn-blue{background:#1a73e8;color:#fff}
 .btn-green{background:#1e8449;color:#fff}
 .btn-red{background:#C0392B;color:#fff}
@@ -382,6 +383,13 @@ function exportarDia() {
 }
 
 // SERVICE WORKER
+// Evitar que el teclado del sistema desplace el layout
+document.addEventListener('focusin', function(e) {
+  if(e.target.tagName === 'INPUT') {
+    setTimeout(() => { e.target.scrollIntoView({block:'center'}); }, 300);
+  }
+});
+
 if("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
