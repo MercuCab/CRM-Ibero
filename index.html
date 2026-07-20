@@ -203,6 +203,12 @@ function renderDias(){
 function selDia(d){diaActual=d;renderDias();filtrarClientes(document.getElementById("search").value);}
 
 // ── CLIENTES ──
+function getClientesDia(dia){
+  const base=CLIENTES[dia]||[];
+  const extra=DATA[`clientes_extra_${dia}`]||[];
+  return [...base,...extra];
+}
+
 function filtrarClientes(q){
   const lista=getClientesDia(diaActual).filter(c=>!q||c.nom.toLowerCase().includes(q.toLowerCase())||c.num.includes(q));
   const h=hoy();
@@ -747,11 +753,7 @@ function guardarNuevoCliente(){
 }
 
 // ── OBTENER LISTA DE CLIENTES (incluye extras) ──
-function getClientesDia(dia){
-  const base=CLIENTES[dia]||[];
-  const extra=DATA[`clientes_extra_${dia}`]||[];
-  return [...base,...extra];
-}
+
 
 const LISTA_PRECIOS=[
 {"cod":"1018","desc":"JAMON CRUDO PARMA \"MONTESANO\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":73610.35},
