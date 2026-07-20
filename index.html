@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#C0392B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CRM Ibero">
+<title>CRM La Ibero</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f0f0f0;height:100vh;overflow:hidden}
+.screen{display:none;height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.header{background:#C0392B;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;min-height:54px;flex-shrink:0}
+.header h1{font-size:17px;font-weight:600;flex:1}
+.header-back{font-size:26px;cursor:pointer;padding:4px 8px 4px 0;line-height:1}
+.header-sub{font-size:12px;opacity:.8;margin-top:1px}
+.scroll{flex:1;overflow-y:auto;padding:12px;padding-bottom:80px}
+.dias-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.dia-btn{padding:12px 4px;text-align:center;background:#fff;border:2px solid #e0e0e0;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:#333}
+.dia-btn.active{background:#C0392B;border-color:#C0392B;color:#fff}
+.search-box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px 14px;font-size:15px;width:100%;margin-bottom:12px}
+.cli-card{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.cli-card:active{background:#f5f5f5}
+.cli-nom{font-size:14px;font-weight:500;color:#222}
+.cli-num{font-size:12px;color:#888;margin-top:2px}
+.cli-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.badge-ok{background:#d5f5e3;color:#1e8449}
+.badge-pend{background:#fdebd0;color:#d4820a}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e0e0e0;flex-shrink:0;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:11px 12px;text-align:center;font-size:12px;cursor:pointer;color:#888;border-bottom:2px solid transparent;white-space:nowrap}
+.tab.active{color:#C0392B;border-bottom-color:#C0392B;font-weight:500}
+/* PEDIDO */
+.pedido-layout{display:flex;flex-direction:column;height:100%;min-height:0}
+.pedido-top{flex:1;overflow-y:auto;padding:12px}
+.teclado-fijo{background:#fff;border-top:2px solid #C0392B;padding:6px 10px 24px;flex-shrink:0}
+.display{background:#fff;border:2px solid #C0392B;border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.display-mode{font-size:13px;font-weight:700;color:#C0392B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+.display-val{font-size:30px;font-weight:700;letter-spacing:3px;color:#222;min-height:36px}
+.display-hint{font-size:11px;color:#C0392B;margin-top:2px}
+.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:5px}
+.tkey{height:50px;font-size:22px;font-weight:600;border:1px solid #ddd;border-radius:8px;background:#fff;color:#222;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tkey:active{background:#f0f0f0;transform:scale(.96)}
+.tkey.wide{grid-column:span 2}
+.tkey.del{font-size:16px;background:#f5f5f5}
+.btn{width:100%;padding:10px;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-bottom:4px}
+.btn:active{opacity:.85}
+.btn-blue{background:#1a73e8;color:#fff}
+.btn-green{background:#1e8449;color:#fff}
+.btn-red{background:#C0392B;color:#fff}
+.btn-gray{background:#eee;color:#444}
+.btn-orange{background:#e67e22;color:#fff}
+.btn-sm{padding:7px 12px;font-size:12px;font-weight:500;border:none;border-radius:8px;cursor:pointer;width:auto}
+/* ITEMS */
+.pedido-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f0}
+.pedido-item:last-child{border:none}
+.pi-cod{font-size:14px;font-weight:500}
+.pi-qty{font-size:14px;color:#1a73e8;font-weight:600}
+.pi-del{background:none;border:none;color:#ccc;font-size:18px;padding:4px 8px;cursor:pointer}
+/* HISTORIAL */
+.hist-item{padding:10px 0;border-bottom:1px solid #f0f0f0}
+.hist-item:last-child{border:none}
+.hist-fecha{font-size:12px;color:#888;margin-bottom:3px}
+.hist-prods{font-size:13px;color:#444}
+.hist-total{font-size:12px;color:#1a73e8;font-weight:500;margin-top:2px}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:#fff;border-radius:10px;padding:12px;text-align:center}
+.stat-val{font-size:24px;font-weight:600;color:#222}
+.stat-label{font-size:11px;color:#888;margin-top:2px}
+/* CARD */
+.card{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.card-title{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;font-weight:500}
+.empty{text-align:center;padding:30px 20px;color:#aaa;font-size:14px}
+/* MIS PRODUCTOS */
+.prod-fav{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.prod-fav:last-child{border:none}
+.prod-fav-cod{font-size:14px;font-weight:500;color:#222}
+.prod-fav-desc{font-size:12px;color:#888;margin-top:1px}
+.prod-fav-acc{display:flex;gap:6px;align-items:center}
+.prod-fav-qty{font-size:13px;color:#1a73e8;font-weight:500}
+.add-prod-form{background:#f8f8f8;border-radius:10px;padding:12px;margin-bottom:10px}
+.form-row{display:flex;gap:8px;margin-bottom:8px}
+.form-input{flex:1;padding:9px 12px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff}
+/* IA PROMO */
+.ia-box{background:linear-gradient(135deg,#1a73e8,#C0392B);border-radius:12px;padding:16px;margin-bottom:12px;color:#fff}
+.ia-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.ia-sub{font-size:12px;opacity:.8}
+.promo-chip{display:inline-block;background:#fff;color:#C0392B;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;margin:4px;cursor:pointer;border:none}
+.promo-chip:active{opacity:.8}
+.ia-result{background:#fff;border-radius:10px;padding:12px 14px;font-size:13px;color:#333;line-height:1.6;margin-top:10px;white-space:pre-wrap}
+.ia-loading{text-align:center;padding:20px;color:#888;font-size:13px}
+/* EXPORTAR */
+.export-section{background:#fff;border-radius:10px;padding:14px;margin-bottom:10px}
+.export-title{font-size:14px;font-weight:600;color:#222;margin-bottom:4px}
+.export-sub{font-size:12px;color:#888;margin-bottom:12px}
+/* FICHA CLIENTE */
+.ficha-field{margin-bottom:10px}
+.ficha-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;font-weight:500}
+.ficha-value{font-size:15px;color:#222;font-weight:500}
+.ficha-input{width:100%;padding:10px 12px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#222;margin-bottom:8px}
+.ficha-input:focus{outline:none;border-color:#C0392B}
+/* COBRANZAS */
+.cobro-item{padding:10px 0;border-bottom:1px solid #f0f0f0}
+.cobro-item:last-child{border:none}
+.cobro-fecha{font-size:11px;color:#888;margin-bottom:2px}
+.cobro-monto{font-size:16px;font-weight:600;color:#1e8449}
+.cobro-nota{font-size:13px;color:#444;margin-top:2px}
+/* NUEVO CLIENTE */
+.fab{position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:#C0392B;color:#fff;font-size:26px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:100}
+/* COLOR BADGE */
+.color-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<!-- SCREEN MAIN -->
+<div class="screen active" id="screen-main">
+  <div class="header"><div><h1>CRM La Ibero</h1><div class="header-sub">Eduardo Cabrera <span id="fecha-precios"></span></div></div></div>
+  <div class="scroll">
+    <div class="dias-grid" id="dias-grid"></div>
+    <input class="search-box" type="search" placeholder="Buscar cliente..." id="search" oninput="filtrarClientes(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();const p=document.querySelector('.cli-card');if(p)p.click();}">
+    <div id="lista-clientes"></div>
+  </div>
+  <button class="fab" onclick="abrirNuevoCliente()" title="Nuevo cliente">+</button>
+</div>
+
+<!-- SCREEN NUEVO CLIENTE -->
+<div class="screen" id="screen-nuevo-cliente">
+  <div class="header">
+    <span class="header-back" onclick="volverMain()">‹</span>
+    <div style="flex:1"><h1 id="nc-title">Nuevo cliente</h1><div class="header-sub" id="nc-sub">Completá los datos</div></div>
+  </div>
+  <div class="scroll">
+    <div class="card">
+      <div class="card-title">Datos del cliente</div>
+      <input class="ficha-input" id="nc-nombre" placeholder="Nombre del cliente *" type="text">
+      <input class="ficha-input" id="nc-fantasia" placeholder="Nombre de fantasía" type="text">
+      <input class="ficha-input" id="nc-numero" placeholder="Número de cliente" type="number" inputmode="numeric">
+      <select class="ficha-input" id="nc-dia">
+        <option value="">Día de visita</option>
+        <option>Lunes</option><option>Martes</option><option>Miercoles</option><option>Jueves</option><option>Viernes</option>
+      </select>
+      <input class="ficha-input" id="nc-condicion" placeholder="Condición de pago (ej: CC 15 días)" type="text">
+      <input class="ficha-input" id="nc-horario" placeholder="Horario de atención" type="text">
+      <input class="ficha-input" id="nc-color" placeholder="Color / categoría" type="text">
+      <input class="ficha-input" id="nc-telefono" placeholder="Teléfono / WhatsApp" type="tel" inputmode="tel">
+    </div>
+    <button class="btn btn-red" onclick="guardarNuevoCliente()">Guardar cliente</button>
+    <div id="nc-edit-id" style="display:none"></div>
+  </div>
+</div>
+
+<!-- SCREEN CLIENTE -->
+<div class="screen" id="screen-cliente">
+  <div class="header">
+    <span class="header-back" onclick="volverMain()">‹</span>
+    <div style="flex:1"><h1 id="cli-title">Cliente</h1><div class="header-sub" id="cli-sub"></div></div>
+    <button onclick="exportarExcel()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">📊 Excel</button>
+  </div>
+  <div class="tabs" id="cli-tabs">
+    <div class="tab active" onclick="setTab('pedido',this)">Pedido</div>
+    <div class="tab" onclick="setTab('productos',this)">Mis productos</div>
+    <div class="tab" onclick="setTab('historial',this)">Historial</div>
+    <div class="tab" onclick="setTab('cobranzas',this)">Cobranzas</div>
+    <div class="tab" onclick="setTab('ficha',this)">Ficha</div>
+    <div class="tab" onclick="setTab('dia',this)">Día</div>
+  </div>
+  <div id="tab-content" style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0"></div>
+</div>
+
+<script>
+const CLIENTES = {
+  Lunes:[{num:"28104",nom:"Parkson Wise"},{num:"28100",nom:"Xiongping He"},{num:"28091",nom:"Marina Ortega"},{num:"28078",nom:"Qiaoying Chen"},{num:"7062",nom:"Zheng Mendi"},{num:"27006",nom:"Weng Caixing"},{num:"27029",nom:"Cheng Sheng"},{num:"28088",nom:"Ariel Maximiliano"},{num:"28006",nom:"Ling Enping"},{num:"28106",nom:"Chenggong Dan"},{num:"28098",nom:"Sheng Lin"},{num:"28010",nom:"Redondo Nelida"},{num:"28067",nom:"Maria del Pilar"},{num:"08011",nom:"Arras Marcelo"},{num:"7053",nom:"Oliva y Jamon"},{num:"58003",nom:"Pablo A. Gonzalez"},{num:"28077",nom:"Guido Grossi"},{num:"28072",nom:"Las Tres Primas"},{num:"8537",nom:"Helueni"},{num:"28080",nom:"Jose Luis Unda"}],
+  Martes:[{num:"28002",nom:"Marduel Redondo"},{num:"58013",nom:"He Laishui"},{num:"59005",nom:"Pablo Bracho"},{num:"59011",nom:"Ariel Super"},{num:"58017",nom:"Xialing Ling"},{num:"59032",nom:"Aguilera Maria"},{num:"58001",nom:"Delina Hadad"},{num:"59021",nom:"Chaotuan Wang"},{num:"59030",nom:"Proveeduria LR"},{num:"59028",nom:"Dafang Zhang"},{num:"58010",nom:"Maria de los Angeles"},{num:"35031",nom:"Stumpf Matias"},{num:"58015",nom:"Xinguo XU"},{num:"59031",nom:"Wu Wenbin"},{num:"59020",nom:"Maria Gil Duarte"},{num:"59007",nom:"Eligia de la Cruz"},{num:"35017",nom:"Jian Lin"},{num:"35029",nom:"Pascual Miceli"},{num:"59008",nom:"Lacteos el Horizonte"},{num:"59017",nom:"Caixing Du"},{num:"8531",nom:"Azcuenaga 894"},{num:"8501",nom:"La Macarena"},{num:"59004",nom:"Monica Chanchamire"}],
+  Miercoles:[{num:"7054",nom:"Qing Lin"},{num:"7058",nom:"Jesus Emilio"},{num:"7511",nom:"Gustavo Keller"},{num:"7037",nom:"Marduel Redondo E."},{num:"7035",nom:"Hecmau"},{num:"07043",nom:"Alberto Pfleger"},{num:"7060",nom:"Mariano Marduel"},{num:"7063",nom:"Aguad Eduardo"},{num:"7052",nom:"Qiuyun Xie"},{num:"7019",nom:"Lianquin Chen"},{num:"7010",nom:"Youqiang Chen"},{num:"7025",nom:"Reale Marcelo"},{num:"7026",nom:"Galeano Segovia"},{num:"8025",nom:"Han Yun"},{num:"7051",nom:"Xiaofeng Wang"},{num:"7055",nom:"Roberto Ariel"},{num:"8018",nom:"Ye Yunzhu"},{num:"10023",nom:"Wu Qiangming"},{num:"10542",nom:"Sergio Alonso"},{num:"10047",nom:"Maoliang Wu"},{num:"7065",nom:"Alimentos Distrib."},{num:"7007",nom:"Diego Campos"},{num:"7030",nom:"Sergio Bassano"}],
+  Jueves:[{num:"8067",nom:"Xiaofeng Chen"},{num:"8531",nom:"Azcuenaga 894"},{num:"8545",nom:"Lolison"},{num:"8537",nom:"Helueni"},{num:"8539",nom:"Francisco Bravo"},{num:"8546",nom:"Barca Group"},{num:"8547",nom:"Magnolias Cakes"},{num:"8072",nom:"Guo Lianrong"},{num:"8060",nom:"Carlos Yeregui"},{num:"8550",nom:"8 Sentidos SRL"},{num:"8026",nom:"Xie Wenhui"},{num:"8066",nom:"Juan Burgos"},{num:"08043",nom:"Mingqing Zhang"},{num:"8016",nom:"Lin Huahong"},{num:"28089",nom:"Huahong You"},{num:"8015",nom:"You Huaqin"},{num:"8065",nom:"Alicia Elena"},{num:"28012",nom:"Yu Wenzhen"},{num:"35043",nom:"Liu Yang Xing"}],
+  Viernes:[{num:"36048",nom:"Elias Lafuente"},{num:"36053",nom:"Sun Zun Hua"},{num:"36054",nom:"Huang Xianyan"},{num:"36518",nom:"Matediez"},{num:"36510",nom:"EstoEsAmor"},{num:"36049",nom:"Johan Arturo"},{num:"36050",nom:"Julio Minaya"},{num:"36521",nom:"Casco Carmen"},{num:"36527",nom:"JoJo Ventures"},{num:"36535",nom:"Coffe Bar SRL"},{num:"36542",nom:"Xenocast"},{num:"36035",nom:"Lin Yanjun"},{num:"36041",nom:"Sildial"},{num:"36055",nom:"Quicaño Rivas Flor"},{num:"07043",nom:"Alberto Pablo"}]
+};
+const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes"];
+let diaActual="Lunes", clienteActual=null, tabActual="pedido";
+let modo="cod", input="", codActual="", descActual="";
+let pedidoActual=[];
+let iaLoading=false;
+
+function loadData(){try{return JSON.parse(localStorage.getItem("crm_ibero")||"{}");}catch(e){return{};}}
+function saveData(d){localStorage.setItem("crm_ibero",JSON.stringify(d));}
+let DATA=loadData();
+
+const hoy=()=>new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"});
+const fechaCompleta=()=>new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"});
+
+// ── DÍAS ──
+function renderDias(){
+  document.getElementById("dias-grid").innerHTML=DIAS.map(d=>
+    `<div class="dia-btn ${d===diaActual?'active':''}" onclick="selDia('${d}')">${d.slice(0,3)}</div>`
+  ).join("");
+}
+function selDia(d){diaActual=d;renderDias();filtrarClientes(document.getElementById("search").value);}
+
+// ── CLIENTES ──
+function getClientesDia(dia){
+  const base=CLIENTES[dia]||[];
+  const extra=DATA[`clientes_extra_${dia}`]||[];
+  return [...base,...extra];
+}
+
+function filtrarClientes(q){
+  const lista=getClientesDia(diaActual).filter(c=>!q||c.nom.toLowerCase().includes(q.toLowerCase())||c.num.includes(q));
+  const h=hoy();
+  document.getElementById("lista-clientes").innerHTML=lista.map(c=>{
+    const visitado=DATA[`hist_${diaActual}_${c.num}`]?.some(v=>v.fecha===h);
+    return `<div class="cli-card" onclick="selCliente('${c.num}','${c.nom.replace(/'/g,"\\'")}')">
+      <div><div class="cli-nom">${c.nom}</div><div class="cli-num">${c.num}</div></div>
+      <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}">${visitado?'Visitado':'Pendiente'}</span>
+    </div>`;
+  }).join("");
+}
+
+function selCliente(num,nom){
+  clienteActual={num,nom};
+  pedidoActual=[];modo="cod";input="";codActual="";descActual="";
+  document.getElementById("cli-title").textContent=nom;
+  document.getElementById("cli-sub").textContent=`N° ${num} · ${diaActual}`;
+  showScreen("screen-cliente");
+  setTab("pedido",document.querySelector(".tab"));
+}
+function volverMain(){showScreen("screen-main");filtrarClientes(document.getElementById("search").value);}
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+
+// ── TABS ──
+function setTab(tab,el){
+  tabActual=tab;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  if(el)el.classList.add("active");
+  else document.querySelectorAll(".tab").forEach((t,i)=>{if(["pedido","productos","historial","cobranzas","ficha","dia"][i]===tab)t.classList.add("active");});
+  renderTab();
+}
+function renderTab(){
+  const el=document.getElementById("tab-content");
+  if(tabActual==="pedido") el.innerHTML=renderPedido();
+  else if(tabActual==="productos"){el.innerHTML="";el.appendChild(crearProductos());}
+  else if(tabActual==="historial"){el.innerHTML=`<div class="scroll">${renderHistorial()}</div>`;}
+  else if(tabActual==="cobranzas"){el.innerHTML=`<div class="scroll">${renderCobranzas()}</div>`;}
+  else if(tabActual==="ficha"){el.innerHTML=`<div class="scroll">${renderFicha()}</div>`;}
+  else{el.innerHTML=`<div class="scroll">${renderDia()}</div>`;}
+}
+
+// ── TECLADO ──
+function press(n){if(input.length<6){input+=n;renderTab();}}
+function borrar(){
+  if(input.length>0)input=input.slice(0,-1);
+  else if(modo==="desc"){modo="cod";input=codActual;codActual="";}
+  else if(modo==="qty"){modo="desc";input=descActual;descActual="";}
+  renderTab();
+}
+function buscarProducto(cod){
+  return LISTA_PRECIOS.find(p=>p.cod===cod)||null;
+}
+
+function confirmar(){
+  if(!input)return;
+  if(modo==="cod"){
+    codActual=input;
+    const prod=buscarProducto(codActual);
+    window._prodActual=prod;
+    input="";modo="desc";
+  }
+  else if(modo==="desc"){descActual=input;input="";modo="qty";}
+  else{
+    const qty=parseInt(input);
+    if(qty>0){
+      const ex=pedidoActual.find(p=>p.cod===codActual);
+      if(ex){ex.qty+=qty;}
+      else{const p=window._prodActual;pedidoActual.push({cod:codActual,desc:descActual,qty,nombre:p?.desc||"",precio:p?.precio||0});}
+    }
+    codActual="";descActual="";input="";modo="cod";
+  }
+  renderTab();
+}
+function eliminarItem(i){pedidoActual.splice(i,1);renderTab();}
+
+function guardarPedido(){
+  if(!pedidoActual.length||!clienteActual)return;
+  const key=`hist_${diaActual}_${clienteActual.num}`;
+  if(!DATA[key])DATA[key]=[];
+  DATA[key].unshift({fecha:hoy(),items:[...pedidoActual],total:pedidoActual.reduce((s,i)=>s+i.qty,0)});
+  saveData(DATA);
+  pedidoActual=[];modo="cod";input="";codActual="";descActual="";
+  setTab("historial",null);
+  document.querySelectorAll(".tab").forEach((t,i)=>{t.classList.toggle("active",i===2);});
+}
+
+// ── RENDER PEDIDO ──
+function renderPedido(){
+  const items=pedidoActual;
+  const modoLabel=modo==="cod"?"📦 CÓDIGO del producto":modo==="desc"?"🏷️ DESCUENTO %":"🔢 CANTIDAD de unidades";
+  const prod=window._prodActual;
+  const prodInfo=prod?` — ${prod.desc} · $${prod.precio.toLocaleString('es-AR')}`:"";
+  const hint=modo==="desc"?`Cód: ${codActual}${prodInfo}`:modo==="qty"?`Cód: ${codActual} · Desc: ${descActual}%`:"";
+  return `
+  <div class="pedido-layout">
+    <div class="pedido-top">
+      ${items.length?`
+        <div class="card">
+          <div class="card-title">Pedido de hoy — ${hoy()}</div>
+          ${items.map((it,i)=>`
+            <div class="pedido-item">
+              <div>
+                <div class="pi-cod">Cód. ${it.cod}${it.nombre?` — ${it.nombre}`:''}</div>
+                <div style="font-size:11px;color:#888">Desc: ${it.desc}%${it.precio?` · $${parseInt(it.precio).toLocaleString('es-AR')} c/u`:''}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="pi-qty">${it.qty} u.</span>
+                <button class="pi-del" onclick="eliminarItem(${i})">✕</button>
+              </div>
+            </div>`).join("")}
+          <div style="padding:10px 0 0;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:14px">
+            <span style="color:#888">Total</span>
+            <span style="font-weight:600">${items.reduce((s,i)=>s+i.qty,0)} unidades</span>
+          </div>
+          <button class="btn btn-green" style="margin-top:8px" onclick="guardarPedido()">Guardar visita</button>
+        </div>`:`<div class="empty">Ingresá el código, descuento y cantidad con el teclado</div>`}
+    </div>
+    <div class="teclado-fijo">
+      <div class="display">
+        <div class="display-mode">${modoLabel}${hint?` — ${hint}`:""}</div>
+        <div class="display-val">${input||"_"}</div>
+      </div>
+      <button class="btn btn-blue" style="margin-bottom:6px;font-size:16px;padding:13px" onclick="confirmar()">
+        ${modo==="cod"?"✓ Confirmar código":modo==="desc"?"✓ Confirmar descuento":"✓ Agregar al pedido"}
+      </button>
+      <div class="teclado">
+        <button class="tkey" onclick="press('7')">7</button>
+        <button class="tkey" onclick="press('8')">8</button>
+        <button class="tkey" onclick="press('9')">9</button>
+        <button class="tkey" onclick="press('4')">4</button>
+        <button class="tkey" onclick="press('5')">5</button>
+        <button class="tkey" onclick="press('6')">6</button>
+        <button class="tkey" onclick="press('1')">1</button>
+        <button class="tkey" onclick="press('2')">2</button>
+        <button class="tkey" onclick="press('3')">3</button>
+        <button class="tkey wide" onclick="press('0')">0</button>
+        <button class="tkey del" onclick="borrar()">⌫</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── MIS PRODUCTOS ──
+function crearProductos(){
+  const wrap=document.createElement("div");
+  wrap.style.cssText="flex:1;overflow-y:auto;padding:12px";
+  const key=`prods_${clienteActual.num}`;
+  const prods=DATA[key]||[];
+
+  function render(){
+    wrap.innerHTML=`
+      <div class="card">
+        <div class="card-title">Agregar producto habitual</div>
+        <div class="add-prod-form">
+          <div class="form-row">
+            <input class="form-input" id="np-buscar" placeholder="Buscar por código o nombre..." oninput="buscarEnLista(this.value)">
+          </div>
+          <div id="np-resultados" style="max-height:150px;overflow-y:auto;margin-bottom:8px"></div>
+          <div class="form-row">
+            <input class="form-input" id="np-cod" placeholder="Código" type="number" inputmode="numeric">
+            <input class="form-input" id="np-nombre" placeholder="Descripción" readonly style="font-size:12px;background:#f5f5f5">
+            <input class="form-input" id="np-desc" placeholder="Desc %" type="number" inputmode="numeric" style="max-width:70px">
+          </div>
+          <button class="btn btn-blue" onclick="agregarProdFav()">+ Agregar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Productos habituales de ${clienteActual.nom}</div>
+        ${prods.length?prods.map((p,i)=>`
+          <div class="prod-fav">
+            <div>
+              <div class="prod-fav-cod">Cód. ${p.cod}${p.nombre?' — '+p.nombre:''}</div>
+              <div class="prod-fav-desc">Descuento: ${p.desc}%</div>
+            </div>
+            <div class="prod-fav-acc">
+              <button class="btn-sm btn-red" onclick="elimProdFav(${i})" style="background:#fde8e8;color:#C0392B">Quitar</button>
+            </div>
+          </div>`).join(""):
+          `<div class="empty" style="padding:16px 0">Sin productos habituales.<br>Agregá los que más vendés acá.</div>`}
+      </div>
+      ${prods.length?`<button class="btn btn-green" onclick="usarProdsFav()">Cargar productos habituales en pedido ↑</button>`:""}
+    `;
+  }
+
+  window.buscarEnLista=function(q){
+    const res=document.getElementById("np-resultados");
+    if(!q||q.length<2){res.innerHTML="";return;}
+    const found=LISTA_PRECIOS.filter(p=>p.cod.includes(q)||p.desc.toLowerCase().includes(q.toLowerCase())).slice(0,6);
+    res.innerHTML=found.map(p=>`<div onclick="selProdFav('${p.cod}','${p.desc.replace(/'/g,"\'")}','${p.precio}')" style="padding:7px 10px;background:#fff;border:1px solid #eee;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:13px"><b>${p.cod}</b> — ${p.desc} <span style="color:#1a73e8;float:right">$${p.precio.toLocaleString('es-AR')}</span></div>`).join("");
+  };
+  window.selProdFav=function(cod,nombre,precio){
+    document.getElementById("np-cod").value=cod;
+    document.getElementById("np-nombre").value=nombre;
+    document.getElementById("np-buscar").value="";
+    document.getElementById("np-resultados").innerHTML="";
+  };
+  window.agregarProdFav=function(){
+    const cod=document.getElementById("np-cod").value.trim();
+    const desc=document.getElementById("np-desc").value.trim()||"0";
+    if(!cod)return;
+    if(!DATA[key])DATA[key]=[];
+    const nombre=document.getElementById("np-nombre")?.value||"";
+    if(!DATA[key].find(p=>p.cod===cod)){
+      DATA[key].push({cod,desc,nombre});
+      saveData(DATA);
+    }
+    render();
+  };
+  window.elimProdFav=function(i){
+    DATA[key].splice(i,1);
+    saveData(DATA);
+    render();
+  };
+  window.usarProdsFav=function(){
+    const prods=DATA[key]||[];
+    prods.forEach(p=>{
+      if(!pedidoActual.find(x=>x.cod===p.cod)){
+        pedidoActual.push({cod:p.cod,desc:p.desc,qty:0});
+      }
+    });
+    setTab("pedido",null);
+    document.querySelectorAll(".tab").forEach((t,i)=>{t.classList.toggle("active",i===0);});
+  };
+
+  render();
+  return wrap;
+}
+
+// ── HISTORIAL ──
+function renderHistorial(){
+  const key=`hist_${diaActual}_${clienteActual?.num}`;
+  const hist=DATA[key]||[];
+  const totalV=hist.length;
+  const totalU=hist.reduce((s,h)=>s+h.total,0);
+  return `
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${totalV}</div><div class="stat-label">Visitas</div></div>
+      <div class="stat"><div class="stat-val">${totalU}</div><div class="stat-label">Unidades</div></div>
+      <div class="stat"><div class="stat-val" style="font-size:15px">${hist[0]?.fecha||"—"}</div><div class="stat-label">Última</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Historial de visitas</div>
+      ${hist.length?hist.map(h=>`
+        <div class="hist-item">
+          <div class="hist-fecha">${h.fecha}</div>
+          <div class="hist-prods">${h.items.map(i=>`${i.cod} x${i.qty} (${i.desc}%)`).join(" · ")}</div>
+          <div class="hist-total">${h.total} unidades totales</div>
+        </div>`).join(""):
+        `<div class="empty">Sin visitas registradas todavía.</div>`}
+    </div>`;
+}
+
+// ── IA / PROMO ──
+function renderIA(){
+  const key=`hist_${diaActual}_${clienteActual?.num}`;
+  const hist=DATA[key]||[];
+  return `
+    <div class="ia-box">
+      <div class="ia-title">✨ Asistente IA</div>
+      <div class="ia-sub">${clienteActual?.nom} · ${diaActual}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cómo usar</div>
+      <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:12px">Tocá un botón, se copia el contexto del cliente y lo pegás en el chat con Claude.</p>
+      <button class="promo-chip" onclick="copiarParaIA('sugerencia')">💡 Sugerencia de venta</button>
+      <button class="promo-chip" onclick="copiarParaIA('promo')">🏷️ Armar promoción</button>
+      <button class="promo-chip" onclick="copiarParaIA('whatsapp')">💬 Mensaje WhatsApp</button>
+      <button class="promo-chip" onclick="copiarParaIA('analisis')">📊 Analizar historial</button>
+      <button class="promo-chip" onclick="copiarParaIA('reactivar')">🔔 Reactivar cliente</button>
+    </div>
+    <div id="ia-result-box"></div>
+  `;
+}
+
+function copiarParaIA(tipo){
+  const key=`hist_${diaActual}_${clienteActual?.num}`;
+  const hist=DATA[key]||[];
+  const prodsKey=`prods_${clienteActual.num}`;
+  const prodsFav=(DATA[prodsKey]||[]).map(p=>`cod ${p.cod}${p.nombre?' ('+p.nombre+')':''} desc ${p.desc}%`).join(", ")||"no definidos";
+  const histResumen=hist.slice(0,5).map(h=>h.fecha+': '+h.items.map(i=>i.cod+' x'+i.qty+' ('+i.desc+'%)').join(', ')).join('
+')||"Sin historial";
+  const msgs={
+    sugerencia:'[CRM La Ibero] Cliente: '+clienteActual.nom+' (N°'+clienteActual.num+'), visita los '+diaActual+'.
+Productos habituales: '+prodsFav+'.
+Historial reciente:
+'+histResumen+'
+
+Dame 2-3 sugerencias concretas de qué ofrecerle en la próxima visita para aumentar el ticket.',
+    promo:'[CRM La Ibero] Cliente: '+clienteActual.nom+'.
+Productos habituales: '+prodsFav+'.
+Armame una promoción atractiva para ofrecerle en la próxima visita con producto, beneficio y forma de presentársela.',
+    whatsapp:'[CRM La Ibero] Necesito un WhatsApp informal para contactar a '+clienteActual.nom+' de La Ibero Española y ofrecerle novedades de quesos y fiambres. Máximo 4 líneas, tono natural.',
+    analisis:'[CRM La Ibero] Historial de '+clienteActual.nom+':
+'+histResumen+'
+Decime tendencia de compra, productos más frecuentes y señales de alerta.',
+    reactivar:'[CRM La Ibero] '+clienteActual.nom+' lleva tiempo sin comprar. Último registro: '+(hist[0]?.fecha||'sin visitas')+'. Dame estrategia y mensaje para reactivarlo.'
+  };
+  const texto=msgs[tipo];
+  navigator.clipboard?.writeText(texto).then(()=>{
+    document.getElementById("ia-result-box").innerHTML='<div class="card" style="border:1px solid #1e8449"><div style="color:#1e8449;font-weight:600;margin-bottom:6px">✓ Copiado</div><div style="font-size:13px;color:#555">Pegalo en el chat con Claude.</div><div style="margin-top:8px;background:#f8f8f8;border-radius:8px;padding:10px;font-size:12px;color:#888">'+texto.replace(/
+/g,'<br>')+'</div></div>';
+  }).catch(()=>{
+    document.getElementById("ia-result-box").innerHTML='<div class="card"><div class="card-title">Copiá este texto y pegalo en Claude:</div><div style="background:#f8f8f8;border-radius:8px;padding:10px;font-size:12px;color:#444">'+texto.replace(/
+/g,'<br>')+'</div></div>';
+  });
+}
+
+// ── RESUMEN DEL DÍA ──
+function renderDia(){
+  const h=hoy();
+  const lista=getClientesDia(diaActual);
+  const visitados=lista.filter(c=>DATA[`hist_${diaActual}_${c.num}`]?.some(v=>v.fecha===h));
+  const pendientes=lista.filter(c=>!DATA[`hist_${diaActual}_${c.num}`]?.some(v=>v.fecha===h));
+  const totalU=visitados.reduce((s,c)=>{const v=DATA[`hist_${diaActual}_${c.num}`]?.find(v=>v.fecha===h);return s+(v?.total||0);},0);
+  return `
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${lista.length}</div><div class="stat-label">Clientes</div></div>
+      <div class="stat"><div class="stat-val" style="color:#1e8449">${visitados.length}</div><div class="stat-label">Visitados</div></div>
+      <div class="stat"><div class="stat-val" style="color:#d4820a">${pendientes.length}</div><div class="stat-label">Pendientes</div></div>
+    </div>
+    ${pendientes.length?`<div class="card">
+      <div class="card-title">Pendientes</div>
+      ${pendientes.map(c=>`
+        <div class="pedido-item" style="cursor:pointer" onclick="selCliente('${c.num}','${c.nom.replace(/'/g,"\\'")}')">
+          <div><div class="pi-cod">${c.nom}</div><div style="font-size:12px;color:#888">${c.num}</div></div>
+          <span class="cli-badge badge-pend">Pendiente</span>
+        </div>`).join("")}
+    </div>`:""}
+    ${visitados.length?`<div class="card">
+      <div class="card-title">Visitados hoy · ${totalU} u. totales</div>
+      ${visitados.map(c=>{const v=DATA[`hist_${diaActual}_${c.num}`]?.find(v=>v.fecha===h);
+        return`<div class="pedido-item"><div><div class="pi-cod">${c.nom}</div><div style="font-size:12px;color:#888">${v?.items.map(i=>`${i.cod} x${i.qty}`).join(" · ")||""}</div></div><span class="cli-badge badge-ok">${v?.total||0} u.</span></div>`;
+      }).join("")}
+    </div>`:""}
+    <button class="btn btn-gray" onclick="exportarDia()">Copiar resumen para Claude ↗</button>
+  `;
+}
+
+// ── EXPORTAR EXCEL ──
+function exportarExcel(){
+  const key=`hist_${diaActual}_${clienteActual?.num}`;
+  const hist=DATA[key]||[];
+  if(!hist.length){alert("No hay historial para exportar.");return;}
+
+  // Armar CSV
+  const fechas=[...new Set(hist.map(h=>h.fecha))].sort();
+  const codigos=[...new Set(hist.flatMap(h=>h.items.map(i=>i.cod)))];
+
+  let csv=`Código,Descuento%,${fechas.join(",")},Total Unidades\n`;
+  codigos.forEach(cod=>{
+    const descRow=hist.flatMap(h=>h.items).find(i=>i.cod===cod)?.desc||"0";
+    const qtys=fechas.map(f=>{
+      const visita=hist.find(h=>h.fecha===f);
+      const item=visita?.items.find(i=>i.cod===cod);
+      return item?item.qty:"";
+    });
+    const total=qtys.reduce((s,q)=>s+(parseInt(q)||0),0);
+    csv+=`${cod},${descRow}%,${qtys.join(",")},${total}\n`;
+  });
+
+  // Descargar CSV
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=`${clienteActual.nom.replace(/ /g,"_")}_${diaActual}_historial.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── EXPORTAR DÍA ──
+function exportarDia(){
+  const h=hoy();
+  const lista=getClientesDia(diaActual);
+  const visitados=lista.filter(c=>DATA[`hist_${diaActual}_${c.num}`]?.some(v=>v.fecha===h));
+  if(!visitados.length){alert("No hay pedidos registrados hoy.");return;}
+  const txt=`Resumen ${diaActual} ${h}:\n`+
+    visitados.map(c=>{const v=DATA[`hist_${diaActual}_${c.num}`]?.find(v=>v.fecha===h);
+      return`${c.nom} (${c.num}): ${v?.items.map(i=>`cod ${i.cod} x${i.qty} desc${i.desc}%`).join(", ")} — ${v?.total} u.`;
+    }).join("\n");
+  navigator.clipboard?.writeText(txt).catch(()=>{});
+  alert("Resumen copiado. Pegalo en el chat con Claude.");
+}
+
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+
+// ── FICHA CLIENTE ──
+function renderFicha(){
+  const key=`ficha_${clienteActual?.num}`;
+  const ficha=DATA[key]||{};
+  const colorMap={"Verde":"#27ae60","Azul":"#2980b9","Rojo":"#e74c3c","Amarillo":"#f1c40f","Naranja":"#e67e22","Negro":"#222"};
+  const colorDot=ficha.color?`<span class="color-dot" style="background:${colorMap[ficha.color]||'#aaa'}"></span>`:"";
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin:0">Datos del cliente</div>
+        <button class="btn-sm" style="background:#f0f0f0;color:#444;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-size:12px" onclick="editarFicha()">Editar</button>
+      </div>
+      <div class="ficha-field"><div class="ficha-label">Nombre de fantasía</div><div class="ficha-value">${ficha.fantasia||'—'}</div></div>
+      <div class="ficha-field"><div class="ficha-label">Condición de pago</div><div class="ficha-value">${ficha.condicion||'—'}</div></div>
+      <div class="ficha-field"><div class="ficha-label">Horario</div><div class="ficha-value">${ficha.horario||'—'}</div></div>
+      <div class="ficha-field"><div class="ficha-label">Color / Categoría</div><div class="ficha-value">${colorDot}${ficha.color||'—'}</div></div>
+      <div class="ficha-field"><div class="ficha-label">Teléfono / WhatsApp</div>
+        <div class="ficha-value">${ficha.telefono?`<a href="tel:${ficha.telefono}" style="color:#1a73e8;text-decoration:none">${ficha.telefono}</a> <a href="https://wa.me/54${ficha.telefono.replace(/\D/g,'')}" target="_blank" style="font-size:12px;color:#25d366;margin-left:8px">WhatsApp ↗</a>`:'—'}</div>
+      </div>
+    </div>
+    <button class="btn btn-orange" onclick="abrirWhatsApp()">💬 Abrir WhatsApp</button>
+  `;
+}
+
+function editarFicha(){
+  const key=`ficha_${clienteActual?.num}`;
+  const ficha=DATA[key]||{};
+  document.getElementById("nc-title").textContent="Editar cliente";
+  document.getElementById("nc-sub").textContent=clienteActual.nom;
+  document.getElementById("nc-nombre").value=clienteActual.nom;
+  document.getElementById("nc-numero").value=clienteActual.num;
+  document.getElementById("nc-fantasia").value=ficha.fantasia||"";
+  document.getElementById("nc-condicion").value=ficha.condicion||"";
+  document.getElementById("nc-horario").value=ficha.horario||"";
+  document.getElementById("nc-color").value=ficha.color||"";
+  document.getElementById("nc-telefono").value=ficha.telefono||"";
+  document.getElementById("nc-dia").value=diaActual;
+  document.getElementById("nc-edit-id").textContent=clienteActual.num;
+  document.getElementById("nc-edit-id").style.display="block";
+  showScreen("screen-nuevo-cliente");
+}
+
+function abrirWhatsApp(){
+  const key=`ficha_${clienteActual?.num}`;
+  const ficha=DATA[key]||{};
+  if(!ficha.telefono){alert("No hay teléfono cargado en la ficha.");return;}
+  const num=ficha.telefono.replace(/\D/g,'');
+  window.open(`https://wa.me/54${num}`,'_blank');
+}
+
+// ── COBRANZAS ──
+function renderCobranzas(){
+  const key=`cobros_${clienteActual?.num}`;
+  const cobros=DATA[key]||[];
+  const total=cobros.reduce((s,c)=>s+(parseFloat(c.monto)||0),0);
+  return `
+    <div class="card">
+      <div class="card-title">Registrar cobro</div>
+      <input class="ficha-input" id="cobro-monto" placeholder="Monto cobrado ($)" type="number" inputmode="decimal">
+      <input class="ficha-input" id="cobro-nota" placeholder="Observación (ej: pagó factura 1234)" type="text">
+      <button class="btn btn-green" onclick="guardarCobro()">+ Registrar cobro</button>
+    </div>
+    ${cobros.length?`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="card-title" style="margin:0">Historial de cobros</div>
+        <div style="font-size:14px;font-weight:600;color:#1e8449">Total: $${total.toLocaleString('es-AR')}</div>
+      </div>
+      ${cobros.map((c,i)=>`
+        <div class="cobro-item">
+          <div class="cobro-fecha">${c.fecha}</div>
+          <div class="cobro-monto">$${parseFloat(c.monto).toLocaleString('es-AR')}</div>
+          ${c.nota?`<div class="cobro-nota">${c.nota}</div>`:''}
+          <button onclick="eliminarCobro(${i})" style="background:none;border:none;color:#ddd;font-size:12px;cursor:pointer;margin-top:4px">Eliminar</button>
+        </div>`).join('')}
+    </div>`:`<div class="empty">Sin cobros registrados todavía.</div>`}
+  `;
+}
+
+function guardarCobro(){
+  const monto=document.getElementById("cobro-monto").value.trim();
+  const nota=document.getElementById("cobro-nota").value.trim();
+  if(!monto)return;
+  const key=`cobros_${clienteActual.num}`;
+  if(!DATA[key])DATA[key]=[];
+  DATA[key].unshift({fecha:fechaCompleta(),monto,nota});
+  saveData(DATA);
+  renderTab();
+}
+
+function eliminarCobro(i){
+  if(!confirm("¿Eliminás este cobro?"))return;
+  const key=`cobros_${clienteActual.num}`;
+  DATA[key].splice(i,1);
+  saveData(DATA);
+  renderTab();
+}
+
+// ── NUEVO / EDITAR CLIENTE ──
+function abrirNuevoCliente(){
+  document.getElementById("nc-title").textContent="Nuevo cliente";
+  document.getElementById("nc-sub").textContent="Completá los datos";
+  document.getElementById("nc-nombre").value="";
+  document.getElementById("nc-numero").value="";
+  document.getElementById("nc-fantasia").value="";
+  document.getElementById("nc-condicion").value="";
+  document.getElementById("nc-horario").value="";
+  document.getElementById("nc-color").value="";
+  document.getElementById("nc-telefono").value="";
+  document.getElementById("nc-dia").value="";
+  document.getElementById("nc-edit-id").style.display="none";
+  document.getElementById("nc-edit-id").textContent="";
+  showScreen("screen-nuevo-cliente");
+}
+
+function guardarNuevoCliente(){
+  const nombre=document.getElementById("nc-nombre").value.trim();
+  const numero=document.getElementById("nc-numero").value.trim();
+  const dia=document.getElementById("nc-dia").value;
+  if(!nombre){alert("El nombre es obligatorio.");return;}
+  if(!dia){alert("Elegí un día de visita.");return;}
+
+  const editId=document.getElementById("nc-edit-id").textContent;
+  const esEdicion=!!editId;
+  const numFinal=esEdicion?editId:(numero||Date.now().toString().slice(-5));
+
+  // Guardar ficha
+  const fichaKey=`ficha_${numFinal}`;
+  DATA[fichaKey]={
+    fantasia:document.getElementById("nc-fantasia").value.trim(),
+    condicion:document.getElementById("nc-condicion").value.trim(),
+    horario:document.getElementById("nc-horario").value.trim(),
+    color:document.getElementById("nc-color").value.trim(),
+    telefono:document.getElementById("nc-telefono").value.trim()
+  };
+
+  // Agregar a lista de clientes extras si es nuevo
+  const extKey=`clientes_extra_${dia}`;
+  if(!esEdicion){
+    if(!DATA[extKey])DATA[extKey]=[];
+    if(!DATA[extKey].find(c=>c.num===numFinal)){
+      DATA[extKey].push({num:numFinal,nom:nombre});
+    }
+  } else {
+    // Actualizar nombre si cambió
+    const extKeys=Object.keys(DATA).filter(k=>k.startsWith("clientes_extra_"));
+    extKeys.forEach(k=>{
+      const idx=DATA[k].findIndex(c=>c.num===editId);
+      if(idx>=0)DATA[k][idx].nom=nombre;
+    });
+  }
+
+  saveData(DATA);
+  alert(esEdicion?"Cliente actualizado ✓":"Cliente agregado ✓");
+  volverMain();
+}
+
+// ── OBTENER LISTA DE CLIENTES (incluye extras) ──
+
+
+const LISTA_PRECIOS=[
+{"cod":"1018","desc":"JAMON CRUDO PARMA \"MONTESANO\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":73610.35},
+{"cod":"1025","desc":"JAMON CRUDO PARMA \"CAGNOLI\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":44776.599824},
+{"cod":"1021","desc":"JAMON CRUDO PARMA \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":41252.409},
+{"cod":"1016","desc":"JAMON CRUDO \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":40461.92568},
+{"cod":"1020","desc":"JAMON CRUDO 1/2 \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN MITADES","precio":40461.92568},
+{"cod":"1010","desc":"JAMON CRUDO BLOQUE \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN MITADES","precio":44370.7605},
+{"cod":"1041","desc":"JAMON CRUDO EL ARTESANO","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN MITADES","precio":22390.4325975},
+{"cod":"1042","desc":"JAMON CRUDO ARGENTINO EL ARTESANO","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":50057.3525485},
+{"cod":"1005","desc":"JAMON CRUDO SARRIA CON HUESO","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":20134.4},
+{"cod":"1004","desc":"JAMON CRUDO DESHUESADO \"SARRIA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":29100.5},
+{"cod":"1003","desc":"JAMON CRUDO SARRIA BLOQUE","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":30673.5},
+{"cod":"1007","desc":"JAMON CRUDO SARRIA \"SERRANO\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":30673.5},
+{"cod":"1006","desc":"JAMON CRUDO \"CASAPUEBLO\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN MITADES","precio":24632.9998068},
+{"cod":"1026","desc":"JAMON CRUDO SOL DE AVELLANEDA","cat":"FIAMBRES CRUDOS","pres":"PIEZA","precio":18675.0},
+{"cod":"1002","desc":"JAMON CRUDO C/HUESO \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA","precio":29515.3848},
+{"cod":"1044","desc":"JAMON CRUDO PARMA \"OCTAVA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":45719.9998222},
+{"cod":"1045","desc":"JAMON CRUDO PERNIL \"DELIPORK\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":24211.93302},
+{"cod":"1046","desc":"JAMON CRUDO DOINA \"SPECK\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":29075.05854},
+{"cod":"1032","desc":"JAMON CRUDO SIERRA NOBLE","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":44628.298},
+{"cod":"1033","desc":"JAMON CRUDO SAN MICHELE VAL DEL CINGHIO","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":44280.1125},
+{"cod":"1028","desc":"JAMON CRUDO GRASSETTO LISTO BLOQUE","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN MITADES","precio":24854.23082835},
+{"cod":"1013","desc":"JAMON CRUDO BOCATTI","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":50589.5630625},
+{"cod":"1207","desc":"LOMO CURADO \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA","precio":27043.2459},
+{"cod":"1015","desc":"BONDIOLA VACIO \"CALCHAQUI\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA ENTERA","precio":27354.00013038},
+{"cod":"1017","desc":"BONDIOLA VACIO \"DOINA\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN RED AL VACIO","precio":25881.56604},
+{"cod":"1012","desc":"BONDIOLA AL VACIO \"EL GALAICO\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA EN RED","precio":21773.8575},
+{"cod":"1029","desc":"BONDIOLA \"CAGNOLI\"","cat":"FIAMBRES CRUDOS","pres":"PIEZA","precio":28570.72119275},
+{"cod":"1101","desc":"JAMON COCIDO NATURAL BOCATTI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":19439.9323483019},
+{"cod":"1193","desc":"JAMON COCIDO HORNEADO AHUMADO NATURAL","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":21000.119305},
+{"cod":"1183","desc":"JAMON COCIDO HORNEADO CAGNOLI","cat":"FIAMBRES COCIDOS","pres":"PIEZA EN MITADES","precio":18798.05110425},
+{"cod":"1155","desc":"JAMON COCIDO COCCION LENTA CAGNOLI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":18572.509857},
+{"cod":"1103","desc":"JAMON COCIDO NATURAL EL GALAICO etiq negra","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":12923.838},
+{"cod":"1100","desc":"JAMON COCIDO NATURAL CALCHAQUI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":16429.416859625},
+{"cod":"1104","desc":"JAMON COCIDO NATURAL EL GALAICO etiq azul","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":10886.92875},
+{"cod":"1137","desc":"JAMON COCIDO NATURAL 1/2 CAÑA GRASSETTO","cat":"FIAMBRES COCIDOS","pres":"PIEZA EN MITADES","precio":10916.880350376},
+{"cod":"1138","desc":"JAMON COCIDO NATURAL C/CUERO GRASSETTO","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":10917.2366886},
+{"cod":"1139","desc":"JAMON COCIDO NATURAL PREMIUM GRASSETTO BAJO SODIO","cat":"FIAMBRES COCIDOS","pres":"PIEZA EN MITADES","precio":13672.41193395},
+{"cod":"1165","desc":"JAMON COCIDO MINI CAGNOLI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":12168.43127775},
+{"cod":"1171","desc":"JAMON COCIDO BARRA CAGNOLI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":12168.43127775},
+{"cod":"1164","desc":"JAMON COCIDO FACUNDO","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":9298.324935625},
+{"cod":"1186","desc":"JAMON COCIDO FACUNDO CUADRADO","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":9298.324935625},
+{"cod":"1136","desc":"JAMON COCIDO CUADRADO TRADICIONAL GRASSETTO","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":9809.30651085},
+{"cod":"1105","desc":"FIAMBRE DE PATA \"J\" CALCHAQUI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":12889.442771667},
+{"cod":"1106","desc":"FIAMBRE DE PATA \"J\" CALCHAQUI mini","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":12889.442771667},
+{"cod":"1108","desc":"FIAMBRE DE PATA \"1284\" etiq azul  tradicional","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":6882.51375},
+{"cod":"1128","desc":"FIAMBRE DE PATA \"1284\" etiq azul  media caña","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":6882.51375},
+{"cod":"1167","desc":"FIAMBRE DE PATA CAGNOLI MINI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":8230.76935725},
+{"cod":"1172","desc":"FIAMBRE DE PATA CAGNOLI BARRA","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":8230.76935725},
+{"cod":"1135","desc":"FIAMBRE DE PATA GRASSETTO CUADRADO","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":7617.72907665},
+{"cod":"1119","desc":"FIAMBRE DE CERDO \"P\" CALCHAQUI grande","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":11029.239571581},
+{"cod":"1109","desc":"FIAMBRE DE CERDO \"P\" CALCHAQUI mini","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":11029.239571581},
+{"cod":"1140","desc":"FIAMBRE DE CERDO VAINA \"CALCHAQUI\"","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":10973.893275576},
+{"cod":"1110","desc":"FIAMBRE PALETA DE CERDO 1284 ETIQ AMARILLA","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":6030.83025},
+{"cod":"1111","desc":"FIAMBRE DE CERDO 1284 etiq roja tradicional","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":5829.77475},
+{"cod":"1168","desc":"FIAMBRE PARA EMPAREDADOS ALTEZA","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":5445.945736},
+{"cod":"1129","desc":"PASTRON EBRO","cat":"FIAMBRES COCIDOS","pres":"PIEZA EN MITADES","precio":46803.61992202},
+{"cod":"1141","desc":"RIBS BOCATTI","cat":"FIAMBRES COCIDOS","pres":"PIEZA","precio":23375.68945173},
+{"cod":"1113","desc":"MORTADELA C/PISTACCIO BOCATTI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":14674.223868304},
+{"cod":"1143","desc":"MORTADELA C/PISTACCIO MONTESANO","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":16742.77},
+{"cod":"1133","desc":"MORTADELA C/PISTACCIO GRASSETTO","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":6903.90177708},
+{"cod":"1114","desc":"MORTADELA BOCHA CALCHAQUI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"BOCHA","precio":8770.86257941548},
+{"cod":"1132","desc":"MORTADELA BOCHA CALCHAQUI AL VACIO","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":11992.36323516},
+{"cod":"1120","desc":"MORTADELA CAÑON CALCHAQUI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":9091.64967018},
+{"cod":"1131","desc":"MORTADELA GIGANTE CALCHAQUI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":10848.8551479},
+{"cod":"1184","desc":"MORTADELA BOCHA \"CAGNOLI\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"BOCHA","precio":8605.0980125},
+{"cod":"1117","desc":"MORTADELA PICCOLA \"CALCHAQUI\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"MINI PIEZA","precio":2947.758792594},
+{"cod":"1180","desc":"MORTADELA PIEZA MINI X300 CAGNOLI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"MINI PIEZA","precio":2500.063522},
+{"cod":"1181","desc":"MORTADELA C/PISTACHO PIEZA MINI X250 CAGNOLI","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"MINI PIEZA","precio":4151.18935},
+{"cod":"1118","desc":"LEBERWURST \"CALCHAQUI\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"MINI PIEZA","precio":1692.483541364},
+{"cod":"1179","desc":"LEBERWURST CAGNOLI X 150 GR","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"MINI PIEZA","precio":1141.71253075},
+{"cod":"1134","desc":"SALCHICHON PRIMAVERA \"CALCHAQUI\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":7543.17979569},
+{"cod":"1148","desc":"SALCHICHON C/JAMÓN \"OCTAVA\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":8454.27},
+{"cod":"1149","desc":"SALCHICHON PRIMAVERA \"OCTAVA\"","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"PIEZA","precio":8454.27},
+{"cod":"1150","desc":"PATE BOCATTI CLASICO","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"UNIDAD","precio":1626.56278566513},
+{"cod":"1151","desc":"PATE BOCATTI PIMIENTA","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"UNIDAD","precio":1754.32136161975},
+{"cod":"1152","desc":"PATE BOCATTI JAMON COCIDO","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"UNIDAD","precio":1649.918811618},
+{"cod":"1153","desc":"PATE BOCATTI PANCETA","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"UNIDAD","precio":1669.81635107788},
+{"cod":"1154","desc":"PATE BOCATTI CHAMPIGNON","cat":"FIAMBRES EMBUTIDOS Y PATES","pres":"UNIDAD","precio":1612.05226816288},
+{"cod":"1401","desc":"MATAMBRE CARNE \"LAZZARANO\"","cat":"MATAMBRES","pres":"PIEZA EN MITADES","precio":24593.9629},
+{"cod":"1402","desc":"MATAMBRE POLLO \"LAZZARANO\"","cat":"MATAMBRES","pres":"PIEZA EN MITADES","precio":19807.39241},
+{"cod":"1037","desc":"BONDIOLA CAGNOLI FETEADA","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 120 GRS","precio":4722.5377375},
+{"cod":"1145","desc":"JAMON COCIDO NATURAL \"CALCHAQUÍ\" FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 130 GRS","precio":3388.03129994389},
+{"cod":"1116","desc":"JAMON COCIDO NATURAL \"BOCATTI\" FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 130 GRS","precio":3990.75455937278},
+{"cod":"1174","desc":"JAMON COCIDO FETEADO CAGNOLI","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 150 GRS","precio":2815.763775},
+{"cod":"1210","desc":"LOMO C/HIERBAS \"BOCATTI\" FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 70 GRS","precio":2341.52435630789},
+{"cod":"1121","desc":"MORTADELA \"CALCHAQUÍ\" FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 130 GRS","precio":2120.575490033},
+{"cod":"1115","desc":"MORTADELA C/PISTACCIO \"BOCATTI\" FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 70 GRS","precio":1602.49112463611},
+{"cod":"1327","desc":"SALAMIN BOCATTI FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER X 70GRS","precio":3514.427307622},
+{"cod":"1304","desc":"SALAME MILAN CALCHAQUÍ FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 130 GRS","precio":3217.39446386478},
+{"cod":"1328","desc":"SALAME MILAN BOCATTI FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER X 70 GRS","precio":2132.41901207378},
+{"cod":"1350","desc":"SALAME FETEADO CAGNOLI","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 180 GRS","precio":4320.126525},
+{"cod":"1022","desc":"JAMON CRUDO DOINA FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 120 GRS","precio":9058.665},
+{"cod":"1023","desc":"BONDIOLA DOINA FETEADA","cat":"FIAMBRES FETEADOS","pres":"BLISTER x 120 GRS","precio":4505.1204},
+{"cod":"1034","desc":"JAMON CRUDO EL ARTESANO 12 MESES FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER X 100 GRS","precio":5906.62413928125},
+{"cod":"1035","desc":"JAMON CRUDO EL ARTESANO 6 MESES FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER X 100 GRS","precio":4192.4122576875},
+{"cod":"1038","desc":"BONDIOLA EL ARTESANO FETEADO","cat":"FIAMBRES FETEADOS","pres":"BLISTER X 100 GRS","precio":4313.57936625},
+{"cod":"1201","desc":"PANCETA AHUMADA \"EL GALAICO\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":17193.708},
+{"cod":"1202","desc":"PANCETA AHUMADA \"CALCHAQUI\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":21263.06929824},
+{"cod":"1212","desc":"PANCETA AHUMADA \"1284\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":15352.722},
+{"cod":"1206","desc":"PANCETA SALADA \"EL GALAICO\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":18098.64},
+{"cod":"1216","desc":"PANCETA AHUMADA PLANCHA CAGNOLI","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":19492.07231675},
+{"cod":"1250","desc":"PANCETA AHUMADA PLANCHA CHACRA 43","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA EN MITADES","precio":14541.74064475},
+{"cod":"1203","desc":"LOMO C/HIERBAS \"BOCATTI\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":21156.0843298959},
+{"cod":"1204","desc":"LOMO AHUMADO NATURAL \"EL GALAICO\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":17559.5625},
+{"cod":"1205","desc":"LOMO AHUMADO DE PRAGA \"EL GALAICO\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":17910.75375},
+{"cod":"1209","desc":"LOMO HORNEADO \"OCTAVA\"","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":25860.12},
+{"cod":"1220","desc":"LOMO HORNEADO C/HIERBAS CAGNOLI","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":18293.0477125},
+{"cod":"1217","desc":"LOMO AHUMADO GRASSETTO","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":12696.25878213},
+{"cod":"1221","desc":"LOMO C/HIERBA GRASSETTO","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":15273.2448561},
+{"cod":"1222","desc":"PECHUGA DE PAVO AHUMADA","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":28738.2485544},
+{"cod":"1208","desc":"PECHUGA DE PAVO CAMPO AUSTRAL","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"PIEZA","precio":24695.70675},
+{"cod":"1225","desc":"CHORIZO ALEMAN","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"UNID AL VACIO","precio":14423.8348023},
+{"cod":"1223","desc":"SALCHICHAS TIPO FRANKFURT CON PIEL","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"UNID AL VACIO","precio":14423.8348023},
+{"cod":"1224","desc":"SALCHICHAS TIPO FRANKFURT COPETIN CON PIEL","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"UNID AL VACIO","precio":15833.7951189},
+{"cod":"1373","desc":"CHORIZO FRESCO CAGNOLI","cat":"FIAMBRES AHUMADOS Y HORNEADOS","pres":"UNID AL VACIO","precio":4333.04124825},
+{"cod":"1324","desc":"SALAME DE CERDO MONTESANO PICADO FINO","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":32988.23},
+{"cod":"1325","desc":"SALAME DE CERDO MONTESANO PICADO GRUESO","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":32988.23},
+{"cod":"1310","desc":"SALAME DE CERDO DOINA","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":32282.2434},
+{"cod":"1306","desc":"SALAME DE CERDO CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":15540.5745},
+{"cod":"1302","desc":"SALAME MILAN CALCHAQUI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":18371.343593295},
+{"cod":"1339","desc":"SALAME MILAN CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":15133.668924},
+{"cod":"1319","desc":"SALAME CANTIMPALO CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":17658.37085925},
+{"cod":"1305","desc":"SALAME MILAN 1804","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":12516.27566592},
+{"cod":"1340","desc":"SALAME MILAN CHACRA 43","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":13381.1253125},
+{"cod":"1317","desc":"SALAME MILAN IMPERIALE","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":9939.21225},
+{"cod":"1318","desc":"SALAME A LAS FINAS HIERBAS CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":19944.376881},
+{"cod":"1311","desc":"SALAMINES P.. FINO CALCHAQUI","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":19490.884053795},
+{"cod":"1313","desc":"CHORIZO COLORADO CALCHAQUI","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":16348.12899489},
+{"cod":"1332","desc":"SALAMIN PICADO FINO CAGNOLI","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":27772.20891775},
+{"cod":"1333","desc":"SALAMIN PICADO GRUESO CAGNOLI","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":27772.20891775},
+{"cod":"1352","desc":"CHORIZO A LA ESPAÑOLA (RIOJANITO) CAGNOLI","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":24789.661556},
+{"cod":"1334","desc":"LONGANIZA CALABRESA CAGNOLI","cat":"FIAMBRES SECOS","pres":"TIRA X 2 UNID","precio":29160.46811425},
+{"cod":"1358","desc":"LONGANIZA ESPAÑOLA CAGNOLI","cat":"FIAMBRES SECOS","pres":"TIRA X 2 UNID","precio":29160.46811425},
+{"cod":"1362","desc":"SALAMIN PICADO FINO CHACRA 43","cat":"FIAMBRES SECOS","pres":"TIRA X 4 UNID","precio":21926.3149545},
+{"cod":"1335","desc":"BASTON LONGANIZA CALABRESA CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":24789.661556},
+{"cod":"1336","desc":"BASTON FINO CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":24789.661556},
+{"cod":"1337","desc":"BASTON PICADO GRUESO CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":24789.661556},
+{"cod":"1342","desc":"BASTON LONGANIZA ESPAÑOLA BASTON CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":24789.661556},
+{"cod":"1359","desc":"BASTON PEPPERONI CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":24789.661556},
+{"cod":"1312","desc":"BASTON PICADO FINO CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":16617.32325},
+{"cod":"1314","desc":"BASTON PICADO GRUESO CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":16617.32325},
+{"cod":"1316","desc":"BASTON LONGANIZA CALABRESA CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":15666.38425},
+{"cod":"1341","desc":"SPIANATTA CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":29700.7840855},
+{"cod":"1353","desc":"SPIANATTA AL AJI MOLIDO  CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":36035.6770125},
+{"cod":"1354","desc":"SPIANATA A LAS FINAS HIERBAS CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":36035.6770125},
+{"cod":"1366","desc":"SPIANATA A LA PIMIENTA CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":36035.6770125},
+{"cod":"1344","desc":"SOPRESATTA A LA ITALIANA ATM CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":6027.2837625},
+{"cod":"1348","desc":"BASTON P/ FINO AJ AJI MOLIDO CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":29698.59177725},
+{"cod":"1345","desc":"BASTON P/ FINO A LAS FINAS HIERBAS CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":29698.59177725},
+{"cod":"1357","desc":"BASTON P/GRUESO A LA PIMIENTA CAGNOLI","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":29698.59177725},
+{"cod":"1355","desc":"SALAME BASTON P.FINO CHACRA 43","cat":"FIAMBRES SECOS","pres":"PIEZA","precio":18418.66976125},
+{"cod":"1338","desc":"FUET ATM CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":6343.4129},
+{"cod":"1356","desc":"FUET SERRANO CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":6343.4129},
+{"cod":"1367","desc":"SALAMIN PICADO FINO ATM CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":5141.752825},
+{"cod":"1368","desc":"SALAMIN PICADO GRUESO ATM CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":5141.752825},
+{"cod":"1371","desc":"SALAMIN PICADO FINO PICANTE CAGNOLI ATM","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":5398.455051},
+{"cod":"1372","desc":"SALAMIN PICADO FINO AHUMADO CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":5398.455051},
+{"cod":"1361","desc":"SALAMIN PICADO FINO FINAS HIERBAS CAGNOLI","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":5398.455051},
+{"cod":"1330","desc":"SALAME FUET BOCATTI","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":5178.40899576},
+{"cod":"1320","desc":"SALAME FUET  DOINA","cat":"FIAMBRES SECOS","pres":"UNID AL VACIO","precio":3757.05},
+{"cod":"1309","desc":"SALAME FUET C/EMPLUME CAMPO AUSTRAL","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":5138.96075},
+{"cod":"1307","desc":"SALAME CHACARERO PONTE LUGO","cat":"FIAMBRES SECOS","pres":"TIRA X 3 UNID","precio":21222.0},
+{"cod":"1308","desc":"LONGANIZA CALABREZA PONTE LUGO","cat":"FIAMBRES SECOS","pres":"TIRA X 2 UNID","precio":21222.0},
+{"cod":"1321","desc":"SOPRESATTA C/PIMENTON AHUMADO PONTE LUGO","cat":"FIAMBRES SECOS","pres":"TIRA X 3 UNID","precio":21222.0},
+{"cod":"1322","desc":"SPIANATTA DE SALAME PONTE LUGO","cat":"FIAMBRES SECOS","pres":"UNIDAD","precio":21222.0},
+{"cod":"2135","desc":"QUESO CREMOSO \"TONUTTI\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":9379.557},
+{"cod":"2157","desc":"QUESO CREMOSO \"LACTEAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":8187.4997875},
+{"cod":"2146","desc":"QUESO CREMOSO AMPARITO","cat":"QUESOS BLANDOS","pres":"HORMA","precio":7457.24953545},
+{"cod":"2158","desc":"QUESO CREMOSO TROZADO \"LACTEAR\"","cat":"QUESOS BLANDOS","pres":"PORCION X 500 GRS","precio":11708.2781574},
+{"cod":"2150","desc":"QUESO CREMOSO BARRAZA","cat":"QUESOS BLANDOS","pres":"HORMA","precio":9323.601276},
+{"cod":"2119","desc":"QUESO CUARTIROLO CHAMEN","cat":"QUESOS BLANDOS","pres":"HORMA","precio":7997.590980225},
+{"cod":"2120","desc":"QUESO CUARTIROLO CHAMEN","cat":"QUESOS BLANDOS","pres":"MEDIA HORMA","precio":8637.5070502875},
+{"cod":"2136","desc":"QUESO POR SALUT MAGRO TONUTTI","cat":"QUESOS BLANDOS","pres":"HORMA","precio":11035.1395},
+{"cod":"2159","desc":"QUESO POR SALUT \"LACTEAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":8999.2490874},
+{"cod":"2160","desc":"QUESO POR SALUT SIN SAL \"LACTEAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":8999.2490874},
+{"cod":"2171","desc":"QUESO POR SALUT SIN SAL LACTEAR","cat":"QUESOS BLANDOS","pres":"MEDIA HORMA","precio":9316.1247465},
+{"cod":"2161","desc":"QUESO POR SALUT MAGRO L. CASEI \"LACTEAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":8999.2490874},
+{"cod":"2168","desc":"QUESO POR SALUT BARRAZA","cat":"QUESOS BLANDOS","pres":"HORMA","precio":10218.0432101},
+{"cod":"2169","desc":"QUESO POR SALUT SIN SAL BARRAZA","cat":"QUESOS BLANDOS","pres":"HORMA","precio":10218.0432101},
+{"cod":"2121","desc":"QUESO POR SALUT CHAMEN","cat":"QUESOS BLANDOS","pres":"HORMA","precio":9290.225538055},
+{"cod":"2122","desc":"QUESO POR SALUT SIN SAL CHAMEN","cat":"QUESOS BLANDOS","pres":"MEDIA HORMA","precio":10033.1459483063},
+{"cod":"2151","desc":"QUESO AZUL \"STA ROSA\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":27421.806258},
+{"cod":"2152","desc":"QUESO AZUL \"STA ROSA\"","cat":"QUESOS BLANDOS","pres":"PORCION X 140 GRS","precio":4937.142672},
+{"cod":"2154","desc":"QUESO AZUL BAVARIA GRANDBLU","cat":"QUESOS BLANDOS","pres":"HORMA","precio":29393.251272},
+{"cod":"2153","desc":"QUESO AZUL \"BAVARIA\"","cat":"QUESOS BLANDOS","pres":"1/2 HORMA","precio":25212.416922},
+{"cod":"2155","desc":"QUESO AZUL \"BAVARIA\"","cat":"QUESOS BLANDOS","pres":"PORCION X 140 GRS","precio":4686.69663},
+{"cod":"2138","desc":"QUESO AZUL SAN GOTARDO","cat":"QUESOS BLANDOS","pres":"HORMA","precio":13820.423375},
+{"cod":"2137","desc":"QUESO AZUL EMPERADOR","cat":"QUESOS BLANDOS","pres":"HORMA","precio":12357.481345},
+{"cod":"2124","desc":"QUESO AZUL LA QUESERA","cat":"QUESOS BLANDOS","pres":"HORMA","precio":13103.54937045},
+{"cod":"2125","desc":"MOZZARELLA CILINDRO \"TONUTTI\"","cat":"QUESOS BLANDOS","pres":"CILINDRO X 3KG","precio":9401.6715},
+{"cod":"2147","desc":"MOZZARELLA FIUMELATTE","cat":"QUESOS BLANDOS","pres":"CILINDRO X3KG","precio":7575.0},
+{"cod":"2148","desc":"MOZZARELLA ABUELO MANOLO","cat":"QUESOS BLANDOS","pres":"CILINDRO X5KG","precio":5844.0},
+{"cod":"2166","desc":"MOZZARELLA CILINDRO BARRAZA","cat":"QUESOS BLANDOS","pres":"CILINDRO X3KG","precio":11192.1739585425},
+{"cod":"2167","desc":"MOZZARELLA PLANCHA BARRAZA","cat":"QUESOS BLANDOS","pres":"PLANCHA X10KG","precio":10588.45673853},
+{"cod":"2101","desc":"MOZZARELLA CILINDRO DOÑA AURORA","cat":"QUESOS BLANDOS","pres":"CILINDRO X3KG","precio":10814.49997485},
+{"cod":"2102","desc":"MOZZARELLA CILINDRO DOÑA AURORA","cat":"QUESOS BLANDOS","pres":"CILINDRO X 500 GRS","precio":6038.4992525},
+{"cod":"2103","desc":"MOZZARELLA CILINDRO AHUMADA DOÑA AURORA","cat":"QUESOS BLANDOS","pres":"CILINDRO X 500 GRS","precio":6038.4992525},
+{"cod":"2104","desc":"MOZZARELLA CILINDRO OREGANO DOÑA AURORA","cat":"QUESOS BLANDOS","pres":"CILINDRO X 500 GRS","precio":6038.4992525},
+{"cod":"2123","desc":"MOZZARELLA CILINDRO BAJO SODIO DOÑA AURORA","cat":"QUESOS BLANDOS","pres":"CILINDRO X 500 GRS","precio":6038.4992525},
+{"cod":"2012","desc":"QUESO BARRA TYBO \"TONUTTI\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":11525.976},
+{"cod":"2015","desc":"QUESO BARRA DANBO \"TONUTTI\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":9873.0645},
+{"cod":"2013","desc":"QUESO BARRA TYBO \"RAMOLAC\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":11024.43472075},
+{"cod":"2026","desc":"QUESO BARRA TYBO \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":10795.5946626},
+{"cod":"2027","desc":"QUESO BARRA DANBO \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":13933.91894895},
+{"cod":"2016","desc":"QUESO BARRA TYBO BARRAZA","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":11329.6660356},
+{"cod":"2018","desc":"QUESO BARRA TYBO LA CHACRA","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":9953.9989098},
+{"cod":"2031","desc":"QUESO BARRA GOUDA OREGANO MIGUE","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":17258.1937775755},
+{"cod":"2032","desc":"QUESO BARRA GOUDA AHUMADO MIGUE","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":18166.6637745595},
+{"cod":"2033","desc":"QUESO BARRA CHEDDAR MIGUE","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":15614.0383239562},
+{"cod":"2003","desc":"QUESO BARRA TYBO CHAMEN","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":10255.3667941725},
+{"cod":"2020","desc":"QUESO BARRA GOUDA AJÍ CHAMEN","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":14857.9001087825},
+{"cod":"2021","desc":"QUESO BARRA GOUDA ALBAHACA CHAMEN","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":14857.9001087825},
+{"cod":"2028","desc":"QUESO MOZZARELLA EN BARRA \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":13270.5287715},
+{"cod":"2029","desc":"QUESO TILSIT LIGHT \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":14587.75433115},
+{"cod":"2030","desc":"QUESO BARRA CHEDDAR \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":13270.5287715},
+{"cod":"2002","desc":"QUESO BARRA DANBO DOÑA AURORA FETEADO X170GR","cat":"QUESOS SEMIDUROS","pres":"FETEADO X150GR","precio":3349.0567031515},
+{"cod":"2222","desc":"QUESO CHEDDAR DOÑA AURORA FETEADO X150GR","cat":"QUESOS SEMIDUROS","pres":"FETEADO X170GR","precio":2952.9299942175},
+{"cod":"2237","desc":"QUESO CHEDDAR EN FETAS \"MILKAUT\"","cat":"QUESOS SEMIDUROS","pres":"PACK x 2,270kg","precio":68640.86306},
+{"cod":"2241","desc":"QUESO CHEDDAR X8 FETAS TONADITA","cat":"QUESOS SEMIDUROS","pres":"PACK x 120g","precio":2587.38333333333},
+{"cod":"2240","desc":"QUESO CHEDDAR X140 FETAS TONADITA","cat":"QUESOS SEMIDUROS","pres":"PACK x 1,68KG","precio":32070.445},
+{"cod":"2225","desc":"QUESO PATEGRAS \"TONUTTI\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":14372.743},
+{"cod":"2268","desc":"QUESO HOLANDA \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":15408.2197511},
+{"cod":"2262","desc":"QUESO PATEGRAS \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":17898.5291485},
+{"cod":"2263","desc":"QUESO FONTINA \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":18819.4595677},
+{"cod":"2266","desc":"QUESO GOUDA \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":16319.9787817},
+{"cod":"2230","desc":"QUESO PATEGRAS CHAMEN","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":15259.5369721025},
+{"cod":"2231","desc":"QUESO FONTINA CHAMEN","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":18654.4715940275},
+{"cod":"2260","desc":"QUESO ATUEL \"STA ROSA\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":26182.397934},
+{"cod":"2213","desc":"QUESO GRUYERE 3L","cat":"QUESOS SEMIDUROS","pres":"CUÑA DE 3 KILOS","precio":21368.4030362},
+{"cod":"2214","desc":"QUESO GRUYERE ESTANCIA DE ORO","cat":"QUESOS SEMIDUROS","pres":"CUÑA DE 3 KILOS","precio":25291.5},
+{"cod":"2264","desc":"QUESO GRUYERE \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":19828.158559},
+{"cod":"2265","desc":"QUESO GRUYERE MEDIA HORMA \"LACTEAR\"","cat":"QUESOS SEMIDUROS","pres":"MEDIA HORMA","precio":19828.158559},
+{"cod":"2226","desc":"QUESO MORLAG PRE VERT HORMA","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":32803.60317},
+{"cod":"2227","desc":"QUESO RACLAG PRE VERT HORMA","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":32342.90371},
+{"cod":"2228","desc":"QUESO MORLAG PRE VERT EN MITADES","cat":"QUESOS SEMIDUROS","pres":"MEDIA HORMA","precio":32803.60317},
+{"cod":"2229","desc":"QUESO RACLAG PRE VERT EN MITADES","cat":"QUESOS SEMIDUROS","pres":"MEDIA HORMA","precio":32342.90371},
+{"cod":"2245","desc":"QUESO MINI GOUDA AHUMADO \"MIGUE\"","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA","precio":19945.3337789197},
+{"cod":"2246","desc":"QUESO MINI GOUDA PEPATO \"MIGUE\"","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA","precio":19945.3531127558},
+{"cod":"2247","desc":"QUESO MINI GOUDA OREGANO \"MIGUE\"","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA","precio":19945.3531127558},
+{"cod":"2249","desc":"QUESO MINI GOUDA AJÍ MIGUE","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA","precio":19945.3531127558},
+{"cod":"2248","desc":"QUESO MINI GOUDA FINAS HIERBAS MIGUE","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA","precio":19945.3531127558},
+{"cod":"2270","desc":"QUESO PESTO ESQUESITO MINI","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA X 500GR","precio":14012.41982855},
+{"cod":"2271","desc":"QUESO SABORIZADO CAFÉ ESQUESITOS MINI","cat":"QUESOS SEMIDUROS","pres":"PORCION","precio":14295.370518},
+{"cod":"2272","desc":"QUESO SABORIZADO VINO ESQUESITO MINI","cat":"QUESOS SEMIDUROS","pres":"PORCION","precio":14578.30925265},
+{"cod":"2273","desc":"QUESO SABORIZADO MANI TOSTADO Y PIMENTON ESQUESITO MINI","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA X 500GR","precio":14012.41982855},
+{"cod":"2274","desc":"QUESO SABORIZADO AHUMADO PIMIENTA NEGRA ESQUESITOS MINI","cat":"QUESOS SEMIDUROS","pres":"MINI HORMA X 500GR","precio":14012.41982855},
+{"cod":"2541","desc":"MANTECA PILON TONADITA","cat":"LACTEOS","pres":"PILON X 2,5 KG","precio":40857.141325},
+{"cod":"2545","desc":"MANTECA TONADITA X 100GRS","cat":"LACTEOS","pres":"PAN X 100 GRS","precio":1877.635045},
+{"cod":"2546","desc":"MANTECA TONADITA X 200GRS","cat":"LACTEOS","pres":"PAN X 200 GRS","precio":3576.35707},
+{"cod":"2547","desc":"MANTECA TONADITA X 200GRS BAJO EN LACTOSA","cat":"LACTEOS","pres":"PAN X 200 GRS","precio":3755.27009},
+{"cod":"2512","desc":"MANTECA RAMOLAC X 100GRS","cat":"LACTEOS","pres":"PAN X 100 GRS","precio":1584.37279},
+{"cod":"2513","desc":"MANTECA RAMOLAC X 200GRS","cat":"LACTEOS","pres":"PAN X 200 GRS","precio":3168.74558},
+{"cod":"2551","desc":"MANTECA CLUCELAT X 100GRS","cat":"LACTEOS","pres":"PAN X 100 GRS","precio":1099.1017818},
+{"cod":"2552","desc":"MANTECA CLUCELAT X 200GRS","cat":"LACTEOS","pres":"PAN X 200 GRS","precio":2198.2035636},
+{"cod":"2548","desc":"CREMA TONADITA X 4 LITROS","cat":"LACTEOS","pres":"BALDE X 3LTS","precio":43516.44},
+{"cod":"2554","desc":"CREMA TONUTTI X 5 LITROS","cat":"LACTEOS","pres":"SACHET X 5LTS","precio":37130.06},
+{"cod":"2589","desc":"QUESO SALSA CHEDDAR TONADITA X3KG","cat":"LACTEOS","pres":"POUCH X3KG","precio":31703.5125},
+{"cod":"2558","desc":"CREMA MILKAUT 44%","cat":"LACTEOS","pres":"BALDE X 5LTS","precio":82967.61396},
+{"cod":"2559","desc":"QUESO CHEDDAR MILKAUT","cat":"LACTEOS","pres":"POUCH X 3,50 KGS","precio":52918.1884},
+{"cod":"2560","desc":"QUESO CREMA MILKAUT","cat":"LACTEOS","pres":"BALDE X 3,60 KGS","precio":79162.85608},
+{"cod":"2302","desc":"QUESO SBRINZ \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":16447.49996175},
+{"cod":"2301","desc":"QUESO REGIANO \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":16447.49996175},
+{"cod":"2305","desc":"QUESO SBRINZ  EN MITADES \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"1/2 HORMA","precio":16447.49996175},
+{"cod":"2304","desc":"QUESO REGIANO  EN MITADES \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"1/2 HORMA","precio":16447.49996175},
+{"cod":"2318","desc":"QUESO ROMANO ESTACIONADO \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":16179.74952825},
+{"cod":"2319","desc":"QUESO PROVOLONE ESTACIONADO \"CASTELMAR\"","cat":"QUESOS DUROS","pres":"1/2 HORMA","precio":24483.4425},
+{"cod":"2303","desc":"QUESO SARDO FRESCO","cat":"QUESOS DUROS","pres":"HORMA","precio":10561.25},
+{"cod":"2335","desc":"QUESO SARDO FRESCO COLBER","cat":"QUESOS DUROS","pres":"HORMA","precio":10103.5},
+{"cod":"2323","desc":"QUESO SARDO \"TONUTTI\"","cat":"QUESOS DUROS","pres":"HORMA","precio":16432.43525},
+{"cod":"2312","desc":"QUESO SARDO DE AUTOR","cat":"QUESOS DUROS","pres":"HORMA","precio":12278.748953075},
+{"cod":"2337","desc":"PROVOLETA HORMA \"NONNA PIA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":16658.67424375},
+{"cod":"2338","desc":"PROVOLETA HORMA FINA X 2 \"NONNA PIA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":19277.099875},
+{"cod":"2339","desc":"POROVOLETA HORMA C/CAZUELA ALUMINIO \"NONNA PIA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":20862.8051775},
+{"cod":"2340","desc":"PROVOLETA MINI \"NONNA PIA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":20862.8051775},
+{"cod":"2341","desc":"PROVOLETA FRACCIONADA X 1 \"NONNA PIA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":19277.099875},
+{"cod":"2336","desc":"PROVOLETA PARRILLERA STA ROSA","cat":"QUESOS DUROS","pres":"HORMA","precio":35893.154682},
+{"cod":"2316","desc":"PROVOLETA PARRILLERA CASTELMAR","cat":"QUESOS DUROS","pres":"HORMA","precio":15913.46625},
+{"cod":"2308","desc":"PROVOLETA PARRILLERA COLBER","cat":"QUESOS DUROS","pres":"HORMA","precio":11155.0},
+{"cod":"2324","desc":"QUESO PROVOLONE \"STA ROSA\"","cat":"QUESOS DUROS","pres":"HORMA","precio":39210.80625},
+{"cod":"2344","desc":"QUESO PROVOLONE \"STA ROSA\"","cat":"QUESOS DUROS","pres":"MEDIA HORMA","precio":39578.875182},
+{"cod":"2345","desc":"QUESO PROVOLONE TROZADO \"STA ROSA\"","cat":"QUESOS DUROS","pres":"PORCION","precio":46485.35892},
+{"cod":"2350","desc":"QUESO SARDO ESTACIONADO \"LACTEAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":18266.4297816},
+{"cod":"2346","desc":"QUESO REGGIANITO \"LACTEAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":21012.8099181},
+{"cod":"2348","desc":"QUESO REGGIANITO MEDIA HORMA \"LACTEAR\"","cat":"QUESOS DUROS","pres":"MEDIA HORMA","precio":21012.8099181},
+{"cod":"2360","desc":"QUESO REGIANITO \"MIGUE\"","cat":"QUESOS DUROS","pres":"HORMA","precio":18515.1498947068},
+{"cod":"2361","desc":"QUESO REGIANITO EN MITADES \"MIGUE\"","cat":"QUESOS DUROS","pres":"MEDIA HORMA","precio":21748.205557452},
+{"cod":"2362","desc":"QUESO PROVOLONE MIGUE","cat":"QUESOS DUROS","pres":"HORMA","precio":25147.03986696},
+{"cod":"2363","desc":"QUESO PROVOLONE 1/4 DE HORMA MIGUE","cat":"QUESOS DUROS","pres":"1/4 HORMA","precio":27001.5510120048},
+{"cod":"2364","desc":"QUESO PARMESANO 10 MESES MIGUE","cat":"QUESOS DUROS","pres":"HORMA","precio":20572.3840958757},
+{"cod":"2365","desc":"QUESO PARMESANO EN MITADES 10 MESES MIGUE","cat":"QUESOS DUROS","pres":"MEDIA HORMA","precio":24256.8869983704},
+{"cod":"2359","desc":"QUESO PARMESANO 10 MESES MIGUE MINI","cat":"QUESOS DUROS","pres":"MINI HORMA","precio":23164.2592460664},
+{"cod":"2354","desc":"QUESO PARMESANO PREMIUM 12 MESES MIGUE","cat":"QUESOS DUROS","pres":"CUÑA","precio":24974.4761643696},
+{"cod":"2355","desc":"QUESO PARMESANO GRAN RESERVA 24 MESES MIGUE","cat":"QUESOS DUROS","pres":"CUÑA","precio":31855.6378108056},
+{"cod":"2366","desc":"QUESO PEPATO PASTA DURA EN MITADES \"MIGUE \"","cat":"QUESOS DUROS","pres":"MEDIA HORMA","precio":23046.785265636},
+{"cod":"2367","desc":"QUESO VASCHETTA AL VACÍO \"MIGUE\"","cat":"QUESOS DUROS","pres":"HORMA","precio":15912.390050832},
+{"cod":"2368","desc":"QUESO GRANA PADANO 1/4 DE HORMA AL VACÍO \"MIGUE\"","cat":"QUESOS DUROS","pres":"CUÑA","precio":25655.2223991096},
+{"cod":"2313","desc":"QUESO GRANA PADANO 1KG AL VACÍO \"MIGUE\"","cat":"QUESOS DUROS","pres":"CUÑA","precio":28505.0838949272},
+{"cod":"2369","desc":"QUESO SARDO \"MIGUE\"","cat":"QUESOS DUROS","pres":"HORMA","precio":18617.0908752312},
+{"cod":"2371","desc":"QUESO ROMANITO MIGUE","cat":"QUESOS DUROS","pres":"HORMA","precio":20495.1547426824},
+{"cod":"2372","desc":"QUESO REGIANITO LIGHT MIGUE 1/4H","cat":"QUESOS DUROS","pres":"CUÑA","precio":23355.7266359736},
+{"cod":"2306","desc":"QUESO PROVOLONE PARRILLERO MIGUE","cat":"QUESOS DUROS","pres":"HORMA","precio":17419.58662422},
+{"cod":"2370","desc":"QUESO RALLADO SIN DESHIDRATAR X2KG MIGUE","cat":"QUESOS DUROS","pres":"BOLSA","precio":45234.2022174504},
+{"cod":"2330","desc":"QUESO REGIANITO MIGUE FRACCIONADO X200GR","cat":"QUESOS DUROS","pres":"PORCIÓN X200GRS","precio":25511.9036348194},
+{"cod":"2331","desc":"QUESO PARMESANO MIGUE FRACCIONADO X200GR","cat":"QUESOS DUROS","pres":"PORCIÓN X200GRS","precio":27220.3730785219},
+{"cod":"2332","desc":"QUESO PROVOLONE MIGUE FRACCIONADO X200GR","cat":"QUESOS DUROS","pres":"PORCIÓN X200GRS","precio":30523.0035783394},
+{"cod":"2333","desc":"QUESO REGIANITO SABORIZADO TOMATES SECOS CHAMEN X500GR","cat":"QUESOS DUROS","pres":"PORCIÓN X500GR","precio":18782.35031365},
+{"cod":"2334","desc":"QUESO REGIANITO SABORIZADO FRUTOS SECOS CHAMEN X500GR","cat":"QUESOS DUROS","pres":"PORCIÓN X500GR","precio":18782.35031365},
+{"cod":"2321","desc":"QUESO LAGUNA PRE VERT HORMA","cat":"QUESOS DUROS","pres":"HORMA","precio":29513.07658},
+{"cod":"2327","desc":"QUESO SARDO CHAMEN","cat":"QUESOS DUROS","pres":"HORMA","precio":15269.0880066725},
+{"cod":"2328","desc":"QUESO REGIANITO CHAMEN","cat":"QUESOS DUROS","pres":"HORMA","precio":16843.3302309388},
+{"cod":"2433","desc":"QUESO BRIE \"ILE DE FRANCE\"","cat":"ESPECIALIDADES","pres":"PORCION X 125GRS","precio":11255.679666},
+{"cod":"2434","desc":"QUESO CAMEMBERT \"ILE DE FRANCE\"","cat":"ESPECIALIDADES","pres":"PORCION X 125GRS","precio":11255.725404},
+{"cod":"2435","desc":"QUESO BRIE BLUE \"ILE DE FRANCE\"","cat":"ESPECIALIDADES","pres":"PORCION X 125GRS","precio":11904.488442},
+{"cod":"2408","desc":"QUESO ADLER FONTINA","cat":"ESPECIALIDADES","pres":"X 100 GRS","precio":2792.40654},
+{"cod":"2409","desc":"QUESO ADLER SALAME","cat":"ESPECIALIDADES","pres":"X 100 GRS","precio":2792.40654},
+{"cod":"2410","desc":"QUESO ADLER AZUL","cat":"ESPECIALIDADES","pres":"X 100 GRS","precio":2792.40654},
+{"cod":"2411","desc":"QUESO ADLER JAMON","cat":"ESPECIALIDADES","pres":"X 100 GRS","precio":2792.40654},
+{"cod":"2412","desc":"QUESO ADLER GRUYERE","cat":"ESPECIALIDADES","pres":"X 100 GRS","precio":2792.40654},
+{"cod":"2259","desc":"QUESO FONDUE \"SANTA ROSA \"","cat":"ESPECIALIDADES","pres":"CAJA X 400 GRS","precio":14857.592904},
+{"cod":"2436","desc":"CHEVROTIN CLASICO x120gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 190GRS","precio":9634.95},
+{"cod":"2437","desc":"CHEVORTIN SABOR FINAS HIERBAS x120gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 120GRS","precio":9634.95},
+{"cod":"2438","desc":"CHEVROTIN SABOR OREGANO x120gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 120GRS","precio":9634.95},
+{"cod":"2439","desc":"CHEVROTIN SABOR AJI MOLIDO x120gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 120GRS","precio":9634.95},
+{"cod":"2440","desc":"CHEVROTIN SABOR PIMIENTA NEGRA x120gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 120GRS","precio":9634.95},
+{"cod":"2441","desc":"FETA MEDALLA DE ORO x200gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 200GRS","precio":13293.0},
+{"cod":"2443","desc":"QUESO BRIE CUÑA x100gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"PORCION X 100GRS","precio":5103.0},
+{"cod":"2448","desc":"QUESO BOCCONCINOS x160gr \"WAPI\"","cat":"ESPECIALIDADES","pres":"DOY PACK","precio":3903.795},
+{"cod":"2465","desc":"QUESO BOCCONCINO MOZZARI X200G","cat":"ESPECIALIDADES","pres":"DOY PACK","precio":4721.1768},
+{"cod":"2474","desc":"QUESO BOCCONCINOS MOZZARI X1KG","cat":"ESPECIALIDADES","pres":"DOY PACK","precio":18969.2244},
+{"cod":"2467","desc":"QUESO BRIE MOZZARI HORMA X1,5KG","cat":"ESPECIALIDADES","pres":"HORMA","precio":17949.0222},
+{"cod":"2456","desc":"QUESO BRIE PRE VERT HORMA X1,5KG","cat":"ESPECIALIDADES","pres":"HORMA","precio":23865.89506},
+{"cod":"2457","desc":"QUESO BRIE PRE VERT CUÑA X100GR","cat":"ESPECIALIDADES","pres":"PORCION X 100GRS","precio":4704.79672},
+{"cod":"2458","desc":"QUESO CAMEMBERT PRE VERT PIEZA X200GR","cat":"ESPECIALIDADES","pres":"MINI HORMA","precio":5753.59577},
+{"cod":"2459","desc":"QUESO CAMEMBERT C/PIMIENTA PRE VERT PIEZA X200GR","cat":"ESPECIALIDADES","pres":"MINI HORMA","precio":6232.31141},
+{"cod":"2460","desc":"QUESO CAMEMBERT PRE VERT PIEZA X40GR","cat":"ESPECIALIDADES","pres":"MINI HORMA","precio":1346.06602},
+{"cod":"5001","desc":"PAPAS FRITAS  CLASICAS KRACHITOS","cat":"SNACK","pres":"BOLSA x 420 GRS","precio":9748.9061},
+{"cod":"5006","desc":"PAPAS FRITAS  CLASICAS KRACHITOS","cat":"SNACK","pres":"BOLSA x 275 GRS","precio":6510.7376},
+{"cod":"5002","desc":"PAPAS FRITAS  CLASICAS KRACHITOS","cat":"SNACK","pres":"BOLSA x 105 GRS","precio":2815.7654},
+{"cod":"5003","desc":"PAPAS FRITAS  CLASICAS KRACHITOS","cat":"SNACK","pres":"BOLSA x 50 GRS","precio":1617.2248},
+{"cod":"5004","desc":"PAPAS FRITAS  CORTE AMERICANO KRACHITOS","cat":"SNACK","pres":"BOLSA x 420 GRS","precio":10337.7504},
+{"cod":"5005","desc":"PAPAS FRITAS  SIN SAL KRACHITOS","cat":"SNACK","pres":"BOLSA x 55 GRS","precio":1674.7368},
+{"cod":"5007","desc":"PAPAS FRITAS  CORTE AMERICANO KRACHITOS","cat":"SNACK","pres":"BOLSA x 105 GRS","precio":2815.7654},
+{"cod":"5008","desc":"PAPAS FRITAS  CORTE AMERICANO KRACHITOS","cat":"SNACK","pres":"BOLSA x 50 GRS","precio":1617.2248},
+{"cod":"5010","desc":"PAPAS PAY KRACHITOS","cat":"SNACK","pres":"BOLSA x 55 GRS","precio":1514.114},
+{"cod":"5011","desc":"PALITOS DE MAIZ CON QUESO KRACHITOS","cat":"SNACK","pres":"BOLSA x 240 GRS","precio":5053.5194},
+{"cod":"5013","desc":"PALITOS DE MAIZ CON QUESO KRACHITOS","cat":"SNACK","pres":"BOLSA x 60 GRS","precio":1351.0896},
+{"cod":"5016","desc":"SUPER CONOS MAXI QUESO KRACHITOS","cat":"SNACK","pres":"BOLSA x 70 GRS","precio":1234.0906},
+{"cod":"5017","desc":"BASTONES EXTRA QUESO KRACHITOS","cat":"SNACK","pres":"BOLSA x 240 GRS","precio":5495.5244},
+{"cod":"5018","desc":"BASTONES EXTRA QUESO KRACHITOS","cat":"SNACK","pres":"BOLSA x 60 GRS","precio":1383.685},
+{"cod":"5019","desc":"PALITOS SALADOS KRACHITOS","cat":"SNACK","pres":"BOLSA x 500 GRS","precio":7748.6518},
+{"cod":"5020","desc":"PALITOS SALADOS KRACHITOS","cat":"SNACK","pres":"BOLSA x 110 GRS","precio":1791.483},
+{"cod":"5021","desc":"PALITOS SALADOS KRACHITOS","cat":"SNACK","pres":"BOLSA x 70 GRS","precio":1239.8734},
+{"cod":"5026","desc":"MANI PELADO SALADO KRACHITOS","cat":"SNACK","pres":"BOLSA x 110 GRS","precio":2449.8532},
+{"cod":"5027","desc":"MANI PELADO SALADO KRACHITOS","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1526.0272},
+{"cod":"5036","desc":"PAPAS FRITAS SABOR JAMON SERRANO KRACHITOS","cat":"SNACK","pres":"BOLSA x 55 GRS","precio":1587.505},
+{"cod":"5039","desc":"PAPAS FRITAS SABOR CHEDAR KRACHITOS","cat":"SNACK","pres":"BOLSA x 55 GRS","precio":1581.264},
+{"cod":"5040","desc":"PAPAS FRITAS SABOR KETCHUP KRACHITOS","cat":"SNACK","pres":"BOLSA x 55 GRS","precio":1581.1534},
+{"cod":"5041","desc":"MANI PELADO SALADO KRACHITOS","cat":"SNACK","pres":"BOLSA x 500 GRS","precio":9682.7298},
+{"cod":"5101","desc":"PITA CHIPS ORIGINAL","cat":"SNACK","pres":"BOLSA x 115 GRS","precio":2081.6432},
+{"cod":"5102","desc":"PITA CHIPS CEBOLLA","cat":"SNACK","pres":"BOLSA x 115 GRS","precio":2081.6432},
+{"cod":"5103","desc":"PITA CHIPS JALAPEÑO","cat":"SNACK","pres":"BOLSA x 115 GRS","precio":2081.6432},
+{"cod":"5107","desc":"PITA CHIPS TOMATE Y ROMERO","cat":"SNACK","pres":"BOLSA x 115 GRS","precio":2081.6432},
+{"cod":"5108","desc":"PITA CHIPS CURCUMA","cat":"SNACK","pres":"BOLSA x 115 GRS","precio":2078.070154875},
+{"cod":"5104","desc":"SNACKS TOMATE Y ROMERO","cat":"SNACK","pres":"BOLSA x 130 GRS","precio":2798.62327875},
+{"cod":"5105","desc":"SNACKS RAWMESAN Y REMOLACHA","cat":"SNACK","pres":"BOLSA x 130 GRS","precio":2798.62327875},
+{"cod":"5106","desc":"SNACKS SÉSAMO Y SAL MARINA","cat":"SNACK","pres":"BOLSA x 130 GRS","precio":1820.37672375},
+{"cod":"5050","desc":"PAPA FRITA SLICES CLASICA","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":902.2625},
+{"cod":"5051","desc":"PAPA FRITA SLICES CLASICA","cat":"SNACK","pres":"BOLSA x 150 GRS","precio":1614.43},
+{"cod":"5052","desc":"PAPA FRITA SLICES CLASICA","cat":"SNACK","pres":"BOLSA x 500 GRS","precio":5238.6325},
+{"cod":"5053","desc":"PAPA FRITA SLICES C/AMERICANO","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":902.2625},
+{"cod":"5054","desc":"PAPA FRITA SLICES C/AMERICANO","cat":"SNACK","pres":"BOLSA x 150 GRS","precio":1614.43},
+{"cod":"5055","desc":"PAPA FRITA SLICES C/AMERICANO","cat":"SNACK","pres":"BOLSA x 500 GRS","precio":5764.8375},
+{"cod":"5056","desc":"PAPA FRITA SLICES JAMON SERRANO","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5057","desc":"PAPA FRITA SLICES CHEDDAR","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5058","desc":"PAPA FRITA SLICES SALAME DE CAMPO","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5059","desc":"PALITOS SALADOS SLICES","cat":"SNACK","pres":"BOLSA x 120 GRS","precio":723.1875},
+{"cod":"5060","desc":"BATATAS FRITAS SLICES","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":920.17},
+{"cod":"5061","desc":"PAPAS FRITAS SLICES PESTO","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5062","desc":"PAPAS FRITAS SLICES PROVENZAL","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5063","desc":"PAPAS FRITAS SLICES LLAMARADA LIMON PICANTE","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5064","desc":"PAPAS FRITAS SLICES LLAMARADA BARBACOA PICANTE","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"5065","desc":"PAPAS FRITAS SLICES LLAMARADA PICANTE ARGENTO","cat":"SNACK","pres":"BOLSA x 65 GRS","precio":1265.9225},
+{"cod":"4101","desc":"ACEITUNAS VERDES 00 \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"BALDE x 5 KGS","precio":54676.774},
+{"cod":"4102","desc":"ACEITUNAS VERDES 00 \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":23392.85},
+{"cod":"4103","desc":"ACEITUNAS VERDES DESCAROZADAS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"BALDE x 4 KGS","precio":43404.9525},
+{"cod":"4104","desc":"ACEITUNAS VERDES DESCAROZADAS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 1,6 KGS","precio":19227.0},
+{"cod":"4105","desc":"ACEITUNAS RELLENAS CON MORRON  \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":42619.85},
+{"cod":"4106","desc":"ACEITUNAS NEGRAS 00 \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"BALDE x 5 KGS","precio":79071.0375},
+{"cod":"4107","desc":"ACEITUNAS NEGRAS 00 \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":32974.305},
+{"cod":"4117","desc":"ACEITUNAS NEGRAS DESCAROZADAS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":22880.13},
+{"cod":"4108","desc":"ACEITUNAS NEGRAS TIPO GRIEGAS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":32365.45},
+{"cod":"4109","desc":"AJIES DESPUNTADOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x  900 GRS","precio":17304.3},
+{"cod":"4110","desc":"BERENJENAS CONDIMENTADAS EN ACEITE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":40857.375},
+{"cod":"4111","desc":"CEBOLLITAS IMPORTADAS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":25740.139},
+{"cod":"4138","desc":"ALCAPARRAS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 120 KGS","precio":3396.77},
+{"cod":"4112","desc":"CORAZONES DE ALCAUCILES \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":86521.5},
+{"cod":"4113","desc":"PEPINOS AROMATIZADOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":23713.3},
+{"cod":"4114","desc":"PEPINITOS EN VINAGRE \"ÑORQUINCO\" 000","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":29104.864},
+{"cod":"4115","desc":"PICKLES MIXTOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":14900.925},
+{"cod":"4120","desc":"MORRONES PELADOS AL FUEGO \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO x 2 KGS","precio":47747.05},
+{"cod":"4116","desc":"CHOCLITOS \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 190 GR","precio":10478.715},
+{"cod":"4118","desc":"CEREZAS AL MARASCHINO  \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 170GR","precio":5704.01},
+{"cod":"4121","desc":"ACEITUNAS VERDES FRASCO \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":3508.7065},
+{"cod":"4122","desc":"ACEITUNAS V. DESCAROZADAS FRASCO \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 160 GR","precio":3757.1105},
+{"cod":"4125","desc":"ACEITUNAS VERDES FRASCO \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 500 GR","precio":6442.97875},
+{"cod":"4123","desc":"ACEITUNAS VERDES RELLENAS C/MORRON \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":6085.898},
+{"cod":"4124","desc":"AJIES DESPUNTADOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 120 GR","precio":4300.49425},
+{"cod":"4126","desc":"BERENJENAS CONDIMENTADAS EN ACEITE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 220 GR","precio":7529.74625},
+{"cod":"4127","desc":"CEBOLLITAS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":4347.07},
+{"cod":"4128","desc":"CORAZONES DE ALCAUCIL \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 210 GR","precio":10712.4225},
+{"cod":"4130","desc":"ESPARRAGOS VERDES AL NATURAL \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":7902.35225},
+{"cod":"4133","desc":"MORRONES PELADOS AL FUEGO \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 220 GR","precio":5651.191},
+{"cod":"4134","desc":"PEPINOS AROMATIZADOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":4812.8275},
+{"cod":"4135","desc":"PEPINITOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":4564.4235},
+{"cod":"4136","desc":"PICKLES MIXTOS EN VINAGRE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 200 GR","precio":3167.151},
+{"cod":"4137","desc":"FILETES DE ANCHOAS EN ACEITE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 70 GR","precio":6054.8475},
+{"cod":"4139","desc":"FILETES DE ANCHOAS EN ACEITE \"ÑORQUINCO\"","cat":"ENCURTIDOS","pres":"FRASCO X 60x3","precio":53406.86},
+{"cod":"4150","desc":"FILETES DE ANCHOAS EN ACEITE \"BOCARTE\"","cat":"ENCURTIDOS","pres":"FRASCO X 90 GR","precio":5439.0},
+{"cod":"4151","desc":"FILETES DE ANCHOAS EN ACEITE \"BOCARTE\"","cat":"ENCURTIDOS","pres":"FRASCO X 60x3","precio":40425.0},
+{"cod":"3203","desc":"DULCE DE LECHE \"CHIMBOTE\"","cat":"DULCES","pres":"FRASCO x 1/2 kg","precio":8515.48989555},
+{"cod":"3210","desc":"DULCE DE LECHE \"CHIMBOTE\"","cat":"DULCES","pres":"FRASCO X 220GR","precio":5318.41860275},
+{"cod":"3207","desc":"DULCE DE LECHE \"CHIMBOTE\"","cat":"DULCES","pres":"FRASCO X 850GR","precio":14009.49725505},
+{"cod":"3204","desc":"CARAMELOS \"CHIMBOTE\"","cat":"DULCES","pres":"CAJA x 24","precio":15243.8466114},
+{"cod":"3341","desc":"DULCE BATATA LIGHT \"CORMILLOT\"","cat":"DULCES","pres":"PANES x 430 GRS","precio":1619.96437060036},
+{"cod":"3342","desc":"DULCE MEMBRILLO LIGHT \"CORMILLOT\"","cat":"DULCES","pres":"PANES x 430 GRS","precio":2414.66960064073},
+{"cod":"3360","desc":"DULCE MEMBRILLO LIGHT SIN AZUCAR \"CORMILLOT\"","cat":"DULCES","pres":"PANES x 430 GRS","precio":3136.25062127813},
+{"cod":"3361","desc":"DULCE BATATA LIGHT SIN AZUCAR \"CORMILLOT\"","cat":"DULCES","pres":"PANES x 430 GRS","precio":0.0},
+{"cod":"3301","desc":"DULCE BATATA \"DULCOR\"","cat":"DULCES","pres":"LATA x 5 KG","precio":14646.802944015},
+{"cod":"3302","desc":"DULCE MEMBRILLO \"DULCOR\"","cat":"DULCES","pres":"LATA x 5 KG","precio":17947.14153496},
+{"cod":"3303","desc":"DULCE BATATA C/CHOCOLATE \"DULCOR\"","cat":"DULCES","pres":"LATA x 5 KG","precio":14646.802944015},
+{"cod":"3304","desc":"DULCE BATATA C/CEREZAS  \"DULCOR\"","cat":"DULCES","pres":"LATA x 5 KG","precio":20190.53422683},
+{"cod":"3305","desc":"POSTRE DE DULCE DE LECHE C/CHOC DULCOR","cat":"DULCES","pres":"LATA x 5 KG","precio":32154.52498995},
+{"cod":"3306","desc":"DULCE ZAPALLO \"DULCOR\"","cat":"DULCES","pres":"LATA x 5 KG","precio":3343.9441809015},
+{"cod":"3311","desc":"DULCE BATATA \"DULCOR\"","cat":"DULCES","pres":"CAJON x 5 KG","precio":10807.225082775},
+{"cod":"3312","desc":"DULCE MEMBRILLO \"DULCOR\"","cat":"DULCES","pres":"CAJON x 5 KG","precio":13265.34894784},
+{"cod":"3313","desc":"DULCE BATATA C/CHOCOLATE \"DULCOR\"","cat":"DULCES","pres":"CAJON x 5 KG","precio":10807.225082775},
+{"cod":"3320","desc":"TURRON MANI \"MANICOL\"","cat":"DULCES","pres":"BALDE X 3KG","precio":37519.8714101904},
+{"cod":"3344","desc":"DULCE DE BATATA LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":16670.44337409},
+{"cod":"3345","desc":"DULCE DE MEMBRILLO LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":20447.978397},
+{"cod":"3346","desc":"DULCE DE BATATA C/CHOCO LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":16670.44337409},
+{"cod":"3347","desc":"DULCE DE BATATA C/CEREZA LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":24022.72622871},
+{"cod":"3348","desc":"POSTRE DE DULCE DE LECHE LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":36622.1499265875},
+{"cod":"3349","desc":"DULCE DE ZAPALLO LATA X 5 ESNAOLA","cat":"DULCES","pres":"LATA x 5 KG","precio":6380.62932375},
+{"cod":"3338","desc":"DULCE DE BATATA CAJON X 5 ESNAOLA","cat":"DULCES","pres":"CAJON x 5 KG","precio":12300.383452995},
+{"cod":"3339","desc":"DULCE DE MEMBRILLO CAJON X 5 ESNAOLA","cat":"DULCES","pres":"CAJON x 5 KG","precio":15117.21280784},
+{"cod":"3340","desc":"DULCE DE BATATA C/CHOCO CAJON X 5 ESNAOLA","cat":"DULCES","pres":"CAJON x 5 KG","precio":12300.383452995},
+{"cod":"3331","desc":"DULCE  DE BATATA LATA X 700GRS ESNAOLA","cat":"DULCES","pres":"LATA x 700 grs","precio":4767.21981744558},
+{"cod":"3332","desc":"DULCE DE MEMBRILLO LATA X 700GRS ESNAOLA","cat":"DULCES","pres":"LATA x 700 grs","precio":5904.42564558587},
+{"cod":"3333","desc":"DULCE DE BATATA C/CHOCOLATE LATA X 700GRS ESNAOLA","cat":"DULCES","pres":"LATA x 700 grs","precio":4767.21981744558},
+{"cod":"3334","desc":"POSTRE DE DULCE DE LECHE C/CHOCO LATA X 700 ESNAOLA","cat":"DULCES","pres":"LATA x 700 grs","precio":9468.9063949194},
+{"cod":"3335","desc":"DULCE DE BATATA X 500GRS ESNAOLA","cat":"DULCES","pres":"ESTUCHE X 500 GRS","precio":1856.57834905224},
+{"cod":"3336","desc":"DULCE DE MEMBRILLO X 500GRS ESNAOLA","cat":"DULCES","pres":"ESTUCHE X 500 GRS","precio":2262.17563049573},
+{"cod":"3337","desc":"DULCE DE BATATA C/CHOCOLATE X 500GRS ESNAOLA","cat":"DULCES","pres":"ESTUCHE X 500 GRS","precio":1856.57834905224},
+{"cod":"3321","desc":"DULCE DE BATATA ARCO DE ORO LATA X5KG","cat":"DULCES","pres":"LATA x 5 KG","precio":11521.7175},
+{"cod":"3322","desc":"DULCE DE MEMBRILLO ARCO DE ORO LATA X5KG","cat":"DULCES","pres":"LATA x 5 KG","precio":13075.2075},
+{"cod":"3323","desc":"DULCE DE BATATA C/CHOCO ARCO DE ORO LATA X5KG","cat":"DULCES","pres":"LATA x 5 KG","precio":11780.6325},
+{"cod":"7301","desc":"ALFAJOR DE MAICENA LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 960 GRS","precio":12383.725},
+{"cod":"7302","desc":"ALFAJOR DE CHOCOLATE NEGRO LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 780 GRS","precio":12383.725},
+{"cod":"7303","desc":"ALFAJOR DE CHOCOLATE BLANCO LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 720 GRS","precio":12383.725},
+{"cod":"7304","desc":"ALFAJOR DE CHOCOLATE AL 70% LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 780 GRS","precio":15841.25},
+{"cod":"7305","desc":"BOMBA DE CHOCOLATE NEGRO LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 696 GRS","precio":11736.3},
+{"cod":"7306","desc":"ALFAJOR DE CHOCOLATE MOUSSE DE AVELLANA LA ALDEA X12U","cat":"DULCES","pres":"ESTUCHE X 600 GRS","precio":15111.175},
+{"cod":"7310","desc":"ALFAJOR DE CHOCOLATE LA RECOVA X12U","cat":"DULCES","pres":"ESTUCHE X 720 GRS","precio":7851.75},
+{"cod":"7311","desc":"ALFAJOR DE LIMÓN LA RECOVA X10U","cat":"DULCES","pres":"ESTUCHE X 360 GRS","precio":7851.75},
+{"cod":"2108","desc":"QUESO CREMOSO \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":9073.9524475215},
+{"cod":"2109","desc":"QUESO POR SALUT \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":11752.02944025},
+{"cod":"2110","desc":"QUESO POR SALUT LIGHT \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":11901.69227841},
+{"cod":"2112","desc":"QUESO AZUL \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"HORMA","precio":19873.10758455},
+{"cod":"2113","desc":"QUESO CREMOSO TROZADO \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"PORCION","precio":9660.6272965125},
+{"cod":"2116","desc":"QUESO POR SALUT TROZADO \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"PORCION","precio":11400.7422296625},
+{"cod":"2114","desc":"QUESO POR SALUT DIET S/ SAL TROZ \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"PORCION","precio":12496.78253208},
+{"cod":"2115","desc":"QUESO POR SALUT DIET TROZADO \"TREGAR\"","cat":"QUESOS BLANDOS","pres":"PORCION","precio":11545.9403829},
+{"cod":"2004","desc":"QUESO BARRA DANBO \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":12650.8770002107},
+{"cod":"2006","desc":"QUESO MOZZARELLA EN BARRA \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":14297.7317967},
+{"cod":"2207","desc":"QUESO FONTINA \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":19944.7954563},
+{"cod":"2224","desc":"QUESO FONTINA \"TREGAR\" EN MITADES","cat":"QUESOS SEMIDUROS","pres":"1/2 HORMA","precio":19944.7954563},
+{"cod":"2204","desc":"QUESO CRIOLLO \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":17919.5688254275},
+{"cod":"2223","desc":"QUESO PATEGRAS \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":13768.17403104},
+{"cod":"2205","desc":"QUESO HOLANDA \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"HORMA","precio":18265.50644754},
+{"cod":"2209","desc":"QUESO HOLANDA TROZADO \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"PORCION","precio":18524.9648747625},
+{"cod":"2212","desc":"QUESO CRIOLLO TROZADO \"TREGAR\"","cat":"QUESOS SEMIDUROS","pres":"PORCION","precio":20050.55021739},
+{"cod":"2307","desc":"QUESO REGGIANITO \"TREGAR\"","cat":"QUESOS DUROS","pres":"HORMA","precio":19820.7059436375},
+{"cod":"2309","desc":"QUESO REGGIANITO TROZADO \"TREGAR\"","cat":"QUESOS DUROS","pres":"PORCION","precio":25129.7569578},
+{"cod":"2401","desc":"CHATEL C/JAMON \"TREGAR\"","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2402","desc":"CHATEL CIBOULETTE \"TREGAR\"","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2403","desc":"CHATEL CLASICO \"TREGAR\"","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2404","desc":"CHATEL DIET \"TREGAR\"","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2406","desc":"CHATEL C/SALAME \"TREGAR\"","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2407","desc":"QUESO UNTABLE SABOR CHEDDAR","cat":"QUESOS UNTABLES","pres":"POTE X 180 GRS.","precio":1625.110808035},
+{"cod":"2501","desc":"RICOTTA ENTERA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 300 GRS.","precio":2370.51384713},
+{"cod":"2502","desc":"RICOTTA MAGRA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 300 GRS.","precio":2370.51384713},
+{"cod":"2310","desc":"QUESO RALLADO x 120 GRS. \"TREGAR\"","cat":"VARIOS","pres":"SOBRE X 120 GRS","precio":3355.900357095},
+{"cod":"2311","desc":"QUESO RALLADO x 40 GRS. \"TREGAR\"","cat":"VARIOS","pres":"DISPLAY x 20 SOBRES","precio":23967.62134767},
+{"cod":"2503","desc":"CREMA \"TREGAR\"","cat":"VARIOS","pres":"POTE x 200 GRS","precio":1937.432915275},
+{"cod":"2504","desc":"CREMA \"TREGAR\"","cat":"VARIOS","pres":"POTE x 350 GRS","precio":3033.03297845167},
+{"cod":"2507","desc":"ARROZ CON LECHE  CLASICO \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1158.046238349},
+{"cod":"2508","desc":"ARROZ CON LECHE CON CANELA \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1158.046238349},
+{"cod":"2509","desc":"ARROZ CON LECHE  LIGHT \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1158.046238349},
+{"cod":"2510","desc":"ARROZ CON LECHE CON DULCE DE LECHE \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1158.046238349},
+{"cod":"2511","desc":"ARROZ CON LECHE CON CHOCOLATE \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1158.046238349},
+{"cod":"2515","desc":"QUESO BLANCO CLASICO \"TREGAR\"","cat":"VARIOS","pres":"POTE X 300 GRS","precio":2598.12298579167},
+{"cod":"2516","desc":"QUESO CREMA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 200 GRS","precio":1937.88553291667},
+{"cod":"2518","desc":"QUESO CREMA LIGHT TREGAR","cat":"VARIOS","pres":"POTE X 200 GRS","precio":1937.899231125},
+{"cod":"2517","desc":"QUESO MASCARPONE \"TREGAR\"","cat":"VARIOS","pres":"POTE X 200 GRS","precio":2791.00496675},
+{"cod":"2519","desc":"QUESO BLANCO LIGHT \"TREGAR\"","cat":"VARIOS","pres":"POTE X 300 GRS","precio":2598.12298579167},
+{"cod":"2521","desc":"YOGUR ENTERO FRUTILLA \"TREGAR\"","cat":"VARIOS","pres":"SACHET X 900GR","precio":1806.07352830667},
+{"cod":"2522","desc":"YOGUR ENTERO VAINILLA \"TREGAR\"","cat":"VARIOS","pres":"SACHET X 900GR","precio":1806.11929474167},
+{"cod":"2523","desc":"YOGUR DESCREMADO FRUTILLA \"TREGAR\"","cat":"VARIOS","pres":"SACHET X 900GR","precio":1769.19506764},
+{"cod":"2524","desc":"YOGUR DESCREMADO VAINILLA \"TREGAR\"","cat":"VARIOS","pres":"SACHET X 900GR","precio":1769.19506764},
+{"cod":"2580","desc":"YOGUR ENTERO DURAZNO","cat":"VARIOS","pres":"SACHET X 900GR","precio":1806.07352830667},
+{"cod":"2581","desc":"YOGUR ENTERO ARANDANO","cat":"VARIOS","pres":"SACHET X 900GR","precio":1806.07352830667},
+{"cod":"2525","desc":"YOGUR ENTERO FRUTILLA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.98095125},
+{"cod":"2526","desc":"YOGUR ENTERO DURAZNO \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.98581182},
+{"cod":"2529","desc":"YOGUR ENTERO C/ARANDANOS \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.98581182},
+{"cod":"2527","desc":"YOGUR DESCREMADO FRUTILLA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.989862295},
+{"cod":"2528","desc":"YOGUR DESCREMADO DURAZNO \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.989862295},
+{"cod":"2565","desc":"YOGUR DESCREMADO ARANDANOS \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1137.989862295},
+{"cod":"2566","desc":"YOGUR ENTERO ANANA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1251.79281799},
+{"cod":"2569","desc":"YOGUR ENTERO MANGO MARACUYA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1251.79281799},
+{"cod":"2550","desc":"YOGUR ENTERO CEREZA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1251.79281799},
+{"cod":"2561","desc":"YOGUR DESCREMADO ANANA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 160 GR","precio":1251.793628085},
+{"cod":"2538","desc":"YOGUR NATURAL  \"TREGAR\"","cat":"VARIOS","pres":"POTE X 140 GR","precio":1024.618687235},
+{"cod":"2539","desc":"YOGUR NATURAL SIN AZUCAR \"TREGAR\"","cat":"VARIOS","pres":"POTE X 140 GR","precio":1024.6166619975},
+{"cod":"2562","desc":"YOGUR NATURAL  \"TREGAR\"","cat":"VARIOS","pres":"POTE X 280 GR","precio":2012.958890085},
+{"cod":"2563","desc":"YOGUR NATURAL SIN AZUCAR \"TREGAR\"","cat":"VARIOS","pres":"POTE X 280 GR","precio":2012.958890085},
+{"cod":"2530","desc":"YOGUR ENTERO CREMOSO FRUTILLA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 125 GR","precio":573.0672787125},
+{"cod":"2531","desc":"YOGUR ENTERO CREMOSO VAINILLA \"TREGAR\"","cat":"VARIOS","pres":"POTE X 125 GR","precio":573.0672787125},
+{"cod":"2532","desc":"YOGUR ENTERO CREMOSO DULCE DE LECHE \"TREGAR\"","cat":"VARIOS","pres":"POTE X 125 GR","precio":573.0672787125},
+{"cod":"2536","desc":"YOGUR BATIDO FRUTILLA LIGHT \"TREGAR\"","cat":"VARIOS","pres":"POTE X 125 GR","precio":573.07416452},
+{"cod":"2537","desc":"YOGUR BATIDO VAINILLA LIGHT \"TREGAR\"","cat":"VARIOS","pres":"POTE X 125 GR","precio":573.07416452},
+{"cod":"2584","desc":"YOGUR BATIDO C/CAFÉ","cat":"VARIOS","pres":"POTE X 120 GR","precio":1162.854918225},
+{"cod":"2585","desc":"YOGUR BATIDO C/COCO","cat":"VARIOS","pres":"POTE X 120 GR","precio":1162.854918225},
+{"cod":"2586","desc":"YOGUR BATIDO C/LIMÓN","cat":"VARIOS","pres":"POTE X 120 GR","precio":1162.854918225},
+{"cod":"2594","desc":"YOGUR ENTERO FIRME FRUTILLA","cat":"VARIOS","pres":"POTE X 170 GR","precio":1064.46483},
+{"cod":"2595","desc":"YOGUR ENTERO FIRME VAINILLA","cat":"VARIOS","pres":"POTE X 170 GR","precio":1064.46483},
+{"cod":"2596","desc":"YOGUR DESCREMADO FIRME FRUTILLA","cat":"VARIOS","pres":"POTE X 170 GR","precio":1064.46483},
+{"cod":"2597","desc":"YOGUR DESCREMADO FIRME VAINILLA","cat":"VARIOS","pres":"POTE X 170 GR","precio":1064.46483},
+{"cod":"2567","desc":"YOGUR ENTERO CON CEREALES  \"TREGAR\"","cat":"VARIOS","pres":"POTE X 164 GR","precio":1163.67392427},
+{"cod":"2568","desc":"YOGUR DESCREMADO CON CEREALES \"TREGAR\"","cat":"VARIOS","pres":"POTE X 164 GR","precio":1163.67392427},
+{"cod":"2549","desc":"YOGUR ENTERO CON GRANOLA","cat":"VARIOS","pres":"POTE X 155 GR","precio":1163.673114175},
+{"cod":"3206","desc":"DULCE DE LECHE x 400 GRS. FLIAR.\"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":2270.40819529333},
+{"cod":"3205","desc":"DULCE DE LECHE x 200 GRS. FLIAR \"TREGAR\"","cat":"VARIOS","pres":"POTE","precio":1248.72169803333},
+{"cod":"2533","desc":"LECHE ENTERA LARGA VIDA 1 LTS \"TREGAR\"","cat":"VARIOS","pres":"UAT PACK x 12 UNID","precio":21359.7899391195},
+{"cod":"2534","desc":"LECHE DESCREMADA LARGA VIDA 1 LTS \"TREGAR\"","cat":"VARIOS","pres":"UAT PACK x 12 UNID","precio":21359.7899391195},
+{"cod":"2555","desc":"LECHE DESCREMADA 0% TENOR GRASO TREGAR","cat":"VARIOS","pres":"UAT PACK x 12 UNID","precio":22271.437750815},
+{"cod":"2564","desc":"LECHE DESLACTOSADA DESCR UAT 1 LTS \"TREGAR\"","cat":"VARIOS","pres":"UAT PACK x 12 UNID","precio":24793.305421995},
+{"cod":"2540","desc":"LECHE CHOCOLATADA LARGA VIDA 1 LTS  \"TREGAR\"","cat":"VARIOS","pres":"UAT PACK x 12 UNID","precio":29246.340816},
+{"cod":"2543","desc":"LECHE CHOCOLATADA LARGA VIDA 200 CM3 \"TREGAR\"","cat":"VARIOS","pres":"UAT PACK x 24 UNID","precio":14645.680903755},
+{"cod":"2544","desc":"CREMA CHANTILLY SPRAY  \"TREGAR\"","cat":"VARIOS","pres":"POTE X 250CM3","precio":7793.2951599965}
+];
+
+// Mostrar fecha de actualización
+window.addEventListener('load',()=>{
+  const el=document.getElementById('fecha-precios');
+  if(el) el.textContent='Lista de precios: 19/07/2026';
+});
+
+renderDias();
+filtrarClientes("");
+</script>
+</body>
+</html>
