@@ -68,6 +68,7 @@
   --ok:#1E8449; --ok-bg:#DFF3E6;
   --pending:#B3690B; --pending-bg:#FBE8CF;
   --info:#2C5F8A; --info-bg:#DEE9F1;
+  color:var(--ink);
 }
 :root[data-theme="dark"] .card, :root[data-theme="dark"] .table-wrap, :root[data-theme="dark"] .tabs, :root[data-theme="dark"] .confirm-box{
   --paper-raised:#222A33; --paper-sunk:#1A212A;
@@ -492,8 +493,19 @@ let filtroPlanillaDia = "Todos";
 let cobranzaEditId = null;
 
 function getProd(cod) { return PRECIOS[cod]; }
+function esPiezaVariable(p) { return !!p && /^PIEZA/.test(p.p||""); }
 function money(n) { return "$"+(n||0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function itemTotal(it) { const p=getProd(it.cod); const precio=p?p.v:0; return precio*it.qty*(1-(it.desc||0)/100); }
+function itemTotal(it) {
+  const p=getProd(it.cod);
+  if(!p) return 0;
+  const peso = esPiezaVariable(p) ? (it.peso||0) : 1;
+  return p.v*it.qty*peso*(1-(it.desc||0)/100);
+}
+function itemLineTxt(it){
+  const p = getProd(it.cod);
+  const pesoTxt = (p && esPiezaVariable(p) && it.peso) ? ` × ${fmtNum(it.peso)}kg` : "";
+  return `${it.cod}${p?` ${p.n}`:""} x${it.qty}${pesoTxt}${it.desc?` (-${it.desc}%)`:""}`;
+}
 function esc(s){ return String(s).replace(/'/g,"\\'"); }
 function attrEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
 function htmlEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -800,7 +812,7 @@ function buscarProductoPedido(q){
     <div class="cli-card" style="margin-bottom:6px">
       <div class="cli-main" onclick="seleccionarProductoPedido('${esc(cod)}')">
         <div><div class="cli-nom">${p.n}</div><div class="cli-num">${cod} · ${p.c}</div></div>
-        <span class="prod-price">${money(p.v)}</span>
+        <span class="prod-price">${money(p.v)}${esPiezaVariable(p)?"/kg":""}</span>
       </div>
     </div>`).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
 }
@@ -815,13 +827,41 @@ function seleccionarProductoPedido(cod){
 
 function actualizarPreviewPedido(){
   const cod = document.getElementById("ped-cod").value.trim();
-  const el = document.getElementById("ped-preview");
-  if(!el) return;
-  if(!cod){ el.innerHTML=""; return; }
+  const previewEl = document.getElementById("ped-preview");
+  const pesoRowEl = document.getElementById("ped-peso-row");
+  if(!previewEl || !pesoRowEl) return;
+  if(!cod){ previewEl.innerHTML=""; pesoRowEl.innerHTML=""; actualizarTotalPedido(); return; }
   const p = getProd(cod);
-  el.innerHTML = p
-    ? `<div class="display-hint" style="margin:-2px 0 10px">${p.n} (${p.c}) · ${money(p.v)}</div>`
-    : `<div class="display-hint" style="margin:-2px 0 10px">Código ${cod} · no está en la lista de precios</div>`;
+  if(!p){
+    previewEl.innerHTML = `<div class="display-hint" style="margin:-2px 0 10px">Código ${cod} · no está en la lista de precios</div>`;
+    pesoRowEl.innerHTML = "";
+    actualizarTotalPedido();
+    return;
+  }
+  const porPieza = esPiezaVariable(p);
+  previewEl.innerHTML = `<div class="display-hint" style="margin:-2px 0 10px">${p.n} (${p.c}) · ${money(p.v)}${porPieza?"/kg":""}</div>`;
+  pesoRowEl.innerHTML = porPieza
+    ? `<div class="form-row"><label>Peso (kg) de la pieza<input type="number" id="ped-peso" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 8.4" oninput="actualizarTotalPedido()"></label></div>`
+    : "";
+  actualizarTotalPedido();
+}
+
+function actualizarTotalPedido(){
+  const totalEl = document.getElementById("ped-total-preview");
+  if(!totalEl) return;
+  const cod = document.getElementById("ped-cod")?.value.trim();
+  const p = cod ? getProd(cod) : null;
+  if(!p){ totalEl.innerHTML=""; return; }
+  const porPieza = esPiezaVariable(p);
+  const qty = parseInt(document.getElementById("ped-qty")?.value)||0;
+  const desc = Math.min(100, Math.max(0, parseInt(document.getElementById("ped-desc")?.value)||0));
+  const peso = porPieza ? (parseFloat(document.getElementById("ped-peso")?.value)||0) : 1;
+  if(qty>0 && (!porPieza || peso>0)){
+    const total = p.v*qty*peso*(1-desc/100);
+    totalEl.innerHTML = `<div style="font-size:12px;color:var(--ink-dim);margin-top:4px">Precio total${porPieza?` (${qty} u. × ${fmtNum(peso)} kg × ${money(p.v)}/kg)`:""}</div><div class="final-price" style="margin:2px 0 4px">${money(total)}</div>`;
+  } else {
+    totalEl.innerHTML = "";
+  }
 }
 
 function agregarItemPedido(){
@@ -829,9 +869,13 @@ function agregarItemPedido(){
   const qty = parseInt(document.getElementById("ped-qty").value);
   const desc = Math.min(100, Math.max(0, parseInt(document.getElementById("ped-desc").value)||0));
   if(!cod || !(qty>0)){ mostrarAviso("Ingresá un código y una cantidad válida."); return; }
-  const ex = pedidoActual.find(p=>p.cod===cod && p.desc===desc);
+  const prod = getProd(cod);
+  const porPieza = esPiezaVariable(prod);
+  const peso = porPieza ? parseFloat(document.getElementById("ped-peso")?.value) : undefined;
+  if(porPieza && !(peso>0)){ mostrarAviso("Ingresá el peso (kg) de la pieza."); return; }
+  const ex = pedidoActual.find(it=>it.cod===cod && it.desc===desc && (it.peso||0)===(peso||0));
   if(ex) ex.qty += qty;
-  else pedidoActual.push({cod, qty, desc});
+  else pedidoActual.push(porPieza ? {cod, qty, desc, peso} : {cod, qty, desc});
   renderTab();
 }
 
@@ -848,9 +892,11 @@ function renderPedido() {
       <div class="form-row"><label>Código<input type="text" id="ped-cod" inputmode="numeric" placeholder="Código de producto" oninput="actualizarPreviewPedido()"></label></div>
       <div id="ped-preview"></div>
       <div style="display:flex;gap:10px">
-        <div class="form-row" style="flex:1"><label>Cantidad<input type="number" id="ped-qty" inputmode="numeric" min="1" placeholder="Ej: 5"></label></div>
-        <div class="form-row" style="flex:1"><label>Descuento % (opcional)<input type="number" id="ped-desc" inputmode="numeric" min="0" max="100" placeholder="0"></label></div>
+        <div class="form-row" style="flex:1"><label>Cantidad<input type="number" id="ped-qty" inputmode="numeric" min="1" placeholder="Ej: 5" oninput="actualizarTotalPedido()"></label></div>
+        <div class="form-row" style="flex:1"><label>Descuento % (opcional)<input type="number" id="ped-desc" inputmode="numeric" min="0" max="100" placeholder="0" oninput="actualizarTotalPedido()"></label></div>
       </div>
+      <div id="ped-peso-row"></div>
+      <div id="ped-total-preview"></div>
       <button class="btn btn-accent" onclick="agregarItemPedido()">+ Agregar al pedido</button>
     </div>
     ${items.length?`
@@ -858,11 +904,12 @@ function renderPedido() {
         <div class="card-title">Pedido de hoy — ${hoy()}</div>
         ${items.map((it,i)=>{
           const pi=getProd(it.cod);
+          const pesoTxt = (pi && esPiezaVariable(pi) && it.peso) ? ` · ${fmtNum(it.peso)} kg c/u` : "";
           return `
           <div class="pedido-item">
             <div>
               <div class="pi-cod">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
-              <div class="pi-meta">${it.qty} u.${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
+              <div class="pi-meta">${it.qty} u.${pesoTxt}${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
             </div>
             <button class="pi-del" onclick="eliminarItem(${i})">✕</button>
           </div>`;
@@ -906,7 +953,7 @@ function fichaHistorial(hist){
       }
       const prod = productos.get(it.cod);
       const prev = prod.porFecha.get(v.fecha);
-      prod.porFecha.set(v.fecha, {qty:(prev?prev.qty:0)+it.qty, desc: it.desc||(prev?prev.desc:0)});
+      prod.porFecha.set(v.fecha, {qty:(prev?prev.qty:0)+it.qty, desc: it.desc||(prev?prev.desc:0), pesoTotal:(prev?prev.pesoTotal:0)+((it.peso||0)*it.qty)});
       prod.totalU += it.qty;
       prod.totalM += itemTotal(it);
     });
@@ -928,7 +975,9 @@ function fichaHistorial(hist){
             <td class="ficha-desc">${p.nombre||"—"}</td>
             ${fechas.map(f=>{
               const c = p.porFecha.get(f);
-              return `<td>${c?`${c.qty}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""}`:"—"}</td>`;
+              if(!c) return `<td>—</td>`;
+              const pesoTxt = (esPiezaVariable(getProd(cod)) && c.pesoTotal) ? ` · ${fmtNum(c.pesoTotal)}kg` : "";
+              return `<td>${c.qty}${pesoTxt}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""}</td>`;
             }).join("")}
             <td>${p.totalU}</td>
             <td>${money(p.totalM)}</td>
@@ -1045,7 +1094,7 @@ function renderResumen() {
       <div class="card-title">Visitados hoy · ${totalU} unidades · ${money(totalM)}</div>
       ${visitados.map(c=>{
         const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-        return`<div class="pedido-item"><div><div class="pi-cod">${c.nom}</div><div class="pi-meta">${v?.items.map(i=>`${i.cod} x${i.qty}`).join(" · ")||""}</div></div><span class="cli-badge badge-ok">${money(v?.totalMoney||0)}</span></div>`;
+        return`<div class="pedido-item"><div><div class="pi-cod">${c.nom}</div><div class="pi-meta">${v?.items.map(i=>itemLineTxt(i)).join(" · ")||""}</div></div><span class="cli-badge badge-ok">${money(v?.totalMoney||0)}</span></div>`;
       }).join("")}
     </div>`:""}
     <button class="btn btn-ghost" onclick="exportarDia()">Copiar resumen del día ↗</button>
@@ -1059,7 +1108,7 @@ function exportarCliente() {
   const hist = DATA[key]||[];
   if(!hist.length) return;
   const txt = `Historial ${clienteActual.nom} (${clienteActual.num}) — ${diaActual}:\n`+
-    hist.map(h=>`${h.fecha}: ${h.items.map(i=>{const p=getProd(i.cod);return `${i.cod}${p?` ${p.n}`:""} x${i.qty}${i.desc?` (-${i.desc}%)`:""}`;}).join(", ")} (${h.total} u. · ${money(h.totalMoney||0)})`).join("\n");
+    hist.map(h=>`${h.fecha}: ${h.items.map(i=>itemLineTxt(i)).join(", ")} (${h.total} u. · ${money(h.totalMoney||0)})`).join("\n");
   copiarTexto(txt);
 }
 
@@ -1071,7 +1120,7 @@ function exportarDia() {
   const txt = `Resumen ${diaActual} ${h}:\n`+
     visitados.map(c=>{
       const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-      return `${c.nom} (${c.num}): ${v?.items.map(i=>{const p=getProd(i.cod);return `${i.cod}${p?` ${p.n}`:""} x${i.qty}${i.desc?` (-${i.desc}%)`:""}`;}).join(", ")} — ${v?.total} u. · ${money(v?.totalMoney||0)}`;
+      return `${c.nom} (${c.num}): ${v?.items.map(i=>itemLineTxt(i)).join(", ")} — ${v?.total} u. · ${money(v?.totalMoney||0)}`;
     }).join("\n");
   copiarTexto(txt);
 }
@@ -1097,7 +1146,7 @@ function filtrarPrecios(q) {
       <div class="cli-main" onclick="selProducto('${esc(cod)}')">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
         <div style="flex:1;min-width:0"><div class="cli-nom">${p.n}</div><div class="cli-num">${cod} · ${p.c}</div></div>
-        <span class="prod-price">${money(p.v)}</span>
+        <span class="prod-price">${money(p.v)}${esPiezaVariable(p)?"/kg":""}</span>
       </div>
     </div>`).join("") : `<div class="empty">Sin resultados${q?` para "${q}"`:""}.</div>`;
 }
@@ -1198,7 +1247,7 @@ function renderPrecioDetalle() {
       ${FOTOS[prodSeleccionado]?`<img class="prod-photo" src="${FOTOS[prodSeleccionado]}" alt="">`:""}
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${p.n}</div>
       <div style="font-size:11.5px;color:var(--ink-faint);margin-bottom:8px">${p.p}</div>
-      <div style="font-size:13px;color:var(--ink-dim)">Precio de lista: <b style="color:var(--ink);font-family:var(--font-mono)">${money(p.v)}</b></div>
+      <div style="font-size:13px;color:var(--ink-dim)">Precio de lista${esPiezaVariable(p)?" (por kilo)":""}: <b style="color:var(--ink);font-family:var(--font-mono)">${money(p.v)}${esPiezaVariable(p)?"/kg":""}</b></div>
       <div class="disc-row">
         <input type="number" class="disc-input" id="desc-input" placeholder="0" min="0" max="100" oninput="actualizarPrecioFinal()">
         <span style="font-size:12.5px;color:var(--ink-dim)">% descuento</span>
@@ -1268,7 +1317,7 @@ function filasPlanilla(){
     (DATA[key]||[]).forEach(h=>{
       rows.push({
         fecha: h.fecha, fechaISO: h.fechaISO||"", dia, num, nom: cli?cli.nom:num,
-        productos: h.items.map(it=>{const p=getProd(it.cod); return `${it.cod}${p?" "+p.n:""} x${it.qty}${it.desc?` (-${it.desc}%)`:""}`;}).join(" | "),
+        productos: h.items.map(it=>itemLineTxt(it)).join(" | "),
         unidades: h.total, total: h.totalMoney||0
       });
     });
