@@ -911,7 +911,7 @@ function renderPedido() {
               <div class="pi-cod">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
               <div class="pi-meta">${it.qty} u.${pesoTxt}${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
             </div>
-            <button class="pi-del" onclick="eliminarItem(${i})">✕</button>
+            <button class="pi-del" title="Eliminar" onclick="eliminarItem(${i})">🗑️</button>
           </div>`;
         }).join("")}
         <div style="padding:10px 0 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:13.5px">
