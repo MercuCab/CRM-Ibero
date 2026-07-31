@@ -217,7 +217,8 @@ body{
 .prod-thumb-empty{background:var(--paper-sunk);border:1px dashed var(--line-strong)}
 .prod-photo{display:block;width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line);margin-bottom:10px}
 .disc-row{display:flex;align-items:center;gap:10px;margin-top:12px}
-.disc-input{flex:1;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:16px;width:0;background:var(--paper);color:var(--ink);font-family:var(--font-mono)}
+.disc-input{flex:1;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:16px;width:0;background:var(--paper-sunk);color:var(--ink);font-family:var(--font-mono)}
+.disc-input::placeholder{color:var(--ink-faint)}
 .disc-input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .final-price{font-family:var(--font-mono);font-size:23px;font-weight:700;color:var(--ok);margin-top:10px;font-variant-numeric:tabular-nums}
 
@@ -226,7 +227,8 @@ body{
 
 .form-row{margin-bottom:10px}
 .form-row label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--ink-dim);font-weight:600}
-.form-row input,.form-row select,.form-row textarea{padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14.5px;background:var(--paper);color:var(--ink);font-family:var(--font-body);width:100%}
+.form-row input,.form-row select,.form-row textarea{padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14.5px;background:var(--paper-sunk);color:var(--ink);font-family:var(--font-body);width:100%}
+.form-row input::placeholder,.form-row textarea::placeholder{color:var(--ink-faint)}
 .form-row textarea{resize:vertical;min-height:80px;line-height:1.4}
 .form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .form-row input:disabled{opacity:.6}
