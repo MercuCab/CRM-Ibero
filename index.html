@@ -350,7 +350,6 @@ body{
       <button class="tab active" onclick="setTab('pedido',this)">Pedido</button>
       <button class="tab" onclick="setTab('cobranzas',this)">Cobros</button>
       <button class="tab" onclick="setTab('historial',this)">Historial</button>
-      <button class="tab" onclick="setTab('resumen',this)">Día</button>
       <button class="tab" onclick="setTab('info',this)">Info</button>
     </div>
     <div class="scroll" id="tab-content"></div>
@@ -492,18 +491,15 @@ let filtroPlanillaDia = "Todos";
 let cobranzaEditId = null;
 
 function getProd(cod) { return PRECIOS[cod]; }
-function esPiezaVariable(p) { return !!p && /^PIEZA/.test(p.p||""); }
 function money(n) { return "$"+(n||0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function itemTotal(it) {
   const p=getProd(it.cod);
   if(!p) return 0;
-  const peso = esPiezaVariable(p) ? (it.peso||0) : 1;
-  return p.v*it.qty*peso*(1-(it.desc||0)/100);
+  return p.v*it.qty*(1-(it.desc||0)/100);
 }
 function itemLineTxt(it){
   const p = getProd(it.cod);
-  const pesoTxt = (p && esPiezaVariable(p) && it.peso) ? ` × ${fmtNum(it.peso)}kg` : "";
-  return `${it.cod}${p?` ${p.n}`:""} x${it.qty}${pesoTxt}${it.desc?` (-${it.desc}%)`:""}`;
+  return `${it.cod}${p?` ${p.n}`:""} x${it.qty}${it.desc?` (-${it.desc}%)`:""}`;
 }
 function esc(s){ return String(s).replace(/'/g,"\\'"); }
 function attrEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
@@ -782,11 +778,10 @@ function setTab(tab, el) {
 
 function renderTab() {
   const el = document.getElementById("tab-content");
-  if(tabActual==="pedido") el.innerHTML = renderPedido();
-  else if(tabActual==="cobranzas") el.innerHTML = renderCobranzas();
+  if(tabActual==="cobranzas") el.innerHTML = renderCobranzas();
   else if(tabActual==="historial") el.innerHTML = renderHistorial();
   else if(tabActual==="info") el.innerHTML = renderInfoCliente();
-  else el.innerHTML = renderResumen();
+  else el.innerHTML = renderPedido();
 }
 
 function eliminarItem(i) { pedidoActual.splice(i,1); renderTab(); }
@@ -812,92 +807,36 @@ function buscarProductoPedido(q){
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q));
-  el.innerHTML = entries.length ? entries.slice(0,8).map(([cod,p])=>{
-    const porPieza = esPiezaVariable(p);
-    return `
+  el.innerHTML = entries.length ? entries.slice(0,8).map(([cod,p])=>`
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
       <div style="display:flex;gap:10px">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
         <div style="flex:1;min-width:0">
           <div class="cli-nom">${p.n}</div>
           <div class="cli-num">${cod} · ${p.c}</div>
-          <span class="prod-price" style="margin-left:0">${money(p.v)}${porPieza?"/kg":""}</span>
+          <span class="prod-price" style="margin-left:0">${money(p.v)}</span>
         </div>
       </div>
       <div style="display:flex;gap:6px;margin-top:8px;align-items:flex-end">
-        ${porPieza?`<div class="form-row" style="flex:1;margin-bottom:0"><label style="font-size:10px">Peso (kg)<input type="number" id="sr-peso-${esc(cod)}" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 8.4"></label></div>`:""}
         <div class="form-row" style="flex:1;margin-bottom:0"><label style="font-size:10px">Cant.<input type="number" id="sr-qty-${esc(cod)}" inputmode="numeric" min="1" placeholder="1"></label></div>
         <div class="form-row" style="flex:1;margin-bottom:0"><label style="font-size:10px">Desc %<input type="number" id="sr-desc-${esc(cod)}" inputmode="numeric" min="0" max="100" placeholder="0"></label></div>
         <button class="btn btn-accent" style="width:auto;margin-top:0;padding:9px 16px;flex-shrink:0" onclick="agregarDesdeResultado('${esc(cod)}')">+</button>
       </div>
-    </div>`;
-  }).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
+    </div>`).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
 }
 
-function actualizarPreviewPedido(){
-  const cod = document.getElementById("ped-cod").value.trim();
-  const previewEl = document.getElementById("ped-preview");
-  const pesoRowEl = document.getElementById("ped-peso-row");
-  if(!previewEl || !pesoRowEl) return;
-  if(!cod){ previewEl.innerHTML=""; pesoRowEl.innerHTML=""; actualizarTotalPedido(); return; }
-  const p = getProd(cod);
-  if(!p){
-    previewEl.innerHTML = `<div class="display-hint" style="margin:-2px 0 10px">Código ${cod} · no está en la lista de precios</div>`;
-    pesoRowEl.innerHTML = "";
-    actualizarTotalPedido();
-    return;
-  }
-  const porPieza = esPiezaVariable(p);
-  previewEl.innerHTML = `<div class="display-hint" style="margin:-2px 0 10px">${p.n} (${p.c}) · ${money(p.v)}${porPieza?"/kg":""}</div>`;
-  pesoRowEl.innerHTML = porPieza
-    ? `<div class="form-row"><label>Peso (kg) de la pieza<input type="number" id="ped-peso" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 8.4" oninput="actualizarTotalPedido()"></label></div>`
-    : "";
-  actualizarTotalPedido();
-}
-
-function actualizarTotalPedido(){
-  const totalEl = document.getElementById("ped-total-preview");
-  if(!totalEl) return;
-  const cod = document.getElementById("ped-cod")?.value.trim();
-  const p = cod ? getProd(cod) : null;
-  if(!p){ totalEl.innerHTML=""; return; }
-  const porPieza = esPiezaVariable(p);
-  const qty = parseInt(document.getElementById("ped-qty")?.value)||0;
-  const desc = Math.min(100, Math.max(0, parseInt(document.getElementById("ped-desc")?.value)||0));
-  const peso = porPieza ? (parseFloat(document.getElementById("ped-peso")?.value)||0) : 1;
-  if(qty>0 && (!porPieza || peso>0)){
-    const total = p.v*qty*peso*(1-desc/100);
-    totalEl.innerHTML = `<div style="font-size:12px;color:var(--ink-dim);margin-top:4px">Precio total${porPieza?` (${qty} u. × ${fmtNum(peso)} kg × ${money(p.v)}/kg)`:""}</div><div class="final-price" style="margin:2px 0 4px">${money(total)}</div>`;
-  } else {
-    totalEl.innerHTML = "";
-  }
-}
-
-function agregarAlPedido(cod, qty, desc, peso){
+function agregarAlPedido(cod, qty, desc){
   if(!cod || !(qty>0)){ mostrarAviso("Ingresá un código y una cantidad válida."); return false; }
-  const porPieza = esPiezaVariable(getProd(cod));
-  if(porPieza && !(peso>0)){ mostrarAviso("Ingresá el peso (kg) de la pieza."); return false; }
-  const ex = pedidoActual.find(it=>it.cod===cod && it.desc===desc && (it.peso||0)===(peso||0));
+  const ex = pedidoActual.find(it=>it.cod===cod && it.desc===desc);
   if(ex) ex.qty += qty;
-  else pedidoActual.push(porPieza ? {cod, qty, desc, peso} : {cod, qty, desc});
+  else pedidoActual.push({cod, qty, desc});
   return true;
 }
 
-function agregarItemPedido(){
-  const cod = document.getElementById("ped-cod").value.trim();
-  const qty = parseInt(document.getElementById("ped-qty").value);
-  const desc = Math.min(100, Math.max(0, parseInt(document.getElementById("ped-desc").value)||0));
-  const porPieza = esPiezaVariable(getProd(cod));
-  const peso = porPieza ? parseFloat(document.getElementById("ped-peso")?.value) : undefined;
-  if(agregarAlPedido(cod, qty, desc, peso)) renderTab();
-}
-
 function agregarDesdeResultado(cod){
-  const porPieza = esPiezaVariable(getProd(cod));
   const qty = parseInt(document.getElementById(`sr-qty-${cod}`)?.value)||0;
   const desc = Math.min(100, Math.max(0, parseInt(document.getElementById(`sr-desc-${cod}`)?.value)||0));
-  const peso = porPieza ? parseFloat(document.getElementById(`sr-peso-${cod}`)?.value) : undefined;
-  if(agregarAlPedido(cod, qty, desc, peso)) renderTab();
+  if(agregarAlPedido(cod, qty, desc)) renderTab();
 }
 
 // RENDER PEDIDO
@@ -910,27 +849,17 @@ function renderPedido() {
         <input type="text" id="ped-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoPedido(this.value)">
       </label></div>
       <div id="ped-resultados"></div>
-      <div class="form-row"><label>Código<input type="text" id="ped-cod" inputmode="numeric" placeholder="Código de producto" oninput="actualizarPreviewPedido()"></label></div>
-      <div id="ped-preview"></div>
-      <div style="display:flex;gap:10px">
-        <div class="form-row" style="flex:1"><label>Cantidad<input type="number" id="ped-qty" inputmode="numeric" min="1" placeholder="Ej: 5" oninput="actualizarTotalPedido()"></label></div>
-        <div class="form-row" style="flex:1"><label>Descuento % (opcional)<input type="number" id="ped-desc" inputmode="numeric" min="0" max="100" placeholder="0" oninput="actualizarTotalPedido()"></label></div>
-      </div>
-      <div id="ped-peso-row"></div>
-      <div id="ped-total-preview"></div>
-      <button class="btn btn-accent" onclick="agregarItemPedido()">+ Agregar al pedido</button>
     </div>
     ${items.length?`
       <div class="card">
         <div class="card-title">Pedido de hoy — ${hoy()}</div>
         ${items.map((it,i)=>{
           const pi=getProd(it.cod);
-          const pesoTxt = (pi && esPiezaVariable(pi) && it.peso) ? ` · ${fmtNum(it.peso)} kg c/u` : "";
           return `
           <div class="pedido-item">
             <div>
               <div class="pi-cod">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
-              <div class="pi-meta">${it.qty} u.${pesoTxt}${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
+              <div class="pi-meta">${it.qty} u.${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
             </div>
             <button class="pi-del" title="Eliminar" onclick="eliminarItem(${i})">🗑️</button>
           </div>`;
@@ -974,7 +903,7 @@ function fichaHistorial(hist){
       }
       const prod = productos.get(it.cod);
       const prev = prod.porFecha.get(v.fecha);
-      prod.porFecha.set(v.fecha, {qty:(prev?prev.qty:0)+it.qty, desc: it.desc||(prev?prev.desc:0), pesoTotal:(prev?prev.pesoTotal:0)+((it.peso||0)*it.qty)});
+      prod.porFecha.set(v.fecha, {qty:(prev?prev.qty:0)+it.qty, desc: it.desc||(prev?prev.desc:0)});
       prod.totalU += it.qty;
       prod.totalM += itemTotal(it);
     });
@@ -997,8 +926,7 @@ function fichaHistorial(hist){
             ${fechas.map(f=>{
               const c = p.porFecha.get(f);
               if(!c) return `<td>—</td>`;
-              const pesoTxt = (esPiezaVariable(getProd(cod)) && c.pesoTotal) ? ` · ${fmtNum(c.pesoTotal)}kg` : "";
-              return `<td>${c.qty}${pesoTxt}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""}</td>`;
+              return `<td>${c.qty}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""}</td>`;
             }).join("")}
             <td>${p.totalU}</td>
             <td>${money(p.totalM)}</td>
@@ -1081,68 +1009,12 @@ function eliminarCobro(id){
   });
 }
 
-// RENDER RESUMEN DEL DÍA
-function renderResumen() {
-  const h = hoy();
-  const lista = clientesDelDia(diaActual);
-  const visitados = lista.filter(c=>DATA[`${diaActual}-${c.num}`]?.some(v=>v.fecha===h));
-  const pendientes = lista.filter(c=>!DATA[`${diaActual}-${c.num}`]?.some(v=>v.fecha===h));
-  const totalU = visitados.reduce((s,c)=>{
-    const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-    return s+(v?.total||0);
-  },0);
-  const totalM = visitados.reduce((s,c)=>{
-    const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-    return s+(v?.totalMoney||0);
-  },0);
-  return `
-    <div class="stats">
-      <div class="stat"><div class="stat-val">${lista.length}</div><div class="stat-label">Clientes</div></div>
-      <div class="stat"><div class="stat-val" style="color:var(--ok)">${visitados.length}</div><div class="stat-label">Visitados</div></div>
-      <div class="stat"><div class="stat-val" style="color:var(--pending)">${pendientes.length}</div><div class="stat-label">Pendientes</div></div>
-    </div>
-    ${pendientes.length?`
-    <div class="card">
-      <div class="card-title">Pendientes de visita</div>
-      ${pendientes.map(c=>`
-        <div class="cli-card" style="margin-bottom:6px" onclick="selClienteDesdeResumen('${c.num}','${esc(c.nom)}')">
-          <div><div class="cli-nom">${c.nom}</div><div class="cli-num">${c.num}</div></div>
-          <span class="cli-badge badge-pend">Pendiente</span>
-        </div>`).join("")}
-    </div>`:""}
-    ${visitados.length?`
-    <div class="card">
-      <div class="card-title">Visitados hoy · ${totalU} unidades · ${money(totalM)}</div>
-      ${visitados.map(c=>{
-        const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-        return`<div class="pedido-item"><div><div class="pi-cod">${c.nom}</div><div class="pi-meta">${v?.items.map(i=>itemLineTxt(i)).join(" · ")||""}</div></div><span class="cli-badge badge-ok">${money(v?.totalMoney||0)}</span></div>`;
-      }).join("")}
-    </div>`:""}
-    <button class="btn btn-ghost" onclick="exportarDia()">Copiar resumen del día ↗</button>
-  `;
-}
-
-function selClienteDesdeResumen(num, nom) { selCliente(num, nom); }
-
 function exportarCliente() {
   const key = `${diaActual}-${clienteActual?.num}`;
   const hist = DATA[key]||[];
   if(!hist.length) return;
   const txt = `Historial ${clienteActual.nom} (${clienteActual.num}) — ${diaActual}:\n`+
     hist.map(h=>`${h.fecha}: ${h.items.map(i=>itemLineTxt(i)).join(", ")} (${h.total} u. · ${money(h.totalMoney||0)})`).join("\n");
-  copiarTexto(txt);
-}
-
-function exportarDia() {
-  const h = hoy();
-  const lista = clientesDelDia(diaActual);
-  const visitados = lista.filter(c=>DATA[`${diaActual}-${c.num}`]?.some(v=>v.fecha===h));
-  if(!visitados.length){mostrarAviso("No hay pedidos registrados hoy.");return;}
-  const txt = `Resumen ${diaActual} ${h}:\n`+
-    visitados.map(c=>{
-      const v=DATA[`${diaActual}-${c.num}`]?.find(v=>v.fecha===h);
-      return `${c.nom} (${c.num}): ${v?.items.map(i=>itemLineTxt(i)).join(", ")} — ${v?.total} u. · ${money(v?.totalMoney||0)}`;
-    }).join("\n");
   copiarTexto(txt);
 }
 
@@ -1167,7 +1039,7 @@ function filtrarPrecios(q) {
       <div class="cli-main" onclick="selProducto('${esc(cod)}')">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
         <div style="flex:1;min-width:0"><div class="cli-nom">${p.n}</div><div class="cli-num">${cod} · ${p.c}</div></div>
-        <span class="prod-price">${money(p.v)}${esPiezaVariable(p)?"/kg":""}</span>
+        <span class="prod-price">${money(p.v)}</span>
       </div>
     </div>`).join("") : `<div class="empty">Sin resultados${q?` para "${q}"`:""}.</div>`;
 }
@@ -1331,7 +1203,7 @@ function renderPrecioDetalle() {
       ${FOTOS[prodSeleccionado]?`<img class="prod-photo" src="${FOTOS[prodSeleccionado]}" alt="">`:""}
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${p.n}</div>
       <div style="font-size:11.5px;color:var(--ink-faint);margin-bottom:8px">${p.p}</div>
-      <div style="font-size:13px;color:var(--ink-dim)">Precio de lista${esPiezaVariable(p)?" (por kilo)":""}: <b style="color:var(--ink);font-family:var(--font-mono)">${money(p.v)}${esPiezaVariable(p)?"/kg":""}</b></div>
+      <div style="font-size:13px;color:var(--ink-dim)">Precio de lista: <b style="color:var(--ink);font-family:var(--font-mono)">${money(p.v)}</b></div>
       <div class="disc-row">
         <input type="number" class="disc-input" id="desc-input" placeholder="0" min="0" max="100" oninput="actualizarPrecioFinal()">
         <span style="font-size:12.5px;color:var(--ink-dim)">% descuento</span>
