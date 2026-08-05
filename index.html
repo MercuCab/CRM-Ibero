@@ -97,12 +97,13 @@
   --info:#2C5F8A; --info-bg:#DEE9F1;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{
   font-family:var(--font-body);
   background:var(--paper);
   color:var(--ink);
   height:100vh;
+  height:100dvh;
   overflow:hidden;
 }
 .frame{
@@ -113,6 +114,7 @@ body{
   display:flex;
   flex-direction:column;
   height:100vh;
+  height:100dvh;
 }
 .screen{display:none;flex-direction:column;height:100%;min-height:0}
 .screen.active{display:flex}
