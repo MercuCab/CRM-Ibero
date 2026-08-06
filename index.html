@@ -327,6 +327,7 @@ body{
       <button class="header-icon" onclick="abrirPromociones()" title="Promociones">%</button>
       <button class="header-icon" onclick="abrirPlanilla()" title="Registro de pedidos">&#9638;</button>
       <button class="header-icon" onclick="abrirPrecios()" title="Lista de precios">$</button>
+      <button class="header-icon" onclick="abrirBackup()" title="Copia de seguridad">&#8645;</button>
       <button class="header-icon" onclick="cambiarVendedor()" title="Cerrar sesión">&#8644;</button>
     </div>
     <div class="infobar" id="infobar"></div>
@@ -439,6 +440,30 @@ body{
       <button class="btn btn-ghost" style="margin:0 0 12px" onclick="nuevoObjetivo()">+ Nuevo objetivo</button>
       <div id="objetivos-form"></div>
       <div id="objetivos-lista"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: BACKUP -->
+  <div class="screen" id="screen-backup">
+    <div class="header">
+      <button class="header-back" onclick="showScreen('screen-main')">&lsaquo;</button>
+      <div style="flex:1">
+        <h1>Copia de seguridad</h1>
+        <div class="header-sub">Pasar tus datos a otro dispositivo</div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="card">
+        <h3 style="margin:0 0 6px">Descargar copia</h3>
+        <div class="empty" style="text-align:left;padding:0 0 12px">Genera un archivo con todos tus clientes, pedidos, cobros, objetivos y promociones. Guardalo y pasalo (por WhatsApp, mail, etc.) al otro dispositivo.</div>
+        <button class="btn btn-accent" onclick="descargarBackup()">Descargar copia de seguridad</button>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3 style="margin:0 0 6px">Restaurar copia</h3>
+        <div class="empty" style="text-align:left;padding:0 0 12px">Elegí el archivo descargado desde el otro dispositivo. Esto reemplaza los datos de <b id="backup-vendedor-nombre"></b> en este dispositivo.</div>
+        <label class="btn btn-ghost" style="display:block;text-align:center">Elegir archivo<input type="file" accept="application/json" id="backup-restore-input" style="display:none" onchange="restaurarBackup(this)"></label>
+        <div id="backup-restore-msg" style="margin-top:8px"></div>
+      </div>
     </div>
   </div>
 
@@ -1674,6 +1699,69 @@ function cambiarVendedor(){
     renderSelectorVendedor();
     showScreen("screen-vendedor");
   });
+}
+
+// BACKUP / RESTAURAR (copiar datos entre dispositivos)
+const BACKUP_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1"];
+const BACKUP_KEYS_COMPARTIDAS = ["crm_ibero_fotos_custom_v1","crm_ibero_precios_v1"];
+
+function abrirBackup(){
+  document.getElementById("backup-vendedor-nombre").textContent = vendedorActual || "";
+  document.getElementById("backup-restore-msg").textContent = "";
+  showScreen("screen-backup");
+}
+
+function descargarBackup(){
+  const data = {};
+  BACKUP_KEYS_VENDEDOR.forEach(base => {
+    const v = localStorage.getItem(nsKey(base));
+    if(v!==null) data[base] = v;
+  });
+  BACKUP_KEYS_COMPARTIDAS.forEach(k => {
+    const v = localStorage.getItem(k);
+    if(v!==null) data[k] = v;
+  });
+  const backup = { app:"crm_ibero", version:1, vendedor: vendedorActual, exportadoEl: new Date().toISOString(), data };
+  const blob = new Blob([JSON.stringify(backup)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const fecha = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `crm_ibero_backup_${(vendedorActual||"datos").replace(/\s+/g,"_")}_${fecha}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  mostrarAviso("Copia descargada");
+}
+
+function restaurarBackup(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const msgEl = document.getElementById("backup-restore-msg");
+  const reader = new FileReader();
+  reader.onload = () => {
+    let backup;
+    try{ backup = JSON.parse(reader.result); }
+    catch(e){ msgEl.textContent = "El archivo no es una copia de seguridad válida."; input.value=""; return; }
+    if(!backup || backup.app!=="crm_ibero" || !backup.data){
+      msgEl.textContent = "El archivo no es una copia de seguridad válida.";
+      input.value = "";
+      return;
+    }
+    confirmarAccion(`¿Reemplazar los datos de ${vendedorActual} en este dispositivo con la copia de "${backup.vendedor||"?"}" del ${backup.exportadoEl ? new Date(backup.exportadoEl).toLocaleDateString("es-AR") : "?"}?`, ()=>{
+      BACKUP_KEYS_VENDEDOR.forEach(base => {
+        if(backup.data[base]!==undefined) localStorage.setItem(nsKey(base), backup.data[base]);
+      });
+      BACKUP_KEYS_COMPARTIDAS.forEach(k => {
+        if(backup.data[k]!==undefined) localStorage.setItem(k, backup.data[k]);
+      });
+      mostrarAviso("Datos restaurados");
+      setTimeout(()=> location.reload(), 800);
+    });
+    input.value = "";
+  };
+  reader.readAsText(file);
 }
 
 // OBJETIVOS
