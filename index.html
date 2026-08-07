@@ -254,6 +254,7 @@ body{
 .ficha-table td:nth-child(1),.ficha-table td:nth-child(2){text-align:left}
 .ficha-table td:nth-child(2){white-space:normal;min-width:150px;font-family:var(--font-body);font-size:12px}
 .ficha-pct{color:var(--pending);font-size:9.5px;font-weight:700}
+.ficha-del{background:none;border:none;color:var(--ink-faint);font-size:12px;padding:2px 3px;cursor:pointer;vertical-align:middle}
 
 .obj-bar-track{height:10px;background:var(--paper-sunk);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
 .obj-bar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s ease}
@@ -1115,6 +1116,23 @@ function renderTab() {
 
 function eliminarItem(i) { pedidoActual.splice(i,1); renderTab(); }
 
+function eliminarItemHistorial(cod, fecha){
+  confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
+    const key = `${diaActual}-${clienteActual?.num}`;
+    const hist = DATA[key]||[];
+    hist.forEach(v=>{
+      if(v.fecha!==fecha) return;
+      v.items = v.items.filter(it=>it.cod!==cod);
+      v.total = v.items.reduce((s,i)=>s+i.qty,0);
+      v.totalMoney = v.items.reduce((s,i)=>s+itemTotal(i),0);
+    });
+    DATA[key] = hist.filter(v=>v.items.length>0);
+    saveData(DATA);
+    mostrarAviso("Item eliminado");
+    renderTab();
+  });
+}
+
 function guardarPedido() {
   if(!pedidoActual.length||!clienteActual) return;
   const key = `${diaActual}-${clienteActual.num}`;
@@ -1255,7 +1273,7 @@ function fichaHistorial(hist){
             ${fechas.map(f=>{
               const c = p.porFecha.get(f);
               if(!c) return `<td>—</td>`;
-              return `<td>${c.qty}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""}</td>`;
+              return `<td>${c.qty}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""} <button class="ficha-del" title="Eliminar" onclick="eliminarItemHistorial('${esc(cod)}','${esc(f)}')">🗑️</button></td>`;
             }).join("")}
             <td>${p.totalU}</td>
             <td>${money(p.totalM)}</td>
