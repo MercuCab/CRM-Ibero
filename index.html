@@ -1147,9 +1147,21 @@ function guardarPedido() {
   if(!pedidoActual.length||!clienteActual) return;
   const key = `${diaActual}-${clienteActual.num}`;
   if(!DATA[key]) DATA[key]=[];
-  const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
-  const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
-  DATA[key].unshift({fecha:hoy(),fechaISO:new Date().toISOString().slice(0,10),items:[...pedidoActual],total:totalUnidades,totalMoney});
+  const fechaHoy = hoy();
+  let visita = DATA[key].find(v=>v.fecha===fechaHoy);
+  if(visita){
+    pedidoActual.forEach(it=>{
+      const existente = visita.items.find(x=>x.cod===it.cod && (x.desc||0)===(it.desc||0));
+      if(existente) existente.qty += it.qty;
+      else visita.items.push({...it});
+    });
+    visita.total = visita.items.reduce((s,i)=>s+i.qty,0);
+    visita.totalMoney = visita.items.reduce((s,i)=>s+itemTotal(i),0);
+  } else {
+    const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
+    const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
+    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:[...pedidoActual],total:totalUnidades,totalMoney});
+  }
   saveData(DATA);
   ajustarObjetivosPorItems(pedidoActual, 1);
   pedidoActual=[];
@@ -2148,6 +2160,7 @@ if(vendedorActual && CLIENTES_POR_VENDEDOR[vendedorActual]){
 }
 
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+if(navigator.storage && navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 </script>
 </body>
 </html>
