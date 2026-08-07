@@ -258,6 +258,11 @@ body{
 
 .obj-bar-track{height:10px;background:var(--paper-sunk);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
 .obj-bar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s ease}
+.obj-chip{display:inline-flex;align-items:center;gap:5px;background:var(--paper-sunk);color:var(--ink);font-size:11.5px;padding:5px 6px 5px 10px;border-radius:20px;border:1px solid var(--line)}
+.obj-chip button{background:none;border:none;color:var(--ink-faint);font-size:15px;line-height:1;cursor:pointer;padding:0 2px}
+.obj-prod-result{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--paper-sunk);border-radius:8px;margin-bottom:4px;cursor:pointer;font-size:12.5px}
+.obj-prod-result:active{opacity:.7}
+.obj-prod-cod{color:var(--ink-faint);font-family:var(--font-mono);flex-shrink:0}
 
 .confirm-overlay{position:fixed;inset:0;background:rgba(20,17,14,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:24px}
 .confirm-box{background:var(--paper-raised);border-radius:14px;padding:20px;max-width:320px;width:100%;box-shadow:var(--shadow);border:1px solid var(--line)}
@@ -971,6 +976,7 @@ function saveObjetivos(){ try{ localStorage.setItem(nsKey("crm_ibero_objetivos_v
 let OBJETIVOS = loadObjetivos();
 let objEditando = null;
 let objNuevo = false;
+let objCodigosPendientes = [];
 function fmtNum(n){ n=Number(n)||0; return Number.isInteger(n) ? String(n) : n.toFixed(1); }
 
 function loadPromociones(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_promociones_v1")); return s?JSON.parse(s):[]; }catch(e){ return []; } }
@@ -1120,14 +1126,18 @@ function eliminarItemHistorial(cod, fecha){
   confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
     const key = `${diaActual}-${clienteActual?.num}`;
     const hist = DATA[key]||[];
+    const quitados = [];
     hist.forEach(v=>{
       if(v.fecha!==fecha) return;
+      const salen = v.items.filter(it=>it.cod===cod);
+      quitados.push(...salen);
       v.items = v.items.filter(it=>it.cod!==cod);
       v.total = v.items.reduce((s,i)=>s+i.qty,0);
       v.totalMoney = v.items.reduce((s,i)=>s+itemTotal(i),0);
     });
     DATA[key] = hist.filter(v=>v.items.length>0);
     saveData(DATA);
+    ajustarObjetivosPorItems(quitados, -1);
     mostrarAviso("Item eliminado");
     renderTab();
   });
@@ -1141,6 +1151,7 @@ function guardarPedido() {
   const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
   DATA[key].unshift({fecha:hoy(),fechaISO:new Date().toISOString().slice(0,10),items:[...pedidoActual],total:totalUnidades,totalMoney});
   saveData(DATA);
+  ajustarObjetivosPorItems(pedidoActual, 1);
   pedidoActual=[];
   tabActual="historial";
   document.querySelectorAll("#screen-cliente .tab").forEach((t,i)=>t.classList.toggle("active",i===2));
@@ -1802,17 +1813,20 @@ function abrirObjetivos(){
 
 function nuevoObjetivo(){
   objNuevo = true; objEditando = null;
+  objCodigosPendientes = [];
   renderObjetivosForm();
   document.getElementById("objetivos-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
 function editarObjetivo(id){
   objEditando = id; objNuevo = false;
+  const o = OBJETIVOS.find(x=>x.id===id);
+  objCodigosPendientes = [...(o?.codigos||[])];
   renderObjetivosForm();
   document.getElementById("objetivos-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
-function cancelarFormularioObjetivo(){ objNuevo=false; objEditando=null; renderObjetivosForm(); }
+function cancelarFormularioObjetivo(){ objNuevo=false; objEditando=null; objCodigosPendientes=[]; renderObjetivosForm(); }
 
 function formularioObjetivo(id){
   const o = id ? OBJETIVOS.find(x=>x.id===id) : null;
@@ -1822,7 +1836,15 @@ function formularioObjetivo(id){
       <div class="form-row"><label>Nombre / marca<input type="text" id="of-nombre" value="${o?attrEsc(o.nombre):''}" placeholder="Ej: Quesos rallados Tregar"></label></div>
       <div class="form-row"><label>Unidad<input type="text" id="of-unidad" value="${o?attrEsc(o.unidad):'unidades'}" placeholder="unidades, kg, cajas..."></label></div>
       <div class="form-row"><label>Objetivo (meta)<input type="number" id="of-objetivo" step="any" min="0" value="${o?o.objetivo:''}" placeholder="Ej: 150"></label></div>
-      <div class="form-row"><label>Ya vendido (actual)<input type="number" id="of-actual" step="any" min="0" value="${o?o.actual:0}" placeholder="Ej: 24"></label></div>
+      <div class="form-row"><label>Ya vendido (actual, de arranque)<input type="number" id="of-actual" step="any" min="0" value="${o?o.actual:0}" placeholder="Ej: 24"></label></div>
+      <div class="form-row">
+        <label>Productos que suman a este objetivo
+          <input type="text" id="of-buscar-prod" placeholder="Buscar producto por código o nombre..." oninput="buscarProductoObjetivo(this.value)" autocomplete="off">
+        </label>
+      </div>
+      <div id="of-prod-resultados"></div>
+      <div id="of-prod-chips" class="obj-chips">${renderCodigosObjetivoHTML()}</div>
+      <div style="font-size:11px;color:var(--ink-faint);margin:-4px 0 10px">Cada vez que guardes un pedido con alguno de estos productos, el objetivo se va a sumar solo.</div>
       <div id="of-error" style="color:var(--pending);font-size:12px;margin-bottom:4px"></div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ok" style="margin-top:0" onclick="guardarObjetivo('${id||''}')">Guardar</button>
@@ -1838,16 +1860,63 @@ function guardarObjetivo(id){
   const actual = parseFloat(document.getElementById("of-actual").value)||0;
   const err = document.getElementById("of-error");
   if(!nombre || isNaN(objetivo) || objetivo<=0){ err.textContent = "Completá el nombre y una meta válida."; return; }
+  const codigos = [...objCodigosPendientes];
   if(id){
     const o = OBJETIVOS.find(x=>x.id===id);
-    if(o){ o.nombre=nombre; o.unidad=unidad; o.objetivo=objetivo; o.actual=actual; }
+    if(o){ o.nombre=nombre; o.unidad=unidad; o.objetivo=objetivo; o.actual=actual; o.codigos=codigos; }
   } else {
     const newId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()));
-    OBJETIVOS.push({id:newId, nombre, unidad, objetivo, actual});
+    OBJETIVOS.push({id:newId, nombre, unidad, objetivo, actual, codigos});
   }
   saveObjetivos();
   objNuevo=false; objEditando=null;
+  objCodigosPendientes=[];
   renderObjetivosScreen();
+}
+
+function renderCodigosObjetivoHTML(){
+  if(!objCodigosPendientes.length) return `<div style="font-size:11.5px;color:var(--ink-faint);margin-bottom:8px">Ningún producto vinculado todavía.</div>`;
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${objCodigosPendientes.map(cod=>{
+    const p = PRECIOS[cod];
+    return `<span class="obj-chip">${p?p.n:cod} <button onclick="quitarCodigoObjetivo('${esc(cod)}')" title="Quitar">×</button></span>`;
+  }).join("")}</div>`;
+}
+
+function buscarProductoObjetivo(q){
+  const el = document.getElementById("of-prod-resultados");
+  q = (q||"").toLowerCase().trim();
+  if(!q){ el.innerHTML = ""; return; }
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!objCodigosPendientes.includes(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
+  el.innerHTML = entries.length ? entries.slice(0,6).map(([cod,p])=>`
+    <div class="obj-prod-result" onclick="agregarCodigoObjetivo('${esc(cod)}')">
+      <span>${p.n}</span><span class="obj-prod-cod">${cod} +</span>
+    </div>`).join("") : `<div class="empty" style="padding:8px 4px">Sin resultados.</div>`;
+}
+
+function agregarCodigoObjetivo(cod){
+  if(!objCodigosPendientes.includes(cod)) objCodigosPendientes.push(cod);
+  document.getElementById("of-buscar-prod").value = "";
+  document.getElementById("of-prod-resultados").innerHTML = "";
+  document.getElementById("of-prod-chips").innerHTML = renderCodigosObjetivoHTML();
+}
+
+function quitarCodigoObjetivo(cod){
+  objCodigosPendientes = objCodigosPendientes.filter(c=>c!==cod);
+  document.getElementById("of-prod-chips").innerHTML = renderCodigosObjetivoHTML();
+}
+
+function ajustarObjetivosPorItems(items, factor){
+  if(!items || !items.length) return;
+  let changed = false;
+  items.forEach(it=>{
+    OBJETIVOS.forEach(o=>{
+      if((o.codigos||[]).includes(it.cod)){
+        o.actual = Math.max(0, (o.actual||0) + factor*it.qty);
+        changed = true;
+      }
+    });
+  });
+  if(changed) saveObjetivos();
 }
 
 function borrarObjetivo(id){
@@ -1899,8 +1968,9 @@ function renderObjetivosLista(){
         <span style="font-weight:700;color:${cumplido?'var(--ok)':'var(--ink)'}">${pct}%</span>
       </div>
       <div style="font-size:11.5px;color:${cumplido?'var(--ok)':'var(--pending)'};margin-top:2px">${cumplido?"Objetivo cumplido":`Faltan ${fmtNum(restante)} ${o.unidad}`}</div>
+      <div style="font-size:11px;color:var(--ink-faint);margin-top:4px">${(o.codigos||[]).length ? `🔗 Se suma solo con ${o.codigos.length} producto${o.codigos.length===1?'':'s'} vinculado${o.codigos.length===1?'':'s'}` : "Sin productos vinculados — sumalo a mano abajo"}</div>
       <div class="disc-row" style="margin-top:10px">
-        <input type="number" class="disc-input" id="obj-sumar-${o.id}" placeholder="Cantidad vendida" min="0" step="any">
+        <input type="number" class="disc-input" id="obj-sumar-${o.id}" placeholder="Sumar a mano" min="0" step="any">
         <button class="btn btn-ok" style="margin-top:0;width:auto;padding:0 14px" onclick="sumarObjetivo('${o.id}')">+ Sumar</button>
       </div>
     </div>`;
