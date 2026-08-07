@@ -1,6 +1,6 @@
-// Service Worker v3 — fuerza actualización siempre
-const CACHE = "crm-ibero-v3";
-const FILES = ["/", "/index.html", "/manifest.json"];
+// Service Worker v4 — fuerza actualización siempre
+const CACHE = "crm-ibero-v4";
+const FILES = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();
