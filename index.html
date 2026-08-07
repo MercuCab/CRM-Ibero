@@ -527,6 +527,7 @@ let diaActual = DIAS.includes(DIA_HOY) ? DIA_HOY : "Lunes";
 let clienteActual = null;
 let tabActual = "pedido";
 let pedidoActual = [];
+let pedidoSucio = false;
 let prodSeleccionado = null;
 let precioEditando = false;
 let precioNuevo = false;
@@ -1081,9 +1082,16 @@ function renderInfobar(){
   `;
 }
 
+function cargarPedidoDeHoy(num){
+  const key = `${diaActual}-${num}`;
+  const visitaHoy = (DATA[key]||[]).find(v=>v.fecha===hoy());
+  return visitaHoy ? visitaHoy.items.map(it=>({...it})) : [];
+}
+
 function selCliente(num, nom) {
   clienteActual = {num, nom};
-  pedidoActual = [];
+  pedidoActual = cargarPedidoDeHoy(num);
+  pedidoSucio = false;
   cobranzaEditId = null;
   document.getElementById("cli-title").textContent = nom;
   document.getElementById("cli-sub").textContent = `N° ${num} · ${diaActual}`;
@@ -1109,6 +1117,7 @@ function setTab(tab, el) {
   tabActual = tab;
   document.querySelectorAll("#screen-cliente .tab").forEach(t => t.classList.remove("active"));
   if(el) el.classList.add("active");
+  if(tab==="pedido" && !pedidoSucio && clienteActual) pedidoActual = cargarPedidoDeHoy(clienteActual.num);
   renderTab();
 }
 
@@ -1120,7 +1129,7 @@ function renderTab() {
   else el.innerHTML = renderPedido();
 }
 
-function eliminarItem(i) { pedidoActual.splice(i,1); renderTab(); }
+function eliminarItem(i) { pedidoActual.splice(i,1); pedidoSucio = true; renderTab(); }
 
 function eliminarItemHistorial(cod, fecha){
   confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
@@ -1149,22 +1158,19 @@ function guardarPedido() {
   if(!DATA[key]) DATA[key]=[];
   const fechaHoy = hoy();
   let visita = DATA[key].find(v=>v.fecha===fechaHoy);
+  const itemsAntes = visita ? visita.items.map(it=>({...it})) : [];
+  const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
+  const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
   if(visita){
-    pedidoActual.forEach(it=>{
-      const existente = visita.items.find(x=>x.cod===it.cod && (x.desc||0)===(it.desc||0));
-      if(existente) existente.qty += it.qty;
-      else visita.items.push({...it});
-    });
-    visita.total = visita.items.reduce((s,i)=>s+i.qty,0);
-    visita.totalMoney = visita.items.reduce((s,i)=>s+itemTotal(i),0);
+    visita.items = pedidoActual.map(it=>({...it}));
+    visita.total = totalUnidades;
+    visita.totalMoney = totalMoney;
   } else {
-    const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
-    const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
-    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:[...pedidoActual],total:totalUnidades,totalMoney});
+    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:pedidoActual.map(it=>({...it})),total:totalUnidades,totalMoney});
   }
   saveData(DATA);
-  ajustarObjetivosPorItems(pedidoActual, 1);
-  pedidoActual=[];
+  ajustarObjetivosPorDiferencia(itemsAntes, pedidoActual);
+  pedidoSucio = false;
   tabActual="historial";
   document.querySelectorAll("#screen-cliente .tab").forEach((t,i)=>t.classList.toggle("active",i===2));
   renderTab();
@@ -1200,6 +1206,7 @@ function agregarAlPedido(cod, qty, desc){
   const ex = pedidoActual.find(it=>it.cod===cod && it.desc===desc);
   if(ex) ex.qty += qty;
   else pedidoActual.push({cod, qty, desc});
+  pedidoSucio = true;
   return true;
 }
 
@@ -1924,6 +1931,24 @@ function ajustarObjetivosPorItems(items, factor){
     OBJETIVOS.forEach(o=>{
       if((o.codigos||[]).includes(it.cod)){
         o.actual = Math.max(0, (o.actual||0) + factor*it.qty);
+        changed = true;
+      }
+    });
+  });
+  if(changed) saveObjetivos();
+}
+
+function ajustarObjetivosPorDiferencia(itemsAntes, itemsNuevos){
+  const codigos = new Set([...itemsAntes.map(i=>i.cod), ...itemsNuevos.map(i=>i.cod)]);
+  let changed = false;
+  codigos.forEach(cod=>{
+    const antes = itemsAntes.filter(i=>i.cod===cod).reduce((s,i)=>s+i.qty,0);
+    const nuevo = itemsNuevos.filter(i=>i.cod===cod).reduce((s,i)=>s+i.qty,0);
+    const delta = nuevo - antes;
+    if(!delta) return;
+    OBJETIVOS.forEach(o=>{
+      if((o.codigos||[]).includes(cod)){
+        o.actual = Math.max(0, (o.actual||0) + delta);
         changed = true;
       }
     });
