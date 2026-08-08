@@ -278,6 +278,16 @@ body{
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+.update-banner{
+  position:fixed;left:0;right:0;top:0;z-index:1002;background:var(--accent);color:var(--accent-ink);
+  padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);font-family:var(--font-body);
+}
+.update-banner button{
+  background:rgba(255,255,255,.22);color:inherit;border:none;border-radius:8px;padding:6px 14px;
+  font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;
+}
+
 @media (prefers-reduced-motion:no-preference){
   .tkey:active,.btn:active,.cli-card:active{transition:transform .08s ease,opacity .08s ease}
 }
@@ -2184,7 +2194,21 @@ if(vendedorActual && CLIENTES_POR_VENDEDOR[vendedorActual]){
   showScreen("screen-vendedor");
 }
 
-if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+function mostrarActualizacionDisponible(){
+  if(document.querySelector(".update-banner")) return;
+  const b = document.createElement("div");
+  b.className = "update-banner";
+  b.innerHTML = `Hay una versión nueva del CRM <button onclick="location.reload()">Actualizar</button>`;
+  document.body.appendChild(b);
+}
+
+if("serviceWorker" in navigator){
+  const teniaControlador = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+    if(teniaControlador) mostrarActualizacionDisponible();
+  });
+}
 if(navigator.storage && navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 </script>
 </body>
