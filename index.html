@@ -1098,10 +1098,40 @@ function cargarPedidoDeHoy(num){
   return visitaHoy ? visitaHoy.items.map(it=>({...it})) : [];
 }
 
+function loadBorradores(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_borrador_pedido_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
+function saveBorradores(){ try{ localStorage.setItem(nsKey("crm_ibero_borrador_pedido_v1"), JSON.stringify(BORRADORES)); }catch(e){} }
+let BORRADORES = loadBorradores();
+
+function guardarBorradorPedido(){
+  if(!clienteActual) return;
+  const key = `${diaActual}-${clienteActual.num}`;
+  if(pedidoActual.length){
+    BORRADORES[key] = {fecha: hoy(), items: pedidoActual.map(it=>({...it}))};
+  } else {
+    delete BORRADORES[key];
+  }
+  saveBorradores();
+}
+
+function borradorPendiente(num){
+  const key = `${diaActual}-${num}`;
+  const b = BORRADORES[key];
+  if(b && b.fecha===hoy()) return b.items.map(it=>({...it}));
+  if(b){ delete BORRADORES[key]; saveBorradores(); }
+  return null;
+}
+
 function selCliente(num, nom) {
   clienteActual = {num, nom};
-  pedidoActual = cargarPedidoDeHoy(num);
-  pedidoSucio = false;
+  const borrador = borradorPendiente(num);
+  if(borrador){
+    pedidoActual = borrador;
+    pedidoSucio = true;
+    setTimeout(()=>mostrarAviso("Recuperamos un pedido sin guardar de hoy"), 300);
+  } else {
+    pedidoActual = cargarPedidoDeHoy(num);
+    pedidoSucio = false;
+  }
   cobranzaEditId = null;
   document.getElementById("cli-title").textContent = nom;
   document.getElementById("cli-sub").textContent = `N° ${num} · ${diaActual}`;
@@ -1139,7 +1169,7 @@ function renderTab() {
   else el.innerHTML = renderPedido();
 }
 
-function eliminarItem(i) { pedidoActual.splice(i,1); pedidoSucio = true; renderTab(); }
+function eliminarItem(i) { pedidoActual.splice(i,1); pedidoSucio = true; guardarBorradorPedido(); renderTab(); }
 
 function eliminarItemHistorial(cod, fecha){
   confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
@@ -1180,6 +1210,8 @@ function guardarPedido() {
   }
   saveData(DATA);
   ajustarObjetivosPorDiferencia(itemsAntes, pedidoActual);
+  delete BORRADORES[key];
+  saveBorradores();
   pedidoSucio = false;
   tabActual="historial";
   document.querySelectorAll("#screen-cliente .tab").forEach((t,i)=>t.classList.toggle("active",i===2));
@@ -1217,13 +1249,17 @@ function agregarAlPedido(cod, qty, desc){
   if(ex) ex.qty += qty;
   else pedidoActual.push({cod, qty, desc});
   pedidoSucio = true;
+  guardarBorradorPedido();
   return true;
 }
 
 function agregarDesdeResultado(cod){
   const qty = parseInt(document.getElementById(`sr-qty-${cod}`)?.value)||0;
   const desc = Math.min(100, Math.max(0, parseInt(document.getElementById(`sr-desc-${cod}`)?.value)||0));
-  if(agregarAlPedido(cod, qty, desc)) renderTab();
+  if(agregarAlPedido(cod, qty, desc)){
+    renderTab();
+    document.getElementById("ped-buscar")?.focus();
+  }
 }
 
 // RENDER PEDIDO
