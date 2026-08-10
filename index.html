@@ -1274,9 +1274,27 @@ function agregarDesdeResultado(cod){
 }
 
 // RENDER PEDIDO
+function faltantesSemanaPasada(num){
+  const key = `${diaActual}-${num}`;
+  const anteriores = (DATA[key]||[]).filter(v=>v.fecha!==hoy()).sort((a,b)=>(b.fechaISO||"").localeCompare(a.fechaISO||""));
+  if(!anteriores.length) return null;
+  const anterior = anteriores[0];
+  const codigosHoy = new Set(pedidoActual.map(it=>it.cod));
+  const faltantes = anterior.items.filter(it=>!codigosHoy.has(it.cod));
+  return faltantes.length ? {fecha: anterior.fecha, items: faltantes} : null;
+}
+
+function agregarFaltanteRapido(cod, qty){
+  if(agregarAlPedido(cod, qty, 0)){
+    renderTab();
+    mostrarAviso("Agregado");
+  }
+}
+
 function renderPedido() {
   const items = pedidoActual;
   const totalMoney = items.reduce((s,i)=>s+itemTotal(i),0);
+  const faltantes = clienteActual ? faltantesSemanaPasada(clienteActual.num) : null;
   return `
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
@@ -1284,6 +1302,16 @@ function renderPedido() {
       </label></div>
       <div id="ped-resultados"></div>
     </div>
+    ${faltantes?`
+    <div style="padding:8px 2px 4px">
+      <div style="font-size:11px;color:var(--ink-faint);margin-bottom:6px">⚠️ Semana pasada (${faltantes.fecha}) y sin cargar hoy:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${faltantes.items.map(it=>{
+          const pi = getProd(it.cod);
+          return `<button class="obj-chip" style="cursor:pointer;background:var(--pending-bg);color:var(--pending);border-color:transparent" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?pi.n:it.cod} (${it.qty})</button>`;
+        }).join("")}
+      </div>
+    </div>`:""}
     ${items.length?`
       <div class="card">
         <div class="card-title">Pedido de hoy — ${hoy()}</div>
