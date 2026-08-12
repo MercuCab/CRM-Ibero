@@ -60,7 +60,7 @@
 /* "white surface" contexts (product ficha, forms, tables, tab bar, popups):
    these re-declare the SAME token names with dark-on-white values, so every
    existing component rule (which already reads var(--ink) etc.) adapts automatically. */
-.card, .table-wrap, .tabs, .confirm-box{
+.card, .table-wrap, .tabs, .confirm-box, .menu-item{
   --paper-raised:#FFFFFF; --paper-sunk:#F5F7FA;
   --ink:#1F2937; --ink-dim:#5B6472; --ink-faint:#98A2AD;
   --line:#E3E7EC; --line-strong:#C9D1D9;
@@ -70,7 +70,7 @@
   --info:#2C5F8A; --info-bg:#DEE9F1;
   color:var(--ink);
 }
-:root[data-theme="dark"] .card, :root[data-theme="dark"] .table-wrap, :root[data-theme="dark"] .tabs, :root[data-theme="dark"] .confirm-box{
+:root[data-theme="dark"] .card, :root[data-theme="dark"] .table-wrap, :root[data-theme="dark"] .tabs, :root[data-theme="dark"] .confirm-box, :root[data-theme="dark"] .menu-item{
   --paper-raised:#222A33; --paper-sunk:#1A212A;
   --ink:#EAEFF3; --ink-dim:#95A3B0; --ink-faint:#5E6B77;
   --line:#323B45; --line-strong:#414D59;
@@ -79,7 +79,7 @@
   --info:#7DAFD6; --info-bg:#1E2E3A;
 }
 @media (prefers-color-scheme:dark){
-  .card, .table-wrap, .tabs, .confirm-box{
+  .card, .table-wrap, .tabs, .confirm-box, .menu-item{
     --paper-raised:#222A33; --paper-sunk:#1A212A;
     --ink:#EAEFF3; --ink-dim:#95A3B0; --ink-faint:#5E6B77;
     --line:#323B45; --line-strong:#414D59;
@@ -88,7 +88,7 @@
     --info:#7DAFD6; --info-bg:#1E2E3A;
   }
 }
-:root[data-theme="light"] .card, :root[data-theme="light"] .table-wrap, :root[data-theme="light"] .tabs, :root[data-theme="light"] .confirm-box{
+:root[data-theme="light"] .card, :root[data-theme="light"] .table-wrap, :root[data-theme="light"] .tabs, :root[data-theme="light"] .confirm-box, :root[data-theme="light"] .menu-item{
   --paper-raised:#FFFFFF; --paper-sunk:#F5F7FA;
   --ink:#1F2937; --ink-dim:#5B6472; --ink-faint:#98A2AD;
   --line:#E3E7EC; --line-strong:#C9D1D9;
@@ -138,6 +138,14 @@ body{
 .header-back{font-size:24px;cursor:pointer;padding:2px 10px 2px 0;line-height:1;background:none;border:none;color:inherit}
 .header-icon{font-size:19px;cursor:pointer;padding:4px 6px;margin-left:auto;background:none;border:none;color:inherit;border-radius:8px}
 .header-icon:active{background:rgba(255,255,255,.15)}
+
+.menu-item{display:flex;align-items:center;gap:14px;width:100%;background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;text-align:left;color:var(--ink);font-family:var(--font-body)}
+.menu-item:active{opacity:.75}
+.menu-item-icon{font-size:22px;flex-shrink:0}
+.menu-item-txt{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.menu-item-title{font-weight:700;font-size:14px}
+.menu-item-sub{font-size:11.5px;color:var(--ink-faint)}
+.menu-item-arrow{font-size:20px;color:var(--ink-faint);flex-shrink:0}
 .scroll{flex:1;overflow-y:auto;padding:16px;min-height:0}
 .scroll::-webkit-scrollbar{width:8px}
 .scroll::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:8px}
@@ -174,6 +182,7 @@ body{
 .cli-nom{font-size:14px;font-weight:600;color:var(--ink)}
 .cli-num{font-size:11.5px;color:var(--ink-faint);margin-top:2px;font-family:var(--font-mono)}
 .cli-badge{font-size:10.5px;padding:4px 9px;border-radius:20px;font-weight:600;white-space:nowrap;letter-spacing:.02em}
+.badge-pend{cursor:pointer}
 .badge-ok{background:var(--ok-bg);color:var(--ok)}
 .badge-pend{background:var(--pending-bg);color:var(--pending)}
 .cli-del{background:none;border:none;color:var(--ink-faint);font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0}
@@ -242,12 +251,16 @@ body{
 .planilla-actions .btn{width:auto;flex:1;margin-top:0}
 
 .table-wrap{overflow-x:auto;margin-top:2px;border:1px solid var(--line);border-radius:12px}
-.planilla-table{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--font-mono);white-space:nowrap}
-.planilla-table th,.planilla-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
-.planilla-table th{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);background:var(--paper-sunk);position:sticky;top:0}
-.planilla-table td:nth-child(5){white-space:normal;min-width:200px;font-family:var(--font-body);font-size:12px}
-.planilla-table tfoot td{font-weight:700;border-top:2px solid var(--line-strong);border-bottom:none;background:var(--paper-sunk)}
-.planilla-table tbody tr:last-child td{border-bottom:none}
+.planilla-card{margin-bottom:10px;padding:12px 14px}
+.planilla-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:8px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.planilla-card-nom{font-weight:700;font-size:13.5px}
+.planilla-card-sub{font-size:11px;color:var(--ink-faint);font-family:var(--font-mono);margin-top:2px}
+.planilla-card-total{text-align:right;flex-shrink:0}
+.planilla-card-money{font-weight:700;font-family:var(--font-mono);font-size:13px}
+.planilla-item{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;color:var(--ink-dim)}
+.planilla-item-nom{min-width:0}
+.planilla-item-qty{flex-shrink:0;font-family:var(--font-mono);color:var(--ink)}
+.planilla-item-vacio{font-size:11.5px;color:var(--ink-faint);font-style:italic}
 
 .ficha-table th,.ficha-table td{text-align:center}
 .ficha-table th:nth-child(1),.ficha-table th:nth-child(2),
@@ -341,9 +354,8 @@ body{
       <button class="header-icon" onclick="abrirNuevoCliente()" title="Agregar cliente">➕</button>
       <button class="header-icon" onclick="abrirObjetivos()" title="Objetivos">🎯</button>
       <button class="header-icon" onclick="abrirPromociones()" title="Promociones">🎁</button>
-      <button class="header-icon" onclick="abrirPlanilla()" title="Registro de pedidos">📋</button>
       <button class="header-icon" onclick="abrirPrecios()" title="Lista de precios">💲</button>
-      <button class="header-icon" onclick="abrirBackup()" title="Copia de seguridad">💾</button>
+      <button class="header-icon" onclick="abrirMenu()" title="Más opciones">☰</button>
       <button class="header-icon" onclick="cambiarVendedor()" title="Cerrar sesión">🚪</button>
     </div>
     <div class="infobar" id="infobar"></div>
@@ -420,9 +432,64 @@ body{
   </div>
 
   <!-- SCREEN 5: REGISTRO / EXCEL -->
+  <div class="screen" id="screen-menu">
+    <div class="header">
+      <button class="header-back" onclick="showScreen('screen-main')">&lsaquo;</button>
+      <div style="flex:1">
+        <h1>Más opciones</h1>
+      </div>
+    </div>
+    <div class="scroll">
+      <button class="menu-item" onclick="abrirDescuentos()">
+        <span class="menu-item-icon">🏷️</span>
+        <span class="menu-item-txt">
+          <span class="menu-item-title">Descuentos habilitados</span>
+          <span class="menu-item-sub">Referencia del mes</span>
+        </span>
+        <span class="menu-item-arrow">›</span>
+      </button>
+      <button class="menu-item" onclick="abrirPlanilla()">
+        <span class="menu-item-icon">📋</span>
+        <span class="menu-item-txt">
+          <span class="menu-item-title">Registro de pedidos</span>
+          <span class="menu-item-sub">Ver, imprimir o exportar todo</span>
+        </span>
+        <span class="menu-item-arrow">›</span>
+      </button>
+      <button class="menu-item" onclick="abrirBackup()">
+        <span class="menu-item-icon">💾</span>
+        <span class="menu-item-txt">
+          <span class="menu-item-title">Copia de seguridad</span>
+          <span class="menu-item-sub">Pasar tus datos a otro dispositivo</span>
+        </span>
+        <span class="menu-item-arrow">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN: DESCUENTOS HABILITADOS -->
+  <div class="screen" id="screen-descuentos">
+    <div class="header">
+      <button class="header-back" onclick="showScreen('screen-menu')">&lsaquo;</button>
+      <div style="flex:1">
+        <h1>Descuentos habilitados</h1>
+        <div class="header-sub">Referencia del mes — solo informativo</div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="card">
+        <div class="form-row"><label>Buscar producto por nombre o código
+          <input type="text" id="desc-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoDescuento(this.value)">
+        </label></div>
+        <div id="desc-resultados"></div>
+      </div>
+      <div id="descuentos-lista"></div>
+    </div>
+  </div>
+
   <div class="screen" id="screen-planilla">
     <div class="header">
-      <button class="header-back no-print" onclick="showScreen('screen-main')">&lsaquo;</button>
+      <button class="header-back no-print" onclick="showScreen('screen-menu')">&lsaquo;</button>
       <div style="flex:1">
         <h1>Registro de pedidos</h1>
         <div class="header-sub">Para imprimir o exportar</div>
@@ -463,7 +530,7 @@ body{
   <!-- SCREEN: BACKUP -->
   <div class="screen" id="screen-backup">
     <div class="header">
-      <button class="header-back" onclick="showScreen('screen-main')">&lsaquo;</button>
+      <button class="header-back" onclick="showScreen('screen-menu')">&lsaquo;</button>
       <div style="flex:1">
         <h1>Copia de seguridad</h1>
         <div class="header-sub">Pasar tus datos a otro dispositivo</div>
@@ -1083,13 +1150,24 @@ function filtrarClientes(q) {
     return `<div class="cli-card">
       <div class="cli-main" onclick="selCliente('${c.num}','${esc(c.nom)}')">
         <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num}</div></div>
-        <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}">${visitado?'✅ Visitado':'⏳ Pendiente'}</span>
+        <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}" ${visitado?'':`onclick="event.stopPropagation();marcarVisitadoSinPedido('${esc(c.num)}')" title="Marcar como visitado sin pedido"`}>${visitado?'✅ Visitado':'⏳ Pendiente'}</span>
       </div>
       ${extra?`<button class="cli-del" title="Quitar cliente" onclick="eliminarClienteExtra('${diaActual}','${esc(c.num)}')">✕</button>`:""}
     </div>`;
   }).join("") : `<div class="empty">Sin clientes para "${q}" el día ${diaActual}.<br>
     <button class="btn btn-ghost" style="margin-top:10px;width:auto;padding:9px 18px" onclick="abrirNuevoCliente()">+ Agregar cliente</button></div>`;
   renderInfobar();
+}
+
+function marcarVisitadoSinPedido(num){
+  const key = `${diaActual}-${num}`;
+  if(!DATA[key]) DATA[key] = [];
+  const fechaHoy = hoy();
+  if(DATA[key].some(v=>v.fecha===fechaHoy)) return;
+  DATA[key].unshift({fecha:fechaHoy, fechaISO:new Date().toISOString().slice(0,10), items:[], total:0, totalMoney:0});
+  saveData(DATA);
+  mostrarAviso("Marcado como visitado");
+  filtrarClientes(document.getElementById("search").value);
 }
 
 function renderInfobar(){
@@ -1486,13 +1564,15 @@ function renderHistorial() {
   const totalVisitas = hist.length;
   const totalUnidades = hist.reduce((s,h)=>s+h.total,0);
   const totalMoney = hist.reduce((s,h)=>s+(h.totalMoney||0),0);
+  const totalItems = hist.reduce((s,h)=>s+(h.items?h.items.length:0),0);
   return `
     <div class="stats">
       <div class="stat"><div class="stat-val">${totalVisitas}</div><div class="stat-label">Visitas</div></div>
       <div class="stat"><div class="stat-val">${totalUnidades}</div><div class="stat-label">Unidades</div></div>
       <div class="stat"><div class="stat-val" style="font-size:14px">${money(totalMoney)}</div><div class="stat-label">Total $</div></div>
     </div>
-    ${hist.length ? fichaHistorial(hist) : `<div class="card"><div class="empty">Sin visitas registradas todavía.<br>Cargá el primer pedido en la pestaña Pedido.</div></div>`}
+    ${!hist.length ? `<div class="card"><div class="empty">Sin visitas registradas todavía.<br>Cargá el primer pedido en la pestaña Pedido.</div></div>`
+      : totalItems ? fichaHistorial(hist) : `<div class="card"><div class="empty">Visitas registradas sin pedido.</div></div>`}
     ${hist.length?`<button class="btn btn-ghost" onclick="exportarCliente()">Copiar resumen ↗</button>`:""}
   `;
 }
@@ -1879,7 +1959,7 @@ function filasPlanilla(){
     (DATA[key]||[]).forEach(h=>{
       rows.push({
         fecha: h.fecha, fechaISO: h.fechaISO||"", dia, num, nom: cli?cli.nom:num,
-        productos: h.items.map(it=>itemLineTxt(it)).join(" | "),
+        items: h.items||[],
         unidades: h.total, total: h.totalMoney||0
       });
     });
@@ -1906,15 +1986,27 @@ function renderPlanilla(){
       <div class="stat"><div class="stat-val">${totalU}</div><div class="stat-label">Unidades</div></div>
       <div class="stat"><div class="stat-val" style="font-size:14px">${money(totalM)}</div><div class="stat-label">Total $</div></div>
     </div>
-    <div class="table-wrap">
-      <table class="planilla-table">
-        <thead><tr><th>Fecha</th><th>Día</th><th>Cliente</th><th>N°</th><th>Productos</th><th>Uds.</th><th>Total</th></tr></thead>
-        <tbody>
-          ${rows.map(r=>`<tr><td>${r.fecha}</td><td>${r.dia.slice(0,3)}</td><td>${r.nom}</td><td>${r.num}</td><td>${r.productos}</td><td>${r.unidades}</td><td>${money(r.total)}</td></tr>`).join("")}
-        </tbody>
-        <tfoot><tr><td colspan="5">Total</td><td>${totalU}</td><td>${money(totalM)}</td></tr></tfoot>
-      </table>
-    </div>
+    ${rows.map(r=>`
+      <div class="card planilla-card">
+        <div class="planilla-card-head">
+          <div>
+            <div class="planilla-card-nom">${htmlEsc(r.nom)}</div>
+            <div class="planilla-card-sub">${r.num} · ${r.dia.slice(0,3)} · ${r.fecha}</div>
+          </div>
+          <div class="planilla-card-total">
+            <div class="planilla-card-money">${money(r.total)}</div>
+            <div class="planilla-card-sub">${r.unidades} u.</div>
+          </div>
+        </div>
+        ${r.items.length ? r.items.map(it=>{
+          const pi = getProd(it.cod);
+          return `<div class="planilla-item">
+            <span class="planilla-item-nom">${it.cod}${pi?` · ${htmlEsc(pi.n)}`:""}</span>
+            <span class="planilla-item-qty">${it.qty}u.${it.desc?` -${it.desc}%`:""}</span>
+          </div>`;
+        }).join("") : `<div class="planilla-item-vacio">Visita sin pedido</div>`}
+      </div>
+    `).join("")}
   ` : `<div class="empty">Todavía no guardaste ningún pedido.</div>`;
 }
 
@@ -1923,8 +2015,18 @@ function csvEscape(v){ v = String(v??""); return /[",\n]/.test(v) ? '"'+v.replac
 function descargarCSV(){
   const rows = filasPlanillaFiltradas();
   if(!rows.length){ mostrarAviso("No hay pedidos para exportar."); return; }
-  const header = ["Fecha","Dia","Cliente","Numero","Productos","Unidades","Total"];
-  const lines = [header.join(",")].concat(rows.map(r=>[r.fecha,r.dia,r.nom,r.num,r.productos,r.unidades,r.total.toFixed(2)].map(csvEscape).join(",")));
+  const header = ["Fecha","Dia","Cliente","N Cliente","Codigo","Producto","Cantidad","Descuento %","Precio Unitario","Subtotal"];
+  const lines = [header.join(",")];
+  rows.forEach(r=>{
+    if(!r.items.length){
+      lines.push([r.fecha,r.dia,r.nom,r.num,"","Visita sin pedido","","","",""].map(csvEscape).join(","));
+      return;
+    }
+    r.items.forEach(it=>{
+      const p = getProd(it.cod);
+      lines.push([r.fecha,r.dia,r.nom,r.num,it.cod,p?p.n:"",it.qty,it.desc||0,p?p.v.toFixed(2):"",itemTotal(it).toFixed(2)].map(csvEscape).join(","));
+    });
+  });
   const blob = new Blob(["﻿"+lines.join("\n")], {type:"text/csv;charset=utf-8;"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1997,6 +2099,72 @@ function abrirBackup(){
   document.getElementById("backup-vendedor-nombre").textContent = vendedorActual || "";
   document.getElementById("backup-restore-msg").textContent = "";
   showScreen("screen-backup");
+}
+
+function abrirMenu(){ showScreen("screen-menu"); }
+
+// DESCUENTOS HABILITADOS DEL MES
+function loadDescuentosMes(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_descuentos_mes_v1")); return s?JSON.parse(s):[]; }catch(e){ return []; } }
+function saveDescuentosMes(){ try{ localStorage.setItem(nsKey("crm_ibero_descuentos_mes_v1"), JSON.stringify(DESCUENTOS_MES)); }catch(e){} }
+let DESCUENTOS_MES = loadDescuentosMes();
+
+function abrirDescuentos(){
+  document.getElementById("desc-buscar").value = "";
+  document.getElementById("desc-resultados").innerHTML = "";
+  renderDescuentosLista();
+  showScreen("screen-descuentos");
+}
+
+function buscarProductoDescuento(q){
+  const el = document.getElementById("desc-resultados");
+  q = (q||"").toLowerCase().trim();
+  if(!q){ el.innerHTML = ""; return; }
+  const yaAgregados = new Set(DESCUENTOS_MES.map(d=>d.cod));
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!yaAgregados.has(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
+  el.innerHTML = entries.length ? entries.slice(0,6).map(([cod,p])=>`
+    <div class="obj-prod-result" onclick="agregarDescuentoMes('${esc(cod)}')">
+      <span>${htmlEsc(p.n)}</span><span class="obj-prod-cod">${cod} +</span>
+    </div>`).join("") : `<div class="empty" style="padding:8px 4px">Sin resultados.</div>`;
+}
+
+function agregarDescuentoMes(cod){
+  if(DESCUENTOS_MES.some(d=>d.cod===cod)) return;
+  DESCUENTOS_MES.push({cod, pct: 0});
+  saveDescuentosMes();
+  document.getElementById("desc-buscar").value = "";
+  document.getElementById("desc-resultados").innerHTML = "";
+  renderDescuentosLista();
+}
+
+function actualizarDescuentoMes(cod, pct){
+  const d = DESCUENTOS_MES.find(d=>d.cod===cod);
+  if(!d) return;
+  d.pct = Math.min(100, Math.max(0, parseFloat(pct)||0));
+  saveDescuentosMes();
+}
+
+function quitarDescuentoMes(cod){
+  DESCUENTOS_MES = DESCUENTOS_MES.filter(d=>d.cod!==cod);
+  saveDescuentosMes();
+  renderDescuentosLista();
+}
+
+function renderDescuentosLista(){
+  const el = document.getElementById("descuentos-lista");
+  if(!DESCUENTOS_MES.length){ el.innerHTML = `<div class="card"><div class="empty">Todavía no cargaste descuentos habilitados.<br>Buscá un producto arriba para agregar el primero.</div></div>`; return; }
+  el.innerHTML = DESCUENTOS_MES.map(d=>{
+    const p = getProd(d.cod);
+    return `<div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="min-width:0;font-weight:700;font-size:13px">${d.cod}${p?` · ${htmlEsc(p.n)}`:""}</div>
+        <button class="link-btn link-danger" style="flex-shrink:0" onclick="quitarDescuentoMes('${esc(d.cod)}')">Quitar</button>
+      </div>
+      <div class="disc-row" style="margin-top:8px">
+        <input type="number" class="disc-input" value="${d.pct}" min="0" max="100" oninput="actualizarDescuentoMes('${esc(d.cod)}', this.value)">
+        <span style="font-size:12.5px;color:var(--ink-dim)">% máximo habilitado</span>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function descargarBackup(){
