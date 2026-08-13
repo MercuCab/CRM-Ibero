@@ -593,7 +593,9 @@ const USUARIOS = {
   "emosca": {password:"321", vendedor:"Emiliano Mosca"},
   "cbergara": {password:"321", vendedor:"Cecilia Vergara"},
   "lalleva": {password:"321", vendedor:"Lucas Alleva"},
-  "ebil": {password:"321", vendedor:"Esteban Bil"}
+  "ebil": {password:"321", vendedor:"Esteban Bil"},
+  "jmiramones": {password:"321", vendedor:"Julián Miramontes"},
+  "lferraro": {password:"321", vendedor:"Lautaro Ferraro"}
 };
 let vendedorActual = localStorage.getItem("crm_ibero_vendedor") || null;
 
@@ -2321,13 +2323,15 @@ function quitarCodigoObjetivo(cod){
   document.getElementById("of-prod-chips").innerHTML = renderCodigosObjetivoHTML();
 }
 
+function cantidadObjetivo(it){ return it.peso ? it.qty*it.peso : it.qty; }
+
 function ajustarObjetivosPorItems(items, factor){
   if(!items || !items.length) return;
   let changed = false;
   items.forEach(it=>{
     OBJETIVOS.forEach(o=>{
       if((o.codigos||[]).includes(it.cod)){
-        o.actual = Math.max(0, (o.actual||0) + factor*it.qty);
+        o.actual = Math.max(0, (o.actual||0) + factor*cantidadObjetivo(it));
         changed = true;
       }
     });
@@ -2339,8 +2343,8 @@ function ajustarObjetivosPorDiferencia(itemsAntes, itemsNuevos){
   const codigos = new Set([...itemsAntes.map(i=>i.cod), ...itemsNuevos.map(i=>i.cod)]);
   let changed = false;
   codigos.forEach(cod=>{
-    const antes = itemsAntes.filter(i=>i.cod===cod).reduce((s,i)=>s+i.qty,0);
-    const nuevo = itemsNuevos.filter(i=>i.cod===cod).reduce((s,i)=>s+i.qty,0);
+    const antes = itemsAntes.filter(i=>i.cod===cod).reduce((s,i)=>s+cantidadObjetivo(i),0);
+    const nuevo = itemsNuevos.filter(i=>i.cod===cod).reduce((s,i)=>s+cantidadObjetivo(i),0);
     const delta = nuevo - antes;
     if(!delta) return;
     OBJETIVOS.forEach(o=>{
