@@ -1883,14 +1883,14 @@
       "desc": "QUESO SARDO FRESCO",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 10561.25
+      "precio": 10333.5
     },
     {
       "cod": "2335",
       "desc": "QUESO SARDO FRESCO COLBER",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9901.43
+      "precio": 9881.875
     },
     {
       "cod": "2323",
@@ -2583,112 +2583,112 @@
       "desc": "PAPA FRITA SLICES CLASICA",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 998.165
+      "precio": 1080.3
     },
     {
       "cod": "5051",
       "desc": "PAPA FRITA SLICES CLASICA",
       "cat": "SNACK",
       "pres": "BOLSA x 150 GRS",
-      "precio": 1787.5725
+      "precio": 1933.46
     },
     {
       "cod": "5052",
       "desc": "PAPA FRITA SLICES CLASICA",
       "cat": "SNACK",
       "pres": "BOLSA x 500 GRS",
-      "precio": 5796.8225
+      "precio": 6503.96
     },
     {
       "cod": "5053",
       "desc": "PAPA FRITA SLICES C/AMERICANO",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 998.165
+      "precio": 1080.3
     },
     {
       "cod": "5054",
       "desc": "PAPA FRITA SLICES C/AMERICANO",
       "cat": "SNACK",
       "pres": "BOLSA x 150 GRS",
-      "precio": 1787.5725
+      "precio": 1933.46
     },
     {
       "cod": "5055",
       "desc": "PAPA FRITA SLICES C/AMERICANO",
       "cat": "SNACK",
       "pres": "BOLSA x 500 GRS",
-      "precio": 6378.855
+      "precio": 7157.68
     },
     {
       "cod": "5056",
       "desc": "PAPA FRITA SLICES JAMON SERRANO",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5057",
       "desc": "PAPA FRITA SLICES CHEDDAR",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5058",
       "desc": "PAPA FRITA SLICES SALAME DE CAMPO",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5059",
       "desc": "PALITOS SALADOS SLICES",
       "cat": "SNACK",
       "pres": "BOLSA x 120 GRS",
-      "precio": 761.7574999999999
+      "precio": 763.135
     },
     {
       "cod": "5060",
       "desc": "BATATAS FRITAS SLICES",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 969.1324999999999
+      "precio": 970.885
     },
     {
       "cod": "5061",
       "desc": "PAPAS FRITAS SLICES PESTO",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5062",
       "desc": "PAPAS FRITAS SLICES PROVENZAL",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5063",
       "desc": "PAPAS FRITAS SLICES LLAMARADA LIMON PICANTE",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5064",
       "desc": "PAPAS FRITAS SLICES LLAMARADA BARBACOA PICANTE",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "5065",
       "desc": "PAPAS FRITAS SLICES LLAMARADA PICANTE ARGENTO",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1400.4725
+      "precio": 1515.19
     },
     {
       "cod": "4101",
@@ -2954,49 +2954,49 @@
       "desc": "DULCE DE LECHE \"CHIMBOTE\"",
       "cat": "DULCES",
       "pres": "FRASCO x 1/2 kg",
-      "precio": 8856.109491371999
+      "precio": 8941.285199
     },
     {
       "cod": "3210",
       "desc": "DULCE DE LECHE \"CHIMBOTE\"",
       "cat": "DULCES",
       "pres": "FRASCO X 220GR",
-      "precio": 5531.1553468600005
+      "precio": 5584.740843
     },
     {
       "cod": "3207",
       "desc": "DULCE DE LECHE \"CHIMBOTE\"",
       "cat": "DULCES",
       "pres": "FRASCO X 850GR",
-      "precio": 14569.877145252
+      "precio": 14710.062928
     },
     {
       "cod": "3204",
       "desc": "CARAMELOS \"CHIMBOTE\"",
       "cat": "DULCES",
       "pres": "CAJA x 24",
-      "precio": 15853.600475856001
+      "precio": 16009.598088
     },
     {
       "cod": "3341",
       "desc": "DULCE BATATA LIGHT \"CORMILLOT\"",
       "cat": "DULCES",
       "pres": "PANES x 430 GRS",
-      "precio": 1768.2644534891099
+      "precio": 1771.5884861734908
     },
     {
       "cod": "3342",
       "desc": "DULCE MEMBRILLO LIGHT \"CORMILLOT\"",
       "cat": "DULCES",
       "pres": "PANES x 430 GRS",
-      "precio": 2635.721792399696
+      "precio": 2640.6769240518333
     },
     {
       "cod": "3360",
       "desc": "DULCE MEMBRILLO LIGHT SIN AZUCAR \"CORMILLOT\"",
       "cat": "DULCES",
       "pres": "PANES x 430 GRS",
-      "precio": 3423.358807001467
+      "precio": 3429.793691977033
     },
     {
       "cod": "3361",
@@ -3010,35 +3010,35 @@
       "desc": "DULCE BATATA \"DULCOR\"",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 16019.628051929674
+      "precio": 16051.602869567101
     },
     {
       "cod": "3302",
       "desc": "DULCE MEMBRILLO \"DULCOR\"",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 19629.29797856776
+      "precio": 19668.47778040464
     },
     {
       "cod": "3303",
       "desc": "DULCE BATATA C/CHOCOLATE \"DULCOR\"",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 16019.628051929674
+      "precio": 16051.602869567101
     },
     {
       "cod": "3304",
       "desc": "DULCE BATATA C/CEREZAS  \"DULCOR\"",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 22082.960225888735
+      "precio": 22127.037502955223
     },
     {
       "cod": "3305",
       "desc": "POSTRE DE DULCE DE LECHE C/CHOC DULCOR",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 35168.318228609285
+      "precio": 35238.5171828866
     },
     {
       "cod": "3306",
@@ -3052,91 +3052,91 @@
       "desc": "DULCE BATATA \"DULCOR\"",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 11820.177923232648
+      "precio": 11843.76426276384
     },
     {
       "cod": "3312",
       "desc": "DULCE MEMBRILLO \"DULCOR\"",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 14508.68102084819
+      "precio": 14537.647836041438
     },
     {
       "cod": "3313",
       "desc": "DULCE BATATA C/CHOCOLATE \"DULCOR\"",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 11820.177923232648
+      "precio": 11843.76426276384
     },
     {
       "cod": "3320",
       "desc": "TURRON MANI \"MANICOL\"",
       "cat": "DULCES",
       "pres": "BALDE X 3KG",
-      "precio": 40637.660653884835
+      "precio": 40714.49087268199
     },
     {
       "cod": "3344",
       "desc": "DULCE DE BATATA LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 17337.261109053597
+      "precio": 17371.934657504462
     },
     {
       "cod": "3345",
       "desc": "DULCE DE MEMBRILLO LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 21265.89753288
+      "precio": 21308.42932794576
     },
     {
       "cod": "3346",
       "desc": "DULCE DE BATATA C/CHOCO LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 17337.261109053597
+      "precio": 17371.934657504462
     },
     {
       "cod": "3347",
       "desc": "DULCE DE BATATA C/CEREZA LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 24983.635277858404
+      "precio": 25033.602304972308
     },
     {
       "cod": "3348",
       "desc": "POSTRE DE DULCE DE LECHE LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 38087.035923651005
+      "precio": 38163.2097250074
     },
     {
       "cod": "3349",
       "desc": "DULCE DE ZAPALLO LATA X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 6635.8544967
+      "precio": 6393.390582397499
     },
     {
       "cod": "3338",
       "desc": "DULCE DE BATATA CAJON X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 12792.398791114801
+      "precio": 12817.97823297717
     },
     {
       "cod": "3339",
       "desc": "DULCE DE MEMBRILLO CAJON X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 15721.901320153598
+      "precio": 15753.346853935676
     },
     {
       "cod": "3340",
       "desc": "DULCE DE BATATA C/CHOCO CAJON X 5 ESNAOLA",
       "cat": "DULCES",
       "pres": "CAJON x 5 KG",
-      "precio": 12792.398791114801
+      "precio": 12817.97823297717
     },
     {
       "cod": "3331",
@@ -3192,77 +3192,77 @@
       "desc": "DULCE DE BATATA ARCO DE ORO LATA X5KG",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 11982.586200000002
+      "precio": 11521.7175
     },
     {
       "cod": "3322",
       "desc": "DULCE DE MEMBRILLO ARCO DE ORO LATA X5KG",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 13598.215800000002
+      "precio": 13075.2075
     },
     {
       "cod": "3323",
       "desc": "DULCE DE BATATA C/CHOCO ARCO DE ORO LATA X5KG",
       "cat": "DULCES",
       "pres": "LATA x 5 KG",
-      "precio": 12251.8578
+      "precio": 11780.6325
     },
     {
       "cod": "7301",
       "desc": "ALFAJOR DE MAICENA LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 960 GRS",
-      "precio": 13419.12
+      "precio": 12903.0
     },
     {
       "cod": "7302",
       "desc": "ALFAJOR DE CHOCOLATE NEGRO LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 780 GRS",
-      "precio": 13419.12
+      "precio": 12903.0
     },
     {
       "cod": "7303",
       "desc": "ALFAJOR DE CHOCOLATE BLANCO LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 720 GRS",
-      "precio": 13419.12
+      "precio": 12903.0
     },
     {
       "cod": "7304",
       "desc": "ALFAJOR DE CHOCOLATE AL 70% LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 780 GRS",
-      "precio": 17222.4
+      "precio": 16560.0
     },
     {
       "cod": "7305",
       "desc": "BOMBA DE CHOCOLATE NEGRO LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 696 GRS",
-      "precio": 12773.28
+      "precio": 12282.0
     },
     {
       "cod": "7306",
       "desc": "ALFAJOR DE CHOCOLATE MOUSSE DE AVELLANA LA ALDEA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 600 GRS",
-      "precio": 16361.28
+      "precio": 15732.0
     },
     {
       "cod": "7310",
       "desc": "ALFAJOR DE CHOCOLATE LA RECOVA X12U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 720 GRS",
-      "precio": 8507.8656
+      "precio": 8180.639999999999
     },
     {
       "cod": "7311",
       "desc": "ALFAJOR DE LIMÓN LA RECOVA X10U",
-      "cat": "DULCES",
+      "cat": "ALFAJORES",
       "pres": "ESTUCHE X 360 GRS",
-      "precio": 8507.8656
+      "precio": 8180.639999999999
     },
     {
       "cod": "2108",
