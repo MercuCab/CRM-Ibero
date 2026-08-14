@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "13/08/2026",
+  "fecha_actualizacion": "14/08/2026",
   "total_productos": 551,
   "productos": [
     {
@@ -182,7 +182,7 @@
       "desc": "BONDIOLA AL VACIO \"EL GALAICO\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN RED",
-      "precio": 21773.8575
+      "precio": 22863.213000000003
     },
     {
       "cod": "1029",
@@ -224,7 +224,7 @@
       "desc": "JAMON COCIDO NATURAL EL GALAICO etiq negra",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 12923.838
+      "precio": 13570.560000000001
     },
     {
       "cod": "1100",
@@ -238,7 +238,7 @@
       "desc": "JAMON COCIDO NATURAL EL GALAICO etiq azul",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 10886.92875
+      "precio": 11431.606500000002
     },
     {
       "cod": "1137",
@@ -315,14 +315,14 @@
       "desc": "FIAMBRE DE PATA \"1284\" etiq azul  tradicional",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 6882.51375
+      "precio": 7241.157
     },
     {
       "cod": "1128",
       "desc": "FIAMBRE DE PATA \"1284\" etiq azul  media caña",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 6882.51375
+      "precio": 7241.157
     },
     {
       "cod": "1167",
@@ -371,14 +371,14 @@
       "desc": "FIAMBRE PALETA DE CERDO 1284 ETIQ AMARILLA",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 6030.830250000001
+      "precio": 6346.431
     },
     {
       "cod": "1111",
       "desc": "FIAMBRE DE CERDO 1284 etiq roja tradicional",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 5829.7747500000005
+      "precio": 6122.655
     },
     {
       "cod": "1168",
@@ -679,7 +679,7 @@
       "desc": "PANCETA AHUMADA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 17193.708
+      "precio": 18088.97375
     },
     {
       "cod": "1202",
@@ -693,14 +693,14 @@
       "desc": "PANCETA AHUMADA \"1284\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 15352.722000000002
+      "precio": 16150.78375
     },
     {
       "cod": "1206",
       "desc": "PANCETA SALADA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 18098.64
+      "precio": 19041.025
     },
     {
       "cod": "1216",
@@ -728,14 +728,14 @@
       "desc": "LOMO AHUMADO NATURAL \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA",
-      "precio": 17559.5625
+      "precio": 18438.20325
     },
     {
       "cod": "1205",
       "desc": "LOMO AHUMADO DE PRAGA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA",
-      "precio": 17910.75375
+      "precio": 18806.622750000002
     },
     {
       "cod": "1209",
@@ -1253,14 +1253,14 @@
       "desc": "QUESO POR SALUT BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 10548.3375256875
+      "precio": 10776.625108425002
     },
     {
       "cod": "2169",
       "desc": "QUESO POR SALUT SIN SAL BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 10548.3375256875
+      "precio": 10776.625108425002
     },
     {
       "cod": "2121",
@@ -1281,35 +1281,35 @@
       "desc": "QUESO AZUL \"STA ROSA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 28244.465172000004
+      "precio": 29091.792114000003
     },
     {
       "cod": "2152",
       "desc": "QUESO AZUL \"STA ROSA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION X 140 GRS",
-      "precio": 5650.286179999999
+      "precio": 5819.787820000001
     },
     {
       "cod": "2154",
       "desc": "QUESO AZUL BAVARIA GRANDBLU",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 30275.04942
+      "precio": 31183.299378000003
     },
     {
       "cod": "2153",
       "desc": "QUESO AZUL \"BAVARIA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "1/2 HORMA",
-      "precio": 25968.786228
+      "precio": 26747.856828
     },
     {
       "cod": "2155",
       "desc": "QUESO AZUL \"BAVARIA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION X 140 GRS",
-      "precio": 5363.6613800000005
+      "precio": 5524.57444
     },
     {
       "cod": "2138",
@@ -1358,14 +1358,14 @@
       "desc": "MOZZARELLA CILINDRO BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X3KG",
-      "precio": 11498.22270432
+      "precio": 11805.486431062502
     },
     {
       "cod": "2167",
       "desc": "MOZZARELLA PLANCHA BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "PLANCHA X10KG",
-      "precio": 10901.5962627825
+      "precio": 11118.756211200001
     },
     {
       "cod": "2101",
@@ -1443,13 +1443,6 @@
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
       "precio": 11640.7637632
-    },
-    {
-      "cod": "2018",
-      "desc": "QUESO BARRA TYBO LA CHACRA",
-      "cat": "QUESOS SEMIDUROS",
-      "pres": "HORMA",
-      "precio": 9953.998909799999
     },
     {
       "cod": "2031",
@@ -2366,77 +2359,77 @@
       "desc": "PAPAS FRITAS  CLASICAS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 420 GRS",
-      "precio": 9748.9061
+      "precio": 10061.539499999999
     },
     {
       "cod": "5006",
       "desc": "PAPAS FRITAS  CLASICAS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 275 GRS",
-      "precio": 6510.7376
+      "precio": 6840.5152
     },
     {
       "cod": "5002",
       "desc": "PAPAS FRITAS  CLASICAS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 105 GRS",
-      "precio": 2815.7654
+      "precio": 2905.7937999999995
     },
     {
       "cod": "5003",
       "desc": "PAPAS FRITAS  CLASICAS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 50 GRS",
-      "precio": 1617.2248
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5004",
       "desc": "PAPAS FRITAS  CORTE AMERICANO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 420 GRS",
-      "precio": 10337.7504
+      "precio": 10651.412
     },
     {
       "cod": "5005",
       "desc": "PAPAS FRITAS  SIN SAL KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 55 GRS",
-      "precio": 1674.7368000000001
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5007",
       "desc": "PAPAS FRITAS  CORTE AMERICANO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 105 GRS",
-      "precio": 2815.7654
+      "precio": 2905.7937999999995
     },
     {
       "cod": "5008",
       "desc": "PAPAS FRITAS  CORTE AMERICANO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 50 GRS",
-      "precio": 1617.2248
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5010",
       "desc": "PAPAS PAY KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 55 GRS",
-      "precio": 1514.114
+      "precio": 1685.8442
     },
     {
       "cod": "5011",
       "desc": "PALITOS DE MAIZ CON QUESO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 240 GRS",
-      "precio": 5053.519399999999
+      "precio": 5406.681
     },
     {
       "cod": "5013",
       "desc": "PALITOS DE MAIZ CON QUESO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 60 GRS",
-      "precio": 1351.0896
+      "precio": 1448.1331999999998
     },
     {
       "cod": "5016",
@@ -2450,35 +2443,35 @@
       "desc": "BASTONES EXTRA QUESO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 240 GRS",
-      "precio": 5495.524399999999
+      "precio": 5706.7862
     },
     {
       "cod": "5018",
       "desc": "BASTONES EXTRA QUESO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 60 GRS",
-      "precio": 1383.685
+      "precio": 1476.6996
     },
     {
       "cod": "5019",
       "desc": "PALITOS SALADOS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 500 GRS",
-      "precio": 7748.6518
+      "precio": 8450.6142
     },
     {
       "cod": "5020",
       "desc": "PALITOS SALADOS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 110 GRS",
-      "precio": 1791.4829999999997
+      "precio": 1953.0695999999998
     },
     {
       "cod": "5021",
       "desc": "PALITOS SALADOS KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 70 GRS",
-      "precio": 1239.8734
+      "precio": 1329.0485999999999
     },
     {
       "cod": "5026",
@@ -2492,28 +2485,28 @@
       "desc": "MANI PELADO SALADO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 65 GRS",
-      "precio": 1526.0272
+      "precio": 1619.6263999999999
     },
     {
       "cod": "5036",
       "desc": "PAPAS FRITAS SABOR JAMON SERRANO KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 55 GRS",
-      "precio": 1587.505
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5039",
       "desc": "PAPAS FRITAS SABOR CHEDAR KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 55 GRS",
-      "precio": 1581.264
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5040",
       "desc": "PAPAS FRITAS SABOR KETCHUP KRACHITOS",
       "cat": "SNACK",
       "pres": "BOLSA x 55 GRS",
-      "precio": 1581.1534000000001
+      "precio": 1695.8455999999999
     },
     {
       "cod": "5041",
@@ -2590,14 +2583,14 @@
       "desc": "PAPA FRITA SLICES CLASICA",
       "cat": "SNACK",
       "pres": "BOLSA x 150 GRS",
-      "precio": 1933.46
+      "precio": 2166.14
     },
     {
       "cod": "5052",
       "desc": "PAPA FRITA SLICES CLASICA",
       "cat": "SNACK",
       "pres": "BOLSA x 500 GRS",
-      "precio": 6503.96
+      "precio": 7154.91
     },
     {
       "cod": "5053",
@@ -2611,14 +2604,14 @@
       "desc": "PAPA FRITA SLICES C/AMERICANO",
       "cat": "SNACK",
       "pres": "BOLSA x 150 GRS",
-      "precio": 1933.46
+      "precio": 2166.14
     },
     {
       "cod": "5055",
       "desc": "PAPA FRITA SLICES C/AMERICANO",
       "cat": "SNACK",
       "pres": "BOLSA x 500 GRS",
-      "precio": 7157.68
+      "precio": 7873.725
     },
     {
       "cod": "5056",
@@ -3858,6 +3851,13 @@
       "cat": "VARIOS",
       "pres": "POTE X 250CM3",
       "precio": 7793.2951599965
+    },
+    {
+      "cod": "2017",
+      "desc": "QUESO BARRA TYBO COMUN",
+      "cat": "QUESOS SEMIDUROS",
+      "pres": "HORMA",
+      "precio": 8946.6
     }
   ]
 }
