@@ -186,6 +186,8 @@ body{
 .badge-ok{background:var(--ok-bg);color:var(--ok)}
 .badge-pend{background:var(--pending-bg);color:var(--pending)}
 .cli-del{background:none;border:none;color:var(--ink-faint);font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0}
+.cli-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);background:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;cursor:pointer;padding:0}
+.cli-check.checked{background:var(--ok);border-color:var(--ok)}
 .cli-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
 
 .tabs{display:flex;background:var(--paper-raised);border-bottom:1px solid var(--line);flex-shrink:0}
@@ -1066,6 +1068,19 @@ let DEVOLUCIONES = loadDevoluciones();
 function cobranzaKey(){ return `${diaActual}-${clienteActual?.num}`; }
 function fechaDisplay(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 
+function loadRevisados(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_revisados_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
+function saveRevisados(){ try{ localStorage.setItem(nsKey("crm_ibero_revisados_v1"), JSON.stringify(REVISADOS)); }catch(e){} }
+let REVISADOS = loadRevisados();
+
+function toggleRevisado(num){
+  const key = `${diaActual}-${num}`;
+  const h = hoy();
+  if(REVISADOS[key]?.fecha===h) delete REVISADOS[key];
+  else REVISADOS[key] = {fecha:h};
+  saveRevisados();
+  filtrarClientes(document.getElementById("search").value);
+}
+
 function loadObjetivos(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_objetivos_v1")); return s?JSON.parse(s):[]; }catch(e){ return []; } }
 function saveObjetivos(){ try{ localStorage.setItem(nsKey("crm_ibero_objetivos_v1"), JSON.stringify(OBJETIVOS)); }catch(e){} }
 let OBJETIVOS = loadObjetivos();
@@ -1149,7 +1164,9 @@ function filtrarClientes(q) {
     const extra = esClienteExtra(diaActual, c.num);
     const color = CLIENTES_INFO[c.num]?.color;
     const dot = color ? `<span class="cli-dot" style="background:var(--${color})"></span>` : "";
+    const revisado = REVISADOS[`${diaActual}-${c.num}`]?.fecha===h;
     return `<div class="cli-card">
+      <button class="cli-check ${revisado?'checked':''}" onclick="event.stopPropagation();toggleRevisado('${esc(c.num)}')" title="Marcar que revisé este pedido">${revisado?'✓':''}</button>
       <div class="cli-main" onclick="selCliente('${c.num}','${esc(c.nom)}')">
         <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num}</div></div>
         <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}" ${visitado?'':`onclick="event.stopPropagation();marcarVisitadoSinPedido('${esc(c.num)}')" title="Marcar como visitado sin pedido"`}>${visitado?'✅ Visitado':'⏳ Pendiente'}</span>
@@ -1293,6 +1310,16 @@ function eliminarItemHistorial(cod, fecha){
 
 function guardarPedido() {
   if(!pedidoActual.length||!clienteActual) return;
+  const faltantes = faltantesSemanaPasada(clienteActual.num);
+  if(faltantes){
+    const nombres = faltantes.items.map(it=>{ const pi=getProd(it.cod); return pi?pi.n:it.cod; }).join(", ");
+    confirmarAccion(`⚠️ Sin cargar: ${nombres}. ¿Guardar igual?`, ()=>guardarPedidoConfirmado());
+    return;
+  }
+  guardarPedidoConfirmado();
+}
+
+function guardarPedidoConfirmado() {
   const key = `${diaActual}-${clienteActual.num}`;
   if(!DATA[key]) DATA[key]=[];
   const fechaHoy = hoy();
@@ -1391,8 +1418,8 @@ function renderPedido() {
       <div id="ped-resultados"></div>
     </div>
     ${faltantes?`
-    <div style="padding:8px 2px 4px">
-      <div style="font-size:11px;color:var(--ink-faint);margin-bottom:6px">⚠️ Semana pasada (${faltantes.fecha}) y sin cargar hoy:</div>
+    <div class="card" style="border-color:var(--pending)">
+      <div style="font-size:11.5px;color:var(--pending);font-weight:700;margin-bottom:8px">⚠️ Semana pasada (${faltantes.fecha}) y sin cargar hoy</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
         ${faltantes.items.map(it=>{
           const pi = getProd(it.cod);
@@ -1518,8 +1545,8 @@ function renderDevoluciones(){
       <div id="dev-resultados"></div>
     </div>
     ${items.length?`
-      <div class="card">
-        <div class="card-title">Devolución de hoy — ${hoy()}</div>
+      <div class="card" style="${devolucionSucia?'':'border-color:var(--ok)'}">
+        <div class="card-title" style="display:flex;align-items:center;gap:8px">Devolución de hoy — ${hoy()}${devolucionSucia?'':' <span class="cli-badge badge-ok" style="font-size:10px">✅ Guardada</span>'}</div>
         ${items.map((it,i)=>{
           const pi=getProd(it.cod);
           return `
@@ -1535,7 +1562,7 @@ function renderDevoluciones(){
           <span style="color:var(--ink-dim)">Total</span>
           <span style="font-weight:700;font-family:var(--font-mono)">${items.reduce((s,i)=>s+i.qty,0)} unidades</span>
         </div>
-        <button class="btn btn-ok" onclick="guardarDevolucion()">Guardar devolución</button>
+        ${devolucionSucia?`<button class="btn btn-ok" onclick="guardarDevolucion()">Guardar devolución</button>`:""}
       </div>`:""}
     ${historialPrevio.length?`
       <div class="card">
@@ -1580,50 +1607,24 @@ function renderHistorial() {
 }
 
 function fichaHistorial(hist){
-  const visitas = hist.slice().sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
-  const fechas = [...new Set(visitas.map(v=>v.fecha))];
-  const productos = new Map();
-  visitas.forEach(v=>{
-    v.items.forEach(it=>{
-      if(!productos.has(it.cod)){
-        const p = getProd(it.cod);
-        productos.set(it.cod, {nombre: p?p.n:"", porFecha:new Map(), totalU:0, totalM:0});
-      }
-      const prod = productos.get(it.cod);
-      const prev = prod.porFecha.get(v.fecha);
-      prod.porFecha.set(v.fecha, {qty:(prev?prev.qty:0)+it.qty, desc: it.desc||(prev?prev.desc:0)});
-      prod.totalU += it.qty;
-      prod.totalM += itemTotal(it);
-    });
-  });
-  const filas = [...productos.entries()];
-  const granTotalU = filas.reduce((s,[,p])=>s+p.totalU,0);
-  const granTotalM = filas.reduce((s,[,p])=>s+p.totalM,0);
-  return `
-    <div class="table-wrap">
-      <table class="planilla-table ficha-table">
-        <thead><tr>
-          <th>Código</th><th>Descripción</th>
-          ${fechas.map(f=>`<th>${f}</th>`).join("")}
-          <th>Total U.</th><th>Total $</th>
-        </tr></thead>
-        <tbody>
-          ${filas.map(([cod,p])=>`<tr>
-            <td>${cod}</td>
-            <td class="ficha-desc">${p.nombre||"—"}</td>
-            ${fechas.map(f=>{
-              const c = p.porFecha.get(f);
-              if(!c) return `<td>—</td>`;
-              return `<td>${c.qty}${c.desc?` <span class="ficha-pct">-${c.desc}%</span>`:""} <button class="ficha-del" title="Eliminar" onclick="eliminarItemHistorial('${esc(cod)}','${esc(f)}')">🗑️</button></td>`;
-            }).join("")}
-            <td>${p.totalU}</td>
-            <td>${money(p.totalM)}</td>
-          </tr>`).join("")}
-        </tbody>
-        <tfoot><tr><td colspan="${2+fechas.length}">Total</td><td>${granTotalU}</td><td>${money(granTotalM)}</td></tr></tfoot>
-      </table>
+  const visitas = hist.slice().sort((a,b)=>(b.fechaISO||"").localeCompare(a.fechaISO||""));
+  return visitas.map(v=>`
+    <div class="card planilla-card">
+      <div class="planilla-card-head">
+        <div class="planilla-card-nom">${v.fecha}</div>
+        <div class="planilla-card-total">
+          <div class="planilla-card-money">${money(v.totalMoney||0)}</div>
+        </div>
+      </div>
+      ${v.items.length ? v.items.map(it=>{
+        const pi = getProd(it.cod);
+        return `<div class="planilla-item">
+          <span class="planilla-item-nom">${it.cod}${pi?` · ${htmlEsc(pi.n)}`:""}${it.desc?` <span class="ficha-pct">-${it.desc}%</span>`:""}</span>
+          <span class="planilla-item-qty">${it.qty}u. <button class="ficha-del" title="Eliminar" onclick="eliminarItemHistorial('${esc(it.cod)}','${esc(v.fecha)}')">🗑️</button></span>
+        </div>`;
+      }).join("") : `<div class="planilla-item-vacio">Visita sin pedido</div>`}
     </div>
-  `;
+  `).join("");
 }
 
 // RENDER COBRANZAS
@@ -2094,7 +2095,7 @@ function cambiarVendedor(){
 }
 
 // BACKUP / RESTAURAR (copiar datos entre dispositivos)
-const BACKUP_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1"];
+const BACKUP_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1","crm_ibero_devoluciones_v1","crm_ibero_revisados_v1"];
 const BACKUP_KEYS_COMPARTIDAS = ["crm_ibero_fotos_custom_v1","crm_ibero_precios_v1"];
 
 function abrirBackup(){
