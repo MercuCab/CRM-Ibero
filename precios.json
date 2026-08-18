@@ -3262,7 +3262,7 @@
       "desc": "QUESO CREMOSO \"TREGAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9440.53746789384
+      "precio": 9549.051736224
     },
     {
       "cod": "2109",
@@ -3290,35 +3290,35 @@
       "desc": "QUESO CREMOSO TROZADO \"TREGAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION",
-      "precio": 10040.867463088001
+      "precio": 10197.75184285
     },
     {
       "cod": "2116",
       "desc": "QUESO POR SALUT TROZADO \"TREGAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION",
-      "precio": 11849.478174441598
+      "precio": 12034.61708735
     },
     {
       "cod": "2114",
       "desc": "QUESO POR SALUT DIET S/ SAL TROZ \"TREGAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION",
-      "precio": 12746.72011635
+      "precio": 12937.923737969999
     },
     {
       "cod": "2115",
       "desc": "QUESO POR SALUT DIET TROZADO \"TREGAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION",
-      "precio": 11823.0447456
+      "precio": 12187.89917345
     },
     {
       "cod": "2004",
       "desc": "QUESO BARRA DANBO \"TREGAR\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 12911.803454780998
+      "precio": 13060.214988744
     },
     {
       "cod": "2006",
@@ -3332,28 +3332,28 @@
       "desc": "QUESO FONTINA \"TREGAR\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 20648.851666192746
+      "precio": 20688.558030635
     },
     {
       "cod": "2224",
       "desc": "QUESO FONTINA \"TREGAR\" EN MITADES",
       "cat": "QUESOS SEMIDUROS",
       "pres": "1/2 HORMA",
-      "precio": 20648.851666192746
+      "precio": 20688.558030635
     },
     {
       "cod": "2204",
       "desc": "QUESO CRIOLLO \"TREGAR\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 18623.752361714498
+      "precio": 18659.5732014725
     },
     {
       "cod": "2223",
       "desc": "QUESO PATEGRAS \"TREGAR\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 14324.407640190448
+      "precio": 14434.181507459998
     },
     {
       "cod": "2205",
@@ -3367,7 +3367,7 @@
       "desc": "QUESO HOLANDA TROZADO \"TREGAR\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "PORCION",
-      "precio": 19254.114470483197
+      "precio": 19554.956821400003
     },
     {
       "cod": "2212",
@@ -3381,14 +3381,14 @@
       "desc": "QUESO REGGIANITO \"TREGAR\"",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 23334.527778476204
+      "precio": 23386.43411061375
     },
     {
       "cod": "2309",
       "desc": "QUESO REGGIANITO TROZADO \"TREGAR\"",
       "cat": "QUESOS DUROS",
       "pres": "PORCION",
-      "precio": 29015.826221866446
+      "precio": 26016.841213440002
     },
     {
       "cod": "2401",
@@ -3430,7 +3430,7 @@
       "desc": "QUESO UNTABLE SABOR CHEDDAR",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1673.8630421608332
+      "precio": 1707.3397199191666
     },
     {
       "cod": "2501",
@@ -3528,7 +3528,7 @@
       "desc": "QUESO CREMA LIGHT TREGAR",
       "cat": "VARIOS",
       "pres": "POTE X 200 GRS",
-      "precio": 2096.03149756
+      "precio": 2096.0164046249997
     },
     {
       "cod": "2517",
@@ -3577,84 +3577,84 @@
       "desc": "YOGUR BEBIBLE ENTERO DURAZNO",
       "cat": "VARIOS",
       "pres": "SACHET X 900GR",
-      "precio": 1860.2556810933334
+      "precio": 1897.4611396216667
     },
     {
       "cod": "2581",
       "desc": "YOGUR BEBIBLE ENTERO ARANDANO",
       "cat": "VARIOS",
       "pres": "SACHET X 900GR",
-      "precio": 1860.2556810933334
+      "precio": 1897.4611396216667
     },
     {
       "cod": "2525",
       "desc": "YOGUR ENTERO FRUTILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.5001893
+      "precio": 1230.84031838625
     },
     {
       "cod": "2526",
       "desc": "YOGUR ENTERO DURAZNO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.50504987
+      "precio": 1230.84031838625
     },
     {
       "cod": "2529",
       "desc": "YOGUR ENTERO C/ARANDANOS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.50504987
+      "precio": 1230.84517895625
     },
     {
       "cod": "2527",
       "desc": "YOGUR DESCREMADO FRUTILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.509100345
+      "precio": 1230.849431955
     },
     {
       "cod": "2528",
       "desc": "YOGUR DESCREMADO DURAZNO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.509100345
+      "precio": 1230.849431955
     },
     {
       "cod": "2565",
       "desc": "YOGUR DESCREMADO ARANDANOS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1183.509100345
+      "precio": 1230.849431955
     },
     {
       "cod": "2566",
       "desc": "YOGUR ENTERO ANANA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1301.86478994
+      "precio": 1353.9393167300002
     },
     {
       "cod": "2569",
       "desc": "YOGUR ENTERO MANGO MARACUYA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1301.86478994
+      "precio": 1353.9393167300002
     },
     {
       "cod": "2550",
       "desc": "YOGUR ENTERO CEREZA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1301.86478994
+      "precio": 1353.9393167300002
     },
     {
       "cod": "2561",
       "desc": "YOGUR DESCREMADO ANANA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 160 GR",
-      "precio": 1301.865600035
+      "precio": 1353.940126825
     },
     {
       "cod": "2538",
@@ -3710,14 +3710,14 @@
       "desc": "YOGUR BATIDO FRUTILLA LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 595.997422735
+      "precio": 619.836898395
     },
     {
       "cod": "2537",
       "desc": "YOGUR BATIDO VAINILLA LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 595.997422735
+      "precio": 619.836898395
     },
     {
       "cod": "2584",
@@ -3787,7 +3787,7 @@
       "desc": "YOGUR ENTERO CON GRANOLA",
       "cat": "VARIOS",
       "pres": "POTE X 155 GR",
-      "precio": 1210.22036278
+      "precio": 1258.6292096949999
     },
     {
       "cod": "3206",
@@ -3808,14 +3808,14 @@
       "desc": "LECHE ENTERA LARGA VIDA 1 LTS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "UAT PACK x 12 UNID",
-      "precio": 22264.03259472892
+      "precio": 22305.337204589996
     },
     {
       "cod": "2534",
       "desc": "LECHE DESCREMADA LARGA VIDA 1 LTS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "UAT PACK x 12 UNID",
-      "precio": 22264.03259472892
+      "precio": 22305.337204589996
     },
     {
       "cod": "2555",
