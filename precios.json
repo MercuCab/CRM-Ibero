@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "18/08/2026",
+  "fecha_actualizacion": "25/08/2026",
   "total_productos": 552,
   "productos": [
     {
@@ -49,7 +49,7 @@
       "desc": "JAMON CRUDO EL ARTESANO",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 21704.312684999997
+      "precio": 23332.136136374997
     },
     {
       "cod": "1042",
@@ -168,7 +168,7 @@
       "desc": "BONDIOLA VACIO \"CALCHAQUI\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 27354.000130379998
+      "precio": 28721.700136899
     },
     {
       "cod": "1017",
@@ -196,7 +196,7 @@
       "desc": "JAMON COCIDO NATURAL BOCATTI",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 19439.93234830185
+      "precio": 20606.328289199962
     },
     {
       "cod": "1193",
@@ -301,14 +301,14 @@
       "desc": "FIAMBRE DE PATA \"J\" CALCHAQUI",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 12889.442771667
+      "precio": 13662.80933796702
     },
     {
       "cod": "1106",
       "desc": "FIAMBRE DE PATA \"J\" CALCHAQUI mini",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 12889.442771667
+      "precio": 13662.80933796702
     },
     {
       "cod": "1108",
@@ -399,14 +399,14 @@
       "desc": "RIBS BOCATTI",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 23375.689451730002
+      "precio": 24076.960135281905
     },
     {
       "cod": "1113",
       "desc": "MORTADELA C/PISTACCIO BOCATTI",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "PIEZA",
-      "precio": 14674.223868304
+      "precio": 15114.45058435312
     },
     {
       "cod": "1143",
@@ -427,7 +427,7 @@
       "desc": "MORTADELA BOCHA CALCHAQUI",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "BOCHA",
-      "precio": 8770.862579415476
+      "precio": 9121.697082592094
     },
     {
       "cod": "1132",
@@ -483,7 +483,7 @@
       "desc": "LEBERWURST \"CALCHAQUI\"",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "MINI PIEZA",
-      "precio": 1692.483541364
+      "precio": 1777.1077184322
     },
     {
       "cod": "1179",
@@ -497,7 +497,7 @@
       "desc": "SALCHICHON PRIMAVERA \"CALCHAQUI\"",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "PIEZA",
-      "precio": 7543.179795689999
+      "precio": 7769.4751895607
     },
     {
       "cod": "1148",
@@ -518,35 +518,35 @@
       "desc": "PATE BOCATTI CLASICO",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "UNIDAD",
-      "precio": 1626.562785665125
+      "precio": 1707.8909249483813
     },
     {
       "cod": "1151",
       "desc": "PATE BOCATTI PIMIENTA",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "UNIDAD",
-      "precio": 1754.3213616197502
+      "precio": 1842.0374297007377
     },
     {
       "cod": "1152",
       "desc": "PATE BOCATTI JAMON COCIDO",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "UNIDAD",
-      "precio": 1649.918811618
+      "precio": 1732.4147521989
     },
     {
       "cod": "1153",
       "desc": "PATE BOCATTI PANCETA",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "UNIDAD",
-      "precio": 1669.816351077875
+      "precio": 1753.3071686317687
     },
     {
       "cod": "1154",
       "desc": "PATE BOCATTI CHAMPIGNON",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "UNIDAD",
-      "precio": 1612.052268162875
+      "precio": 1708.7754042526476
     },
     {
       "cod": "1401",
@@ -581,7 +581,7 @@
       "desc": "JAMON COCIDO NATURAL \"BOCATTI\" FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 130 GRS",
-      "precio": 3990.754559372778
+      "precio": 4230.199832935145
     },
     {
       "cod": "1174",
@@ -595,7 +595,7 @@
       "desc": "LOMO C/HIERBAS \"BOCATTI\" FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 70 GRS",
-      "precio": 2341.5243563078893
+      "precio": 2482.015817686363
     },
     {
       "cod": "1121",
@@ -609,7 +609,7 @@
       "desc": "MORTADELA C/PISTACCIO \"BOCATTI\" FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 70 GRS",
-      "precio": 1602.4911246361112
+      "precio": 1698.640592114278
     },
     {
       "cod": "1327",
@@ -630,7 +630,7 @@
       "desc": "SALAME MILAN BOCATTI FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER X 70 GRS",
-      "precio": 2132.4190120737776
+      "precio": 2260.3641527982045
     },
     {
       "cod": "1350",
@@ -658,21 +658,21 @@
       "desc": "JAMON CRUDO EL ARTESANO 12 MESES FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER X 100 GRS",
-      "precio": 6213.768526899999
+      "precio": 6586.594638514
     },
     {
       "cod": "1035",
       "desc": "JAMON CRUDO EL ARTESANO 6 MESES FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER X 100 GRS",
-      "precio": 3920.370839
+      "precio": 4155.59308934
     },
     {
       "cod": "1038",
       "desc": "BONDIOLA EL ARTESANO FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER X 100 GRS",
-      "precio": 4537.885493295
+      "precio": 4810.1586228927
     },
     {
       "cod": "1201",
@@ -721,7 +721,7 @@
       "desc": "LOMO C/HIERBAS \"BOCATTI\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA",
-      "precio": 21156.084329895897
+      "precio": 23060.13191958653
     },
     {
       "cod": "1204",
@@ -896,14 +896,14 @@
       "desc": "SALAMINES P.. FINO CALCHAQUI",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 4 UNID",
-      "precio": 19490.884053794998
+      "precio": 20075.61057540885
     },
     {
       "cod": "1313",
       "desc": "CHORIZO COLORADO CALCHAQUI",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 4 UNID",
-      "precio": 16348.128994889998
+      "precio": 16838.5728647367
     },
     {
       "cod": "1332",
@@ -1120,7 +1120,7 @@
       "desc": "SALAME FUET BOCATTI",
       "cat": "FIAMBRES SECOS",
       "pres": "UNID AL VACIO",
-      "precio": 5178.40899576
+      "precio": 5437.329445548
     },
     {
       "cod": "1320",
@@ -1141,28 +1141,28 @@
       "desc": "SALAME CHACARERO PONTE LUGO",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 3 UNID",
-      "precio": 21222.0
+      "precio": 23301.756
     },
     {
       "cod": "1308",
       "desc": "LONGANIZA CALABREZA PONTE LUGO",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 2 UNID",
-      "precio": 21222.0
+      "precio": 23301.756
     },
     {
       "cod": "1321",
       "desc": "SOPRESATTA C/PIMENTON AHUMADO PONTE LUGO",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 3 UNID",
-      "precio": 21222.0
+      "precio": 23301.756
     },
     {
       "cod": "1322",
       "desc": "SPIANATTA DE SALAME PONTE LUGO",
       "cat": "FIAMBRES SECOS",
       "pres": "UNIDAD",
-      "precio": 21222.0
+      "precio": 23301.756
     },
     {
       "cod": "2135",
@@ -1449,28 +1449,28 @@
       "desc": "QUESO BARRA GOUDA OREGANO MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 18010.947059424
+      "precio": 18731.384941800963
     },
     {
       "cod": "2032",
       "desc": "QUESO BARRA GOUDA AHUMADO MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 18959.0442481968
+      "precio": 19717.40601812467
     },
     {
       "cod": "2033",
       "desc": "QUESO BARRA CHEDDAR MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 16295.0749452216
+      "precio": 16946.877943030464
     },
     {
       "cod": "2034",
       "desc": "QUESO BARRA GOUDA AL PESTO MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 18010.8234828984
+      "precio": 18731.256422214334
     },
     {
       "cod": "2003",
@@ -1666,35 +1666,35 @@
       "desc": "QUESO MINI GOUDA AHUMADO \"MIGUE\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "MINI HORMA",
-      "precio": 20815.325789629864
+      "precio": 21647.93882121506
     },
     {
       "cod": "2246",
       "desc": "QUESO MINI GOUDA PEPATO \"MIGUE\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "MINI HORMA",
-      "precio": 20815.320393912
+      "precio": 21647.93320966848
     },
     {
       "cod": "2247",
       "desc": "QUESO MINI GOUDA OREGANO \"MIGUE\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "MINI HORMA",
-      "precio": 20815.320393912
+      "precio": 21647.93320966848
     },
     {
       "cod": "2249",
       "desc": "QUESO MINI GOUDA AJÍ MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "MINI HORMA",
-      "precio": 20815.320393912
+      "precio": 21647.93320966848
     },
     {
       "cod": "2248",
       "desc": "QUESO MINI GOUDA FINAS HIERBAS MIGUE",
       "cat": "QUESOS SEMIDUROS",
       "pres": "MINI HORMA",
-      "precio": 20815.320393912
+      "precio": 21647.93320966848
     },
     {
       "cod": "2270",
@@ -1876,14 +1876,14 @@
       "desc": "QUESO SARDO FRESCO",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 10333.5
+      "precio": 9713.49
     },
     {
       "cod": "2335",
       "desc": "QUESO SARDO FRESCO COLBER",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9881.875
+      "precio": 9763.2925
     },
     {
       "cod": "2323",
@@ -1897,7 +1897,7 @@
       "desc": "QUESO SARDO DE AUTOR",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 12278.748953074999
+      "precio": 12917.243898634899
     },
     {
       "cod": "2337",
@@ -2002,147 +2002,147 @@
       "desc": "QUESO REGIANITO \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 19325.349588374775
+      "precio": 20098.363571909766
     },
     {
       "cod": "2361",
       "desc": "QUESO REGIANITO EN MITADES \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "MEDIA HORMA",
-      "precio": 22697.118858332164
+      "precio": 23605.003612665452
     },
     {
       "cod": "2362",
       "desc": "QUESO PROVOLONE MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 26244.266133610803
+      "precio": 27294.036778955237
     },
     {
       "cod": "2363",
       "desc": "QUESO PROVOLONE 1/4 DE HORMA MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "1/4 HORMA",
-      "precio": 28179.685097554324
+      "precio": 29306.8725014565
     },
     {
       "cod": "2364",
       "desc": "QUESO PARMESANO 10 MESES MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 21472.5992330619
+      "precio": 22331.503202384378
     },
     {
       "cod": "2365",
       "desc": "QUESO PARMESANO EN MITADES 10 MESES MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "MEDIA HORMA",
-      "precio": 25315.261022272316
+      "precio": 26327.87146316321
     },
     {
       "cod": "2359",
       "desc": "QUESO PARMESANO 10 MESES MIGUE MINI",
       "cat": "QUESOS DUROS",
       "pres": "MINI HORMA",
-      "precio": 24174.95840694792
+      "precio": 25141.956743225837
     },
     {
       "cod": "2354",
       "desc": "QUESO PARMESANO PREMIUM 12 MESES MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "CUÑA",
-      "precio": 26064.168755882398
+      "precio": 27106.735506117693
     },
     {
       "cod": "2355",
       "desc": "QUESO PARMESANO GRAN RESERVA 24 MESES MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "CUÑA",
-      "precio": 33245.56309799736
+      "precio": 34575.38562191725
     },
     {
       "cod": "2366",
       "desc": "QUESO PEPATO PASTA DURA EN MITADES \"MIGUE \"",
       "cat": "QUESOS DUROS",
       "pres": "MEDIA HORMA",
-      "precio": 24052.367144282398
+      "precio": 25014.461830053693
     },
     {
       "cod": "2367",
       "desc": "QUESO VASCHETTA AL VACÍO \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 22450.850408859842
+      "precio": 23348.884425214237
     },
     {
       "cod": "2368",
       "desc": "QUESO GRANA PADANO 1/4 DE HORMA AL VACÍO \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "CUÑA",
-      "precio": 27890.22349184544
+      "precio": 29005.83243151926
     },
     {
       "cod": "2313",
       "desc": "QUESO GRANA PADANO 1KG AL VACÍO \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "CUÑA",
-      "precio": 30988.345621994646
+      "precio": 32227.87944687443
     },
     {
       "cod": "2369",
       "desc": "QUESO SARDO \"MIGUE\"",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 19429.39512139032
+      "precio": 20206.570926245935
     },
     {
       "cod": "2371",
       "desc": "QUESO ROMANITO MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 21389.401442130482
+      "precio": 22244.9774998157
     },
     {
       "cod": "2372",
       "desc": "QUESO REGIANITO LIGHT MIGUE 1/4H",
       "cat": "QUESOS DUROS",
       "pres": "CUÑA",
-      "precio": 24374.784902339517
+      "precio": 25349.7762984331
     },
     {
       "cod": "2306",
       "desc": "QUESO PROVOLONE PARRILLERO MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 18179.6415238152
+      "precio": 18906.827184767808
     },
     {
       "cod": "2370",
       "desc": "QUESO RALLADO SIN DESHIDRATAR X2KG MIGUE",
       "cat": "QUESOS DUROS",
       "pres": "BOLSA",
-      "precio": 47207.870138586964
+      "precio": 49096.184944130444
     },
     {
       "cod": "2330",
       "desc": "QUESO REGIANITO MIGUE FRACCIONADO X200GR",
       "cat": "QUESOS DUROS",
       "pres": "PORCIÓN X200GRS",
-      "precio": 26626.609072852796
+      "precio": 27691.67343576691
     },
     {
       "cod": "2331",
       "desc": "QUESO PARMESANO MIGUE FRACCIONADO X200GR",
       "cat": "QUESOS DUROS",
       "pres": "PORCIÓN X200GRS",
-      "precio": 28409.715563394
+      "precio": 29546.10418592976
     },
     {
       "cod": "2332",
       "desc": "QUESO PROVOLONE MIGUE FRACCIONADO X200GR",
       "cat": "QUESOS DUROS",
       "pres": "PORCIÓN X200GRS",
-      "precio": 31856.658352345203
+      "precio": 33130.924686439015
     },
     {
       "cod": "2333",
