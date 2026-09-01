@@ -624,6 +624,7 @@ let pedidoActual = [];
 let pedidoSucio = false;
 let devolucionActual = [];
 let devolucionSucia = false;
+let historialProductosAbierto = false;
 let prodSeleccionado = null;
 let precioEditando = false;
 let precioNuevo = false;
@@ -1250,6 +1251,7 @@ function selCliente(num, nom) {
   }
   devolucionActual = cargarDevolucionDeHoy(num);
   devolucionSucia = false;
+  historialProductosAbierto = false;
   cobranzaEditId = null;
   document.getElementById("cli-title").textContent = nom;
   document.getElementById("cli-sub").textContent = `N° ${num} · ${diaActual}`;
@@ -1410,10 +1412,32 @@ function agregarFaltanteRapido(cod, qty){
   }
 }
 
+function historialCompletoProductos(num){
+  const key = `${diaActual}-${num}`;
+  const visitas = (DATA[key]||[]).slice().sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
+  const codigosHoy = new Set(pedidoActual.map(it=>it.cod));
+  const porCod = new Map();
+  visitas.forEach(v=>{
+    v.items.forEach(it=>{
+      porCod.set(it.cod, {qty: it.qty, fecha: v.fecha, fechaISO: v.fechaISO});
+    });
+  });
+  return [...porCod.entries()]
+    .filter(([cod])=>!codigosHoy.has(cod))
+    .sort((a,b)=>(b[1].fechaISO||"").localeCompare(a[1].fechaISO||""))
+    .map(([cod, info])=>({cod, qty: info.qty, fecha: info.fecha}));
+}
+
+function toggleHistorialProductos(){
+  historialProductosAbierto = !historialProductosAbierto;
+  renderTab();
+}
+
 function renderPedido() {
   const items = pedidoActual;
   const totalMoney = items.reduce((s,i)=>s+itemTotal(i),0);
   const faltantes = clienteActual ? faltantesSemanaPasada(clienteActual.num) : null;
+  const historial = clienteActual ? historialCompletoProductos(clienteActual.num) : [];
   return `
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
@@ -1430,6 +1454,17 @@ function renderPedido() {
           return `<button class="obj-chip" style="cursor:pointer;background:var(--pending-bg);color:var(--pending);border-color:transparent" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?pi.n:it.cod} (${it.qty})</button>`;
         }).join("")}
       </div>
+    </div>`:""}
+    ${historial.length?`
+    <div class="card">
+      <button class="link-btn" style="font-size:12.5px;font-weight:700" onclick="toggleHistorialProductos()">${historialProductosAbierto?`▾ Ocultar`:`▸ Ver todo lo que compró antes`} (${historial.length})</button>
+      ${historialProductosAbierto?`
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${historial.map(it=>{
+          const pi = getProd(it.cod);
+          return `<button class="obj-chip" style="cursor:pointer" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?pi.n:it.cod} (${it.qty}) · ${it.fecha}</button>`;
+        }).join("")}
+      </div>`:""}
     </div>`:""}
     ${items.length?`
       <div class="card">
