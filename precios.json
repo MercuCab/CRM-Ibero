@@ -1,6 +1,6 @@
 {
   "fecha_actualizacion": "01/09/2026",
-  "total_productos": 552,
+  "total_productos": 554,
   "productos": [
     {
       "cod": "1018",
@@ -738,13 +738,6 @@
       "precio": 18806.622750000002
     },
     {
-      "cod": "1209",
-      "desc": "LOMO HORNEADO \"OCTAVA\"",
-      "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
-      "pres": "PIEZA",
-      "precio": 25860.12
-    },
-    {
       "cod": "1220",
       "desc": "LOMO HORNEADO C/HIERBAS CAGNOLI",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
@@ -806,13 +799,6 @@
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "UNID AL VACIO",
       "precio": 4786.198257499999
-    },
-    {
-      "cod": "1324",
-      "desc": "SALAME DE CERDO MONTESANO PICADO FINO",
-      "cat": "FIAMBRES SECOS",
-      "pres": "PIEZA",
-      "precio": 32988.229999999996
     },
     {
       "cod": "1325",
@@ -3865,6 +3851,34 @@
       "cat": "VARIOS",
       "pres": "POTE X 280 GRS",
       "precio": 2922.4
+    },
+    {
+      "cod": "1146",
+      "desc": "FIAMBRE DE PATA \"LOS CALVOS 42\"",
+      "cat": "FIAMBRES COCIDOS",
+      "pres": "PIEZA",
+      "precio": 10574.23
+    },
+    {
+      "cod": "1209",
+      "desc": "PANCETA AHUMADA \"LOS CALVOS 42\"",
+      "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
+      "pres": "PIEZA EN MITADES",
+      "precio": 17874.0
+    },
+    {
+      "cod": "1315",
+      "desc": "SALAME MILAN \"LOS CALVOS 42\"",
+      "cat": "FIAMBRES SECOS",
+      "pres": "PIEZA",
+      "precio": 15757.32
+    },
+    {
+      "cod": "1324",
+      "desc": "SALAMIN PICADO FINO \"LOS CALVOS 42\"",
+      "cat": "FIAMBRES SECOS",
+      "pres": "TIRA X 4 UNID",
+      "precio": 17725.88
     }
   ]
 }
