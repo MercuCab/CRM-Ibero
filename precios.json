@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "01/09/2026",
+  "fecha_actualizacion": "08/09/2026",
   "total_productos": 554,
   "productos": [
     {
@@ -21,28 +21,28 @@
       "desc": "JAMON CRUDO PARMA \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 41252.409
+      "precio": 43521.291495
     },
     {
       "cod": "1016",
       "desc": "JAMON CRUDO \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 40461.92568
+      "precio": 42687.3315924
     },
     {
       "cod": "1020",
       "desc": "JAMON CRUDO 1/2 \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 40461.92568
+      "precio": 42687.3315924
     },
     {
       "cod": "1010",
       "desc": "JAMON CRUDO BLOQUE \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 44370.7605
+      "precio": 46811.15232749999
     },
     {
       "cod": "1041",
@@ -105,7 +105,7 @@
       "desc": "JAMON CRUDO C/HUESO \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA",
-      "precio": 29515.3848
+      "precio": 31138.730964
     },
     {
       "cod": "1044",
@@ -126,7 +126,7 @@
       "desc": "JAMON CRUDO DOINA \"SPECK\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 29075.058539999998
+      "precio": 30674.186759699995
     },
     {
       "cod": "1032",
@@ -161,7 +161,7 @@
       "desc": "LOMO CURADO \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA",
-      "precio": 27043.2459
+      "precio": 28530.6244245
     },
     {
       "cod": "1015",
@@ -175,7 +175,7 @@
       "desc": "BONDIOLA VACIO \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN RED AL VACIO",
-      "precio": 25881.566039999998
+      "precio": 27305.052172199998
     },
     {
       "cod": "1012",
@@ -644,14 +644,14 @@
       "desc": "JAMON CRUDO DOINA FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 120 GRS",
-      "precio": 9058.665
+      "precio": 9556.891575
     },
     {
       "cod": "1023",
       "desc": "BONDIOLA DOINA FETEADA",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 120 GRS",
-      "precio": 4505.1204
+      "precio": 4752.902021999999
     },
     {
       "cod": "1034",
@@ -812,7 +812,7 @@
       "desc": "SALAME DE CERDO DOINA",
       "cat": "FIAMBRES SECOS",
       "pres": "UNID AL VACIO",
-      "precio": 32282.2434
+      "precio": 34057.766787
     },
     {
       "cod": "1306",
@@ -1113,7 +1113,7 @@
       "desc": "SALAME FUET  DOINA",
       "cat": "FIAMBRES SECOS",
       "pres": "UNID AL VACIO",
-      "precio": 3757.05
+      "precio": 3963.68775
     },
     {
       "cod": "1309",
@@ -1309,7 +1309,7 @@
       "desc": "QUESO AZUL EMPERADOR",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 12755.853849749998
+      "precio": 13138.529465242498
     },
     {
       "cod": "2124",
@@ -2506,56 +2506,56 @@
       "desc": "PITA CHIPS ORIGINAL",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2081.6432
+      "precio": 2196.1335759999997
     },
     {
       "cod": "5102",
       "desc": "PITA CHIPS CEBOLLA",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2081.6432
+      "precio": 2196.1335759999997
     },
     {
       "cod": "5103",
       "desc": "PITA CHIPS JALAPEÑO",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2081.6432
+      "precio": 2196.1335759999997
     },
     {
       "cod": "5107",
       "desc": "PITA CHIPS TOMATE Y ROMERO",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2081.6432
+      "precio": 2196.1335759999997
     },
     {
       "cod": "5108",
       "desc": "PITA CHIPS CURCUMA",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2078.0701548750003
+      "precio": 2192.3640133931253
     },
     {
       "cod": "5104",
       "desc": "SNACKS TOMATE Y ROMERO",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 2798.6232787500003
+      "precio": 2952.5475590812503
     },
     {
       "cod": "5105",
       "desc": "SNACKS RAWMESAN Y REMOLACHA",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 2798.6232787500003
+      "precio": 2952.5475590812503
     },
     {
       "cod": "5106",
       "desc": "SNACKS SÉSAMO Y SAL MARINA",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 1820.37672375
+      "precio": 1920.49744355625
     },
     {
       "cod": "5050",
