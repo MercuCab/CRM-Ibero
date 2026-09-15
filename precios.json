@@ -1,6 +1,6 @@
 {
-  "fecha_actualizacion": "08/09/2026",
-  "total_productos": 554,
+  "fecha_actualizacion": "15/09/2026",
+  "total_productos": 555,
   "productos": [
     {
       "cod": "1018",
@@ -1162,14 +1162,14 @@
       "desc": "QUESO CREMOSO \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 8420.0987046
+      "precio": 8260.116829212599
     },
     {
       "cod": "2146",
       "desc": "QUESO CREMOSO AMPARITO",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 7621.948872999999
+      "precio": 7477.131844412999
     },
     {
       "cod": "2158",
@@ -1211,7 +1211,7 @@
       "desc": "QUESO POR SALUT \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9197.3385141
+      "precio": 9086.9704519308
     },
     {
       "cod": "2160",
@@ -1232,7 +1232,7 @@
       "desc": "QUESO POR SALUT MAGRO L. CASEI \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9197.3385141
+      "precio": 9086.9704519308
     },
     {
       "cod": "2168",
@@ -3843,7 +3843,7 @@
       "desc": "QUESO BARRA TYBO COMUN",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 8946.6
+      "precio": 8633.469000000001
     },
     {
       "cod": "2520",
@@ -3857,28 +3857,35 @@
       "desc": "FIAMBRE DE PATA \"LOS CALVOS 42\"",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 10574.23
+      "precio": 11377.87148
     },
     {
       "cod": "1209",
       "desc": "PANCETA AHUMADA \"LOS CALVOS 42\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 17874.0
+      "precio": 18159.984
     },
     {
       "cod": "1315",
       "desc": "SALAME MILAN \"LOS CALVOS 42\"",
       "cat": "FIAMBRES SECOS",
       "pres": "PIEZA",
-      "precio": 15757.32
+      "precio": 14843.395439999998
     },
     {
       "cod": "1324",
       "desc": "SALAMIN PICADO FINO \"LOS CALVOS 42\"",
       "cat": "FIAMBRES SECOS",
       "pres": "TIRA X 4 UNID",
-      "precio": 17725.88
+      "precio": 18009.49408
+    },
+    {
+      "cod": "1011",
+      "desc": "JAMON CRUDO \"LOS CALVOS 42\"",
+      "cat": "FIAMBRES CRUDOS",
+      "pres": "PIEZA ENTERA",
+      "precio": 35147.0
     }
   ]
 }
