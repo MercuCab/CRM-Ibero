@@ -1,6 +1,6 @@
 {
-  "fecha_actualizacion": "15/09/2026",
-  "total_productos": 555,
+  "fecha_actualizacion": "18/09/2026",
+  "total_productos": 557,
   "productos": [
     {
       "cod": "1018",
@@ -119,7 +119,7 @@
       "desc": "JAMON CRUDO PERNIL \"DELIPORK\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 24211.93302
+      "precio": 24311.12
     },
     {
       "cod": "1046",
@@ -175,14 +175,14 @@
       "desc": "BONDIOLA VACIO \"DOINA\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN RED AL VACIO",
-      "precio": 27305.052172199998
+      "precio": 25881.57
     },
     {
       "cod": "1012",
       "desc": "BONDIOLA AL VACIO \"EL GALAICO\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA EN RED",
-      "precio": 22863.213000000003
+      "precio": 23778.96
     },
     {
       "cod": "1029",
@@ -224,7 +224,7 @@
       "desc": "JAMON COCIDO NATURAL EL GALAICO etiq negra",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 13570.560000000001
+      "precio": 14113.91
     },
     {
       "cod": "1100",
@@ -238,7 +238,7 @@
       "desc": "JAMON COCIDO NATURAL EL GALAICO etiq azul",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 11431.606500000002
+      "precio": 11890.14
     },
     {
       "cod": "1137",
@@ -315,14 +315,14 @@
       "desc": "FIAMBRE DE PATA \"1284\" etiq azul  tradicional",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 7241.157
+      "precio": 7563.02
     },
     {
       "cod": "1128",
       "desc": "FIAMBRE DE PATA \"1284\" etiq azul  media caña",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 7241.157
+      "precio": 7563.02
     },
     {
       "cod": "1167",
@@ -371,14 +371,14 @@
       "desc": "FIAMBRE PALETA DE CERDO 1284 ETIQ AMARILLA",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 6346.431
+      "precio": 6599.93
     },
     {
       "cod": "1111",
       "desc": "FIAMBRE DE CERDO 1284 etiq roja tradicional",
       "cat": "FIAMBRES COCIDOS",
       "pres": "PIEZA",
-      "precio": 6122.655
+      "precio": 6366.5
     },
     {
       "cod": "1168",
@@ -553,14 +553,14 @@
       "desc": "MATAMBRE CARNE \"LAZZARANO\"",
       "cat": "MATAMBRES",
       "pres": "PIEZA EN MITADES",
-      "precio": 24593.9629
+      "precio": 25356.88
     },
     {
       "cod": "1402",
       "desc": "MATAMBRE POLLO \"LAZZARANO\"",
       "cat": "MATAMBRES",
       "pres": "PIEZA EN MITADES",
-      "precio": 19807.39241
+      "precio": 20579.87
     },
     {
       "cod": "1037",
@@ -644,14 +644,14 @@
       "desc": "JAMON CRUDO DOINA FETEADO",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 120 GRS",
-      "precio": 9556.891575
+      "precio": 9058.67
     },
     {
       "cod": "1023",
       "desc": "BONDIOLA DOINA FETEADA",
       "cat": "FIAMBRES FETEADOS",
       "pres": "BLISTER x 120 GRS",
-      "precio": 4752.902021999999
+      "precio": 4505.12
     },
     {
       "cod": "1034",
@@ -679,7 +679,7 @@
       "desc": "PANCETA AHUMADA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 18088.97375
+      "precio": 18851.85
     },
     {
       "cod": "1202",
@@ -693,14 +693,14 @@
       "desc": "PANCETA AHUMADA \"1284\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 16150.78375
+      "precio": 16832.91
     },
     {
       "cod": "1206",
       "desc": "PANCETA SALADA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA EN MITADES",
-      "precio": 19041.025
+      "precio": 19844.06
     },
     {
       "cod": "1216",
@@ -728,14 +728,14 @@
       "desc": "LOMO AHUMADO NATURAL \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA",
-      "precio": 18438.20325
+      "precio": 19176.37
     },
     {
       "cod": "1205",
       "desc": "LOMO AHUMADO DE PRAGA \"EL GALAICO\"",
       "cat": "FIAMBRES AHUMADOS Y HORNEADOS",
       "pres": "PIEZA",
-      "precio": 18806.622750000002
+      "precio": 19559.36
     },
     {
       "cod": "1220",
@@ -812,7 +812,7 @@
       "desc": "SALAME DE CERDO DOINA",
       "cat": "FIAMBRES SECOS",
       "pres": "UNID AL VACIO",
-      "precio": 34057.766787
+      "precio": 32282.24
     },
     {
       "cod": "1306",
@@ -1113,7 +1113,7 @@
       "desc": "SALAME FUET  DOINA",
       "cat": "FIAMBRES SECOS",
       "pres": "UNID AL VACIO",
-      "precio": 3963.68775
+      "precio": 4132.76
     },
     {
       "cod": "1309",
@@ -1162,14 +1162,14 @@
       "desc": "QUESO CREMOSO \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 8260.116829212599
+      "precio": 8255.0
     },
     {
       "cod": "2146",
       "desc": "QUESO CREMOSO AMPARITO",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 7477.131844412999
+      "precio": 7472.5
     },
     {
       "cod": "2158",
@@ -1211,7 +1211,7 @@
       "desc": "QUESO POR SALUT \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9086.9704519308
+      "precio": 9080.5
     },
     {
       "cod": "2160",
@@ -1232,7 +1232,7 @@
       "desc": "QUESO POR SALUT MAGRO L. CASEI \"LACTEAR\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9086.9704519308
+      "precio": 9080.5
     },
     {
       "cod": "2168",
@@ -1267,35 +1267,35 @@
       "desc": "QUESO AZUL \"STA ROSA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 29091.792114000003
+      "precio": 29673.64
     },
     {
       "cod": "2152",
       "desc": "QUESO AZUL \"STA ROSA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION X 140 GRS",
-      "precio": 5819.787820000001
+      "precio": 5936.18
     },
     {
       "cod": "2154",
       "desc": "QUESO AZUL BAVARIA GRANDBLU",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 31183.299378000003
+      "precio": 31806.97
     },
     {
       "cod": "2153",
       "desc": "QUESO AZUL \"BAVARIA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "1/2 HORMA",
-      "precio": 26747.856828
+      "precio": 27282.81
     },
     {
       "cod": "2155",
       "desc": "QUESO AZUL \"BAVARIA\"",
       "cat": "QUESOS BLANDOS",
       "pres": "PORCION X 140 GRS",
-      "precio": 5524.57444
+      "precio": 5635.07
     },
     {
       "cod": "2138",
@@ -1309,7 +1309,7 @@
       "desc": "QUESO AZUL EMPERADOR",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 13138.529465242498
+      "precio": 13166.44
     },
     {
       "cod": "2124",
@@ -1533,7 +1533,7 @@
       "desc": "QUESO CHEDDAR X140 FETAS TONADITA",
       "cat": "QUESOS SEMIDUROS",
       "pres": "PACK x 1,68KG",
-      "precio": 32070.457828178
+      "precio": 32712.06
     },
     {
       "cod": "2225",
@@ -1589,7 +1589,7 @@
       "desc": "QUESO ATUEL \"STA ROSA\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 27776.916090000002
+      "precio": 28332.45
     },
     {
       "cod": "2213",
@@ -1799,21 +1799,21 @@
       "desc": "CREMA MILKAUT 44%",
       "cat": "LACTEOS",
       "pres": "BALDE X 5LTS",
-      "precio": 86911.22902
+      "precio": 88214.9
     },
     {
       "cod": "2559",
       "desc": "QUESO CHEDDAR MILKAUT",
       "cat": "LACTEOS",
       "pres": "POUCH X 3,50 KGS",
-      "precio": 55487.88476
+      "precio": 56320.21
     },
     {
       "cod": "2560",
       "desc": "QUESO CREMA MILKAUT",
       "cat": "LACTEOS",
       "pres": "BALDE X 3,60 KGS",
-      "precio": 83007.0164
+      "precio": 84459.64
     },
     {
       "cod": "2302",
@@ -1862,14 +1862,14 @@
       "desc": "QUESO SARDO FRESCO",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9730.5
+      "precio": 9375.0
     },
     {
       "cod": "2335",
       "desc": "QUESO SARDO FRESCO COLBER",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9618.25
+      "precio": 9516.0
     },
     {
       "cod": "2323",
@@ -1925,7 +1925,7 @@
       "desc": "PROVOLETA PARRILLERA STA ROSA",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 38079.049931999994
+      "precio": 38840.63
     },
     {
       "cod": "2316",
@@ -1946,21 +1946,21 @@
       "desc": "QUESO PROVOLONE \"STA ROSA\"",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 41598.741492
+      "precio": 42430.72
     },
     {
       "cod": "2344",
       "desc": "QUESO PROVOLONE \"STA ROSA\"",
       "cat": "QUESOS DUROS",
       "pres": "MEDIA HORMA",
-      "precio": 41989.237290000005
+      "precio": 42829.02
     },
     {
       "cod": "2345",
       "desc": "QUESO PROVOLONE TROZADO \"STA ROSA\"",
       "cat": "QUESOS DUROS",
       "pres": "PORCION",
-      "precio": 49316.327676
+      "precio": 50302.65
     },
     {
       "cod": "2350",
@@ -2170,63 +2170,63 @@
       "desc": "QUESO BRIE \"ILE DE FRANCE\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 125GRS",
-      "precio": 13267.95008
+      "precio": 13533.32
     },
     {
       "cod": "2434",
       "desc": "QUESO CAMEMBERT \"ILE DE FRANCE\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 125GRS",
-      "precio": 13267.95008
+      "precio": 13533.32
     },
     {
       "cod": "2435",
       "desc": "QUESO BRIE BLUE \"ILE DE FRANCE\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 125GRS",
-      "precio": 14032.7572
+      "precio": 14313.4
     },
     {
       "cod": "2408",
       "desc": "QUESO ADLER FONTINA",
       "cat": "ESPECIALIDADES",
       "pres": "X 100 GRS",
-      "precio": 2962.4671999999996
+      "precio": 3021.72
     },
     {
       "cod": "2409",
       "desc": "QUESO ADLER SALAME",
       "cat": "ESPECIALIDADES",
       "pres": "X 100 GRS",
-      "precio": 2962.4671999999996
+      "precio": 3021.72
     },
     {
       "cod": "2410",
       "desc": "QUESO ADLER AZUL",
       "cat": "ESPECIALIDADES",
       "pres": "X 100 GRS",
-      "precio": 2962.4671999999996
+      "precio": 3021.72
     },
     {
       "cod": "2411",
       "desc": "QUESO ADLER JAMON",
       "cat": "ESPECIALIDADES",
       "pres": "X 100 GRS",
-      "precio": 2962.4671999999996
+      "precio": 3021.72
     },
     {
       "cod": "2412",
       "desc": "QUESO ADLER GRUYERE",
       "cat": "ESPECIALIDADES",
       "pres": "X 100 GRS",
-      "precio": 2962.4671999999996
+      "precio": 3021.72
     },
     {
       "cod": "2259",
       "desc": "QUESO FONDUE \"SANTA ROSA \"",
       "cat": "ESPECIALIDADES",
       "pres": "CAJA X 400 GRS",
-      "precio": 17513.80862
+      "precio": 17864.08
     },
     {
       "cod": "2436",
@@ -2506,56 +2506,56 @@
       "desc": "PITA CHIPS ORIGINAL",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2196.1335759999997
+      "precio": 2195.08
     },
     {
       "cod": "5102",
       "desc": "PITA CHIPS CEBOLLA",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2196.1335759999997
+      "precio": 2195.08
     },
     {
       "cod": "5103",
       "desc": "PITA CHIPS JALAPEÑO",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2196.1335759999997
+      "precio": 2195.08
     },
     {
       "cod": "5107",
       "desc": "PITA CHIPS TOMATE Y ROMERO",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2196.1335759999997
+      "precio": 2195.08
     },
     {
       "cod": "5108",
       "desc": "PITA CHIPS CURCUMA",
       "cat": "SNACK",
       "pres": "BOLSA x 115 GRS",
-      "precio": 2192.3640133931253
+      "precio": 2195.08
     },
     {
       "cod": "5104",
       "desc": "SNACKS TOMATE Y ROMERO",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 2952.5475590812503
+      "precio": 2884.05
     },
     {
       "cod": "5105",
       "desc": "SNACKS RAWMESAN Y REMOLACHA",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 2952.5475590812503
+      "precio": 2884.05
     },
     {
       "cod": "5106",
       "desc": "SNACKS SÉSAMO Y SAL MARINA",
       "cat": "SNACK",
       "pres": "BOLSA x 130 GRS",
-      "precio": 1920.49744355625
+      "precio": 1924.3
     },
     {
       "cod": "5050",
@@ -3381,154 +3381,154 @@
       "desc": "CHATEL C/JAMON \"TREGAR\"",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.34030300405
+      "precio": 1741.49
     },
     {
       "cod": "2402",
       "desc": "CHATEL CIBOULETTE \"TREGAR\"",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.34030300405
+      "precio": 1741.49
     },
     {
       "cod": "2403",
       "desc": "CHATEL CLASICO \"TREGAR\"",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.34030300405
+      "precio": 1741.49
     },
     {
       "cod": "2404",
       "desc": "CHATEL DIET \"TREGAR\"",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.34030300405
+      "precio": 1741.49
     },
     {
       "cod": "2406",
       "desc": "CHATEL C/SALAME \"TREGAR\"",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.34030300405
+      "precio": 1741.49
     },
     {
       "cod": "2407",
       "desc": "QUESO UNTABLE SABOR CHEDDAR",
       "cat": "QUESOS UNTABLES",
       "pres": "POTE X 180 GRS.",
-      "precio": 1707.3397199191666
+      "precio": 1741.49
     },
     {
       "cod": "2501",
       "desc": "RICOTTA ENTERA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 300 GRS.",
-      "precio": 2563.7109867917166
+      "precio": 2614.98
     },
     {
       "cod": "2502",
       "desc": "RICOTTA MAGRA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 300 GRS.",
-      "precio": 2563.7109867917166
+      "precio": 2614.98
     },
     {
       "cod": "2310",
       "desc": "QUESO RALLADO x 120 GRS. \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "SOBRE X 120 GRS",
-      "precio": 3560.2746638101503
+      "precio": 3631.48
     },
     {
       "cod": "2311",
       "desc": "QUESO RALLADO x 40 GRS. \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "DISPLAY x 20 SOBRES",
-      "precio": 25427.249838190197
+      "precio": 25935.79
     },
     {
       "cod": "2503",
       "desc": "CREMA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE x 200 GRS",
-      "precio": 2035.4675899701
+      "precio": 2076.18
     },
     {
       "cod": "2504",
       "desc": "CREMA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE x 350 GRS",
-      "precio": 3186.5044851068
+      "precio": 3250.23
     },
     {
       "cod": "2507",
       "desc": "ARROZ CON LECHE  CLASICO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1228.5713022382802
+      "precio": 1265.43
     },
     {
       "cod": "2508",
       "desc": "ARROZ CON LECHE CON CANELA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1228.5713022382802
+      "precio": 1265.43
     },
     {
       "cod": "2509",
       "desc": "ARROZ CON LECHE  LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1228.5713022382802
+      "precio": 1265.43
     },
     {
       "cod": "2510",
       "desc": "ARROZ CON LECHE CON DULCE DE LECHE \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1228.5713022382802
+      "precio": 1265.43
     },
     {
       "cod": "2511",
       "desc": "ARROZ CON LECHE CON CHOCOLATE \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1228.5713022382802
+      "precio": 1265.43
     },
     {
       "cod": "2515",
       "desc": "QUESO BLANCO CLASICO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 300 GRS",
-      "precio": 2810.129458803333
+      "precio": 2894.43
     },
     {
       "cod": "2516",
       "desc": "QUESO CREMA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 200 GRS",
-      "precio": 2096.0172514233336
+      "precio": 2158.9
     },
     {
       "cod": "2518",
       "desc": "QUESO CREMA LIGHT TREGAR",
       "cat": "VARIOS",
       "pres": "POTE X 200 GRS",
-      "precio": 2096.0164046249997
+      "precio": 2158.9
     },
     {
       "cod": "2517",
       "desc": "QUESO MASCARPONE \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 200 GRS",
-      "precio": 3018.7511792533332
+      "precio": 3109.31
     },
     {
       "cod": "2519",
       "desc": "QUESO BLANCO LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 300 GRS",
-      "precio": 2810.129458803333
+      "precio": 2894.43
     },
     {
       "cod": "2521",
@@ -3577,217 +3577,217 @@
       "desc": "YOGUR ENTERO FRUTILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.84031838625
+      "precio": 1255.58
     },
     {
       "cod": "2526",
       "desc": "YOGUR ENTERO DURAZNO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.84031838625
+      "precio": 1255.58
     },
     {
       "cod": "2529",
       "desc": "YOGUR ENTERO C/ARANDANOS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.84517895625
+      "precio": 1255.58
     },
     {
       "cod": "2527",
       "desc": "YOGUR DESCREMADO FRUTILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.849431955
+      "precio": 1255.58
     },
     {
       "cod": "2528",
       "desc": "YOGUR DESCREMADO DURAZNO \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.849431955
+      "precio": 1255.58
     },
     {
       "cod": "2565",
       "desc": "YOGUR DESCREMADO ARANDANOS \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1230.849431955
+      "precio": 1255.58
     },
     {
       "cod": "2566",
       "desc": "YOGUR ENTERO ANANA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1353.9393167300002
+      "precio": 1381.15
     },
     {
       "cod": "2569",
       "desc": "YOGUR ENTERO MANGO MARACUYA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1353.9393167300002
+      "precio": 1381.15
     },
     {
       "cod": "2550",
       "desc": "YOGUR ENTERO CEREZA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1353.9393167300002
+      "precio": 1381.15
     },
     {
       "cod": "2561",
       "desc": "YOGUR DESCREMADO ANANA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 150 GR",
-      "precio": 1353.940126825
+      "precio": 1381.15
     },
     {
       "cod": "2538",
       "desc": "YOGUR NATURAL  \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 140 GR",
-      "precio": 1108.2279765128
+      "precio": 1130.5
     },
     {
       "cod": "2539",
       "desc": "YOGUR NATURAL SIN AZUCAR \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 140 GR",
-      "precio": 1108.225027767
+      "precio": 1130.5
     },
     {
       "cod": "2562",
       "desc": "YOGUR NATURAL  \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 280 GR",
-      "precio": 2177.2157289168003
+      "precio": 2220.97
     },
     {
       "cod": "2563",
       "desc": "YOGUR NATURAL SIN AZUCAR \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 280 GR",
-      "precio": 2177.2157289168003
+      "precio": 2220.97
     },
     {
       "cod": "2530",
       "desc": "YOGUR ENTERO CREMOSO FRUTILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 619.8293159058
+      "precio": 632.29
     },
     {
       "cod": "2531",
       "desc": "YOGUR ENTERO CREMOSO VAINILLA \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 619.8293159058
+      "precio": 632.29
     },
     {
       "cod": "2532",
       "desc": "YOGUR ENTERO CREMOSO DULCE DE LECHE \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 619.8293159058
+      "precio": 632.29
     },
     {
       "cod": "2536",
       "desc": "YOGUR BATIDO FRUTILLA LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 619.836898395
+      "precio": 632.29
     },
     {
       "cod": "2537",
       "desc": "YOGUR BATIDO VAINILLA LIGHT \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 125 GR",
-      "precio": 619.836898395
+      "precio": 632.29
     },
     {
       "cod": "2584",
       "desc": "YOGUR BATIDO C/CAFÉ",
       "cat": "VARIOS",
       "pres": "POTE X 120 GR",
-      "precio": 1257.7441323018002
+      "precio": 1283.02
     },
     {
       "cod": "2585",
       "desc": "YOGUR BATIDO C/COCO",
       "cat": "VARIOS",
       "pres": "POTE X 120 GR",
-      "precio": 1257.7441323018002
+      "precio": 1283.02
     },
     {
       "cod": "2586",
       "desc": "YOGUR BATIDO C/LIMÓN",
       "cat": "VARIOS",
       "pres": "POTE X 120 GR",
-      "precio": 1257.7441323018002
+      "precio": 1283.02
     },
     {
       "cod": "2594",
       "desc": "YOGUR ENTERO FIRME FRUTILLA",
       "cat": "VARIOS",
       "pres": "POTE X 170 GR",
-      "precio": 1151.325160128
+      "precio": 1174.46
     },
     {
       "cod": "2595",
       "desc": "YOGUR ENTERO FIRME VAINILLA",
       "cat": "VARIOS",
       "pres": "POTE X 170 GR",
-      "precio": 1151.325160128
+      "precio": 1174.46
     },
     {
       "cod": "2596",
       "desc": "YOGUR DESCREMADO FIRME FRUTILLA",
       "cat": "VARIOS",
       "pres": "POTE X 170 GR",
-      "precio": 1151.325160128
+      "precio": 1174.46
     },
     {
       "cod": "2597",
       "desc": "YOGUR DESCREMADO FIRME VAINILLA",
       "cat": "VARIOS",
       "pres": "POTE X 170 GR",
-      "precio": 1151.325160128
+      "precio": 1174.46
     },
     {
       "cod": "2567",
       "desc": "YOGUR ENTERO CON CEREALES  \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 164 GR",
-      "precio": 1258.6300197900002
+      "precio": 1283.92
     },
     {
       "cod": "2568",
       "desc": "YOGUR DESCREMADO CON CEREALES \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 164 GR",
-      "precio": 1258.6300197900002
+      "precio": 1283.92
     },
     {
       "cod": "2549",
       "desc": "YOGUR ENTERO CON GRANOLA",
       "cat": "VARIOS",
       "pres": "POTE X 155 GR",
-      "precio": 1258.6292096949999
+      "precio": 1283.92
     },
     {
       "cod": "3206",
       "desc": "DULCE DE LECHE x 400 GRS. FLIAR.\"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 2455.6738449004665
+      "precio": 2504.79
     },
     {
       "cod": "3205",
       "desc": "DULCE DE LECHE x 200 GRS. FLIAR \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE",
-      "precio": 1350.616901634
+      "precio": 1377.63
     },
     {
       "cod": "2533",
@@ -3836,14 +3836,14 @@
       "desc": "CREMA CHANTILLY SPRAY  \"TREGAR\"",
       "cat": "VARIOS",
       "pres": "POTE X 250CM3",
-      "precio": 7949.16106319643
+      "precio": 8108.14
     },
     {
       "cod": "2017",
       "desc": "QUESO BARRA TYBO COMUN",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 8633.469000000001
+      "precio": 8737.5
     },
     {
       "cod": "2520",
@@ -3886,6 +3886,20 @@
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
       "precio": 35147.0
+    },
+    {
+      "cod": "1331",
+      "desc": "BASTON PICADO FINO AHUMADO CAGNOLI",
+      "cat": "FIAMBRES SECOS",
+      "pres": "PIEZA",
+      "precio": 27382.28
+    },
+    {
+      "cod": "2106",
+      "desc": "QUESO CREMOSO DE PROMOCIÓN",
+      "cat": "QUESOS BLANDOS",
+      "pres": "HORMA",
+      "precio": 6632.3
     }
   ]
 }
