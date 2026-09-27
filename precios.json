@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "18/09/2026",
+  "fecha_actualizacion": "27/09/2026",
   "total_productos": 557,
   "productos": [
     {
@@ -1190,14 +1190,14 @@
       "desc": "QUESO CUARTIROLO CHAMEN",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 8413.90742016
+      "precio": 7999.24
     },
     {
       "cod": "2120",
       "desc": "QUESO CUARTIROLO CHAMEN",
       "cat": "QUESOS BLANDOS",
       "pres": "MEDIA HORMA",
-      "precio": 9087.13732608
+      "precio": 8582.3
     },
     {
       "cod": "2136",
@@ -1253,14 +1253,14 @@
       "desc": "QUESO POR SALUT CHAMEN",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 9773.83102784
+      "precio": 9259.42
     },
     {
       "cod": "2122",
       "desc": "QUESO POR SALUT SIN SAL CHAMEN",
       "cat": "QUESOS BLANDOS",
       "pres": "MEDIA HORMA",
-      "precio": 10555.41451712
+      "precio": 9999.87
     },
     {
       "cod": "2151",
@@ -1302,7 +1302,7 @@
       "desc": "QUESO AZUL SAN GOTARDO",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 14816.692
+      "precio": 15793.79
     },
     {
       "cod": "2137",
@@ -1463,7 +1463,7 @@
       "desc": "QUESO BARRA TYBO CHAMEN",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 10789.21679616
+      "precio": 10189.82
     },
     {
       "cod": "2020",
@@ -1862,7 +1862,7 @@
       "desc": "QUESO SARDO FRESCO",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9375.0
+      "precio": 8400.0
     },
     {
       "cod": "2335",
