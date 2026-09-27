@@ -152,6 +152,10 @@ body{
 .scroll::-webkit-scrollbar{width:8px}
 .scroll::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:8px}
 
+.resultados-buscador{max-height:420px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.resultados-buscador::-webkit-scrollbar{width:8px}
+.resultados-buscador::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:8px}
+
 .infobar{display:flex;flex-wrap:wrap;gap:8px 14px;padding:10px 16px;background:var(--paper-deep);border-bottom:1px solid var(--line);flex-shrink:0}
 .info-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-dim)}
 .info-item b{color:var(--ink);font-weight:700}
@@ -487,7 +491,7 @@ body{
         <div class="form-row"><label>Buscar producto por nombre o código
           <input type="text" id="desc-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoDescuento(this.value)">
         </label></div>
-        <div id="desc-resultados"></div>
+        <div id="desc-resultados" class="resultados-buscador"></div>
       </div>
       <div id="descuentos-lista"></div>
     </div>
@@ -1361,7 +1365,7 @@ function buscarProductoPedido(q){
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q));
-  el.innerHTML = entries.length ? entries.slice(0,8).map(([cod,p])=>`
+  el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
       <div style="display:flex;gap:10px">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
@@ -1393,8 +1397,12 @@ function agregarDesdeResultado(cod){
   const qty = parseInt(document.getElementById(`sr-qty-${cod}`)?.value)||0;
   const desc = Math.min(100, Math.max(0, parseInt(document.getElementById(`sr-desc-${cod}`)?.value)||0));
   if(agregarAlPedido(cod, qty, desc)){
+    const q = document.getElementById("ped-buscar")?.value || "";
     renderTab();
-    document.getElementById("ped-buscar")?.focus();
+    const input = document.getElementById("ped-buscar");
+    if(input){ input.value = q; input.focus(); }
+    if(q) buscarProductoPedido(q);
+    mostrarAviso("Agregado");
   }
 }
 
@@ -1447,7 +1455,7 @@ function renderPedido() {
       <div class="form-row"><label>Buscar producto por nombre o código
         <input type="text" id="ped-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoPedido(this.value)">
       </label></div>
-      <div id="ped-resultados"></div>
+      <div id="ped-resultados" class="resultados-buscador"></div>
     </div>
     ${faltantes?`
     <div class="card" style="border-color:var(--pending)">
@@ -1525,7 +1533,7 @@ function buscarProductoDevolucion(q){
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q));
-  el.innerHTML = entries.length ? entries.slice(0,8).map(([cod,p])=>`
+  el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
       <div style="display:flex;gap:10px">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
@@ -1553,8 +1561,12 @@ function agregarDesdeResultadoDevolucion(cod){
   const qty = parseInt(document.getElementById(`dr-qty-${cod}`)?.value)||0;
   const motivo = (document.getElementById(`dr-motivo-${cod}`)?.value||"").trim();
   if(agregarADevolucion(cod, qty, motivo)){
+    const q = document.getElementById("dev-buscar")?.value || "";
     renderTab();
-    document.getElementById("dev-buscar")?.focus();
+    const input = document.getElementById("dev-buscar");
+    if(input){ input.value = q; input.focus(); }
+    if(q) buscarProductoDevolucion(q);
+    mostrarAviso("Agregado");
   }
 }
 
@@ -1585,7 +1597,7 @@ function renderDevoluciones(){
       <div class="form-row"><label>Buscar producto por nombre o código
         <input type="text" id="dev-buscar" placeholder="Ej: Yogur frutilla" autocomplete="off" oninput="buscarProductoDevolucion(this.value)">
       </label></div>
-      <div id="dev-resultados"></div>
+      <div id="dev-resultados" class="resultados-buscador"></div>
     </div>
     ${items.length?`
       <div class="card" style="${devolucionSucia?'':'border-color:var(--ok)'}">
@@ -2167,7 +2179,7 @@ function buscarProductoDescuento(q){
   if(!q){ el.innerHTML = ""; return; }
   const yaAgregados = new Set(DESCUENTOS_MES.map(d=>d.cod));
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>!yaAgregados.has(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
-  el.innerHTML = entries.length ? entries.slice(0,6).map(([cod,p])=>`
+  el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="obj-prod-result" onclick="agregarDescuentoMes('${esc(cod)}')">
       <span>${htmlEsc(p.n)}</span><span class="obj-prod-cod">${cod} +</span>
     </div>`).join("") : `<div class="empty" style="padding:8px 4px">Sin resultados.</div>`;
@@ -2304,7 +2316,7 @@ function formularioObjetivo(id){
           <input type="text" id="of-buscar-prod" placeholder="Buscar producto por código o nombre..." oninput="buscarProductoObjetivo(this.value)" autocomplete="off">
         </label>
       </div>
-      <div id="of-prod-resultados"></div>
+      <div id="of-prod-resultados" class="resultados-buscador"></div>
       <div id="of-prod-chips" class="obj-chips">${renderCodigosObjetivoHTML()}</div>
       <div style="font-size:11px;color:var(--ink-faint);margin:-4px 0 10px">Cada vez que guardes un pedido con alguno de estos productos, el objetivo se va a sumar solo.</div>
       <div id="of-error" style="color:var(--pending);font-size:12px;margin-bottom:4px"></div>
@@ -2349,7 +2361,7 @@ function buscarProductoObjetivo(q){
   q = (q||"").toLowerCase().trim();
   if(!q){ el.innerHTML = ""; return; }
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>!objCodigosPendientes.includes(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
-  el.innerHTML = entries.length ? entries.slice(0,6).map(([cod,p])=>`
+  el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="obj-prod-result" onclick="agregarCodigoObjetivo('${esc(cod)}')">
       <span>${p.n}</span><span class="obj-prod-cod">${cod} +</span>
     </div>`).join("") : `<div class="empty" style="padding:8px 4px">Sin resultados.</div>`;
