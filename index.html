@@ -563,6 +563,9 @@ body{
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script>
 const CLIENTES_POR_VENDEDOR = {
 "Eduardo Cabrera": {
@@ -638,8 +641,122 @@ function htmlEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&l
 function clonar(o){ return JSON.parse(JSON.stringify(o)); }
 
 function nsKey(base){ return `${base}__${vendedorActual||"sin_vendedor"}`; }
+
+// SINCRONIZACIÓN MULTI-DISPOSITIVO (Firebase Firestore)
+// Cada vendedor tiene un documento por tipo de dato (pedidos, cobranzas, etc.)
+// en vendedores/{vendedorActual}/datos/{clave}. Se sigue guardando todo en
+// localStorage como antes (funciona offline), y además se replica a Firestore
+// cuando hay conexión; los cambios de otros dispositivos llegan en vivo.
+const firebaseConfig = {
+  apiKey: "AIzaSyCvb9hqi-hqZvDuG4CWUJh_x_WkkAb9364",
+  authDomain: "crm-ibero.firebaseapp.com",
+  projectId: "crm-ibero",
+  storageBucket: "crm-ibero.firebasestorage.app",
+  messagingSenderId: "509803219367",
+  appId: "1:509803219367:web:6e36e3a1d74187a7f98e82"
+};
+const FS_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1","crm_ibero_devoluciones_v1","crm_ibero_revisados_v1"];
+let fsDB = null, fsReady = false, fsUnsubs = [], fsBootstrapped = new Set();
+
+try{
+  firebase.initializeApp(firebaseConfig);
+  fsDB = firebase.firestore();
+  fsDB.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+  firebase.auth().onAuthStateChanged(user=>{
+    fsReady = !!user;
+    if(user && vendedorActual) fsEscucharTodo();
+  });
+  firebase.auth().signInAnonymously().catch(e=>console.warn("Firebase auth:", e.message));
+}catch(e){ console.warn("Firebase init:", e); }
+
+function fsDocRef(base){
+  if(!vendedorActual || !fsDB) return null;
+  return fsDB.collection("vendedores").doc(vendedorActual).collection("datos").doc(base);
+}
+
+function fsGuardar(base, valor){
+  if(!fsReady || !vendedorActual) return;
+  const ref = fsDocRef(base);
+  if(!ref) return;
+  ref.set({ json: JSON.stringify(valor), ts: firebase.firestore.FieldValue.serverTimestamp() })
+    .catch(e=>console.warn("fsGuardar", base, e.message));
+}
+
+function fsValorLocalActual(base){
+  switch(base){
+    case "crm_ibero_prototipo": return DATA;
+    case "crm_ibero_clientes_extra_v1": return CLIENTES_EXTRA;
+    case "crm_ibero_clientes_info_v1": return CLIENTES_INFO;
+    case "crm_ibero_cobranzas_v1": return COBRANZAS;
+    case "crm_ibero_objetivos_v1": return OBJETIVOS;
+    case "crm_ibero_promociones_v1": return PROMOCIONES;
+    case "crm_ibero_devoluciones_v1": return DEVOLUCIONES;
+    case "crm_ibero_revisados_v1": return REVISADOS;
+  }
+}
+function fsAplicarRemoto(base, valor){
+  switch(base){
+    case "crm_ibero_prototipo": DATA = valor||{}; break;
+    case "crm_ibero_clientes_extra_v1": CLIENTES_EXTRA = valor||{}; break;
+    case "crm_ibero_clientes_info_v1": CLIENTES_INFO = valor||{}; break;
+    case "crm_ibero_cobranzas_v1": COBRANZAS = valor||{}; break;
+    case "crm_ibero_objetivos_v1": OBJETIVOS = valor||[]; break;
+    case "crm_ibero_promociones_v1": PROMOCIONES = valor||[]; break;
+    case "crm_ibero_devoluciones_v1": DEVOLUCIONES = valor||{}; break;
+    case "crm_ibero_revisados_v1": REVISADOS = valor||{}; break;
+  }
+  try{ localStorage.setItem(nsKey(base), JSON.stringify(fsValorLocalActual(base))); }catch(e){}
+}
+
+function fsEscucharTodo(){
+  fsDetenerTodo();
+  FS_KEYS_VENDEDOR.forEach(base=>{
+    const ref = fsDocRef(base);
+    if(!ref) return;
+    const unsub = ref.onSnapshot(snap=>{
+      const remotoExiste = snap.exists && typeof snap.data().json === "string";
+      const remoto = remotoExiste ? JSON.parse(snap.data().json) : null;
+      if(!fsBootstrapped.has(base)){
+        fsBootstrapped.add(base);
+        const local = fsValorLocalActual(base);
+        const tamRemoto = remoto ? JSON.stringify(remoto).length : 0;
+        const tamLocal = JSON.stringify(local).length;
+        // Primera vez que este dispositivo sincroniza esta clave: se queda con
+        // el lado más "grande" (con más info) para no pisar historial real con
+        // datos vacíos de un dispositivo que nunca los tuvo cargados.
+        if(remotoExiste && tamRemoto >= tamLocal){
+          fsAplicarRemoto(base, remoto);
+          refrescarTrasSyncRemoto();
+        } else {
+          fsGuardar(base, local);
+        }
+        return;
+      }
+      if(remotoExiste){
+        fsAplicarRemoto(base, remoto);
+        refrescarTrasSyncRemoto();
+      }
+    }, err=>console.warn("fsEscuchar", base, err.message));
+    fsUnsubs.push(unsub);
+  });
+}
+
+function fsDetenerTodo(){
+  fsUnsubs.forEach(u=>{ try{ u(); }catch(e){} });
+  fsUnsubs = [];
+  fsBootstrapped = new Set();
+}
+
+function refrescarTrasSyncRemoto(){
+  try{
+    const activa = document.querySelector(".screen.active")?.id;
+    if(activa === "screen-cliente"){ renderTab(); }
+    else if(activa === "screen-main"){ filtrarClientes(document.getElementById("search")?.value || ""); }
+  }catch(e){}
+}
+
 function loadData() { try { return JSON.parse(localStorage.getItem(nsKey("crm_ibero_prototipo"))||"{}"); } catch(e){return{};} }
-function saveData(d) { try{ localStorage.setItem(nsKey("crm_ibero_prototipo"), JSON.stringify(d)); }catch(e){} }
+function saveData(d) { try{ localStorage.setItem(nsKey("crm_ibero_prototipo"), JSON.stringify(d)); }catch(e){} fsGuardar("crm_ibero_prototipo", d); }
 let DATA = loadData();
 
 let FOTOS = {
@@ -1046,27 +1163,27 @@ function savePrecios(){ try{ localStorage.setItem("crm_ibero_precios_v1", JSON.s
 let PRECIOS = loadPrecios();
 
 function loadClientesExtra(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_clientes_extra_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
-function saveClientesExtra(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_extra_v1"), JSON.stringify(CLIENTES_EXTRA)); }catch(e){} }
+function saveClientesExtra(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_extra_v1"), JSON.stringify(CLIENTES_EXTRA)); }catch(e){} fsGuardar("crm_ibero_clientes_extra_v1", CLIENTES_EXTRA); }
 let CLIENTES_EXTRA = loadClientesExtra();
 function clientesDelDia(dia){ const base=CLIENTES_POR_VENDEDOR[vendedorActual]||{}; return [...(base[dia]||[]), ...(CLIENTES_EXTRA[dia]||[])]; }
 function esClienteExtra(dia,num){ return (CLIENTES_EXTRA[dia]||[]).some(c=>c.num===num); }
 
 function loadClientesInfo(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_clientes_info_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
-function saveClientesInfo(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_info_v1"), JSON.stringify(CLIENTES_INFO)); }catch(e){} }
+function saveClientesInfo(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_info_v1"), JSON.stringify(CLIENTES_INFO)); }catch(e){} fsGuardar("crm_ibero_clientes_info_v1", CLIENTES_INFO); }
 let CLIENTES_INFO = loadClientesInfo();
 
 function loadCobranzas(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_cobranzas_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
-function saveCobranzas(){ try{ localStorage.setItem(nsKey("crm_ibero_cobranzas_v1"), JSON.stringify(COBRANZAS)); }catch(e){} }
+function saveCobranzas(){ try{ localStorage.setItem(nsKey("crm_ibero_cobranzas_v1"), JSON.stringify(COBRANZAS)); }catch(e){} fsGuardar("crm_ibero_cobranzas_v1", COBRANZAS); }
 let COBRANZAS = loadCobranzas();
 
 function loadDevoluciones(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_devoluciones_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
-function saveDevoluciones(){ try{ localStorage.setItem(nsKey("crm_ibero_devoluciones_v1"), JSON.stringify(DEVOLUCIONES)); }catch(e){} }
+function saveDevoluciones(){ try{ localStorage.setItem(nsKey("crm_ibero_devoluciones_v1"), JSON.stringify(DEVOLUCIONES)); }catch(e){} fsGuardar("crm_ibero_devoluciones_v1", DEVOLUCIONES); }
 let DEVOLUCIONES = loadDevoluciones();
 function cobranzaKey(){ return `${diaActual}-${clienteActual?.num}`; }
 function fechaDisplay(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 
 function loadRevisados(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_revisados_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
-function saveRevisados(){ try{ localStorage.setItem(nsKey("crm_ibero_revisados_v1"), JSON.stringify(REVISADOS)); }catch(e){} }
+function saveRevisados(){ try{ localStorage.setItem(nsKey("crm_ibero_revisados_v1"), JSON.stringify(REVISADOS)); }catch(e){} fsGuardar("crm_ibero_revisados_v1", REVISADOS); }
 let REVISADOS = loadRevisados();
 
 function toggleRevisado(num){
@@ -1079,7 +1196,7 @@ function toggleRevisado(num){
 }
 
 function loadObjetivos(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_objetivos_v1")); return s?JSON.parse(s):[]; }catch(e){ return []; } }
-function saveObjetivos(){ try{ localStorage.setItem(nsKey("crm_ibero_objetivos_v1"), JSON.stringify(OBJETIVOS)); }catch(e){} }
+function saveObjetivos(){ try{ localStorage.setItem(nsKey("crm_ibero_objetivos_v1"), JSON.stringify(OBJETIVOS)); }catch(e){} fsGuardar("crm_ibero_objetivos_v1", OBJETIVOS); }
 let OBJETIVOS = loadObjetivos();
 let objEditando = null;
 let objNuevo = false;
@@ -1087,7 +1204,7 @@ let objCodigosPendientes = [];
 function fmtNum(n){ n=Number(n)||0; return Number.isInteger(n) ? String(n) : n.toFixed(1); }
 
 function loadPromociones(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_promociones_v1")); return s?JSON.parse(s):[]; }catch(e){ return []; } }
-function savePromociones(){ try{ localStorage.setItem(nsKey("crm_ibero_promociones_v1"), JSON.stringify(PROMOCIONES)); }catch(e){} }
+function savePromociones(){ try{ localStorage.setItem(nsKey("crm_ibero_promociones_v1"), JSON.stringify(PROMOCIONES)); }catch(e){} fsGuardar("crm_ibero_promociones_v1", PROMOCIONES); }
 let PROMOCIONES = loadPromociones();
 let promoEditando = null;
 let promoNueva = false;
@@ -2115,6 +2232,7 @@ function iniciarSesionVendedor(){
   renderDias();
   document.getElementById("search").value = "";
   filtrarClientes("");
+  if(fsReady) fsEscucharTodo();
 }
 
 function seleccionarVendedor(nombre){
@@ -2126,6 +2244,7 @@ function seleccionarVendedor(nombre){
 
 function cambiarVendedor(){
   confirmarAccion("¿Cerrar sesión? Vas a tener que ingresar tu usuario y contraseña de nuevo.", ()=>{
+    fsDetenerTodo();
     vendedorActual = null;
     try{ localStorage.removeItem("crm_ibero_vendedor"); }catch(e){}
     renderSelectorVendedor();
