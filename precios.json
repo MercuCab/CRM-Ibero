@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "27/09/2026",
+  "fecha_actualizacion": "02/10/2026",
   "total_productos": 557,
   "productos": [
     {
@@ -406,7 +406,7 @@
       "desc": "MORTADELA C/PISTACCIO BOCATTI",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "PIEZA",
-      "precio": 15118.841366199998
+      "precio": 14878.78
     },
     {
       "cod": "1143",
@@ -427,7 +427,7 @@
       "desc": "MORTADELA BOCHA CALCHAQUI",
       "cat": "FIAMBRES EMBUTIDOS Y PATES",
       "pres": "BOCHA",
-      "precio": 9143.27925755475
+      "precio": 8917.54
     },
     {
       "cod": "1132",
@@ -1316,7 +1316,7 @@
       "desc": "QUESO AZUL LA QUESERA",
       "cat": "QUESOS BLANDOS",
       "pres": "HORMA",
-      "precio": 13960.2163932
+      "precio": 14409.22
     },
     {
       "cod": "2125",
@@ -1407,7 +1407,7 @@
       "desc": "QUESO BARRA TYBO \"RAMOLAC\"",
       "cat": "QUESOS SEMIDUROS",
       "pres": "HORMA",
-      "precio": 11024.436961137599
+      "precio": 9558.19
     },
     {
       "cod": "2026",
@@ -1526,14 +1526,14 @@
       "desc": "QUESO CHEDDAR X8 FETAS TONADITA",
       "cat": "QUESOS SEMIDUROS",
       "pres": "PACK x 120g",
-      "precio": 2639.216065352778
+      "precio": 2718.36
     },
     {
       "cod": "2240",
       "desc": "QUESO CHEDDAR X140 FETAS TONADITA",
       "cat": "QUESOS SEMIDUROS",
       "pres": "PACK x 1,68KG",
-      "precio": 32712.06
+      "precio": 33693.31
     },
     {
       "cod": "2225",
@@ -1862,14 +1862,14 @@
       "desc": "QUESO SARDO FRESCO",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 8400.0
+      "precio": 7788.0
     },
     {
       "cod": "2335",
       "desc": "QUESO SARDO FRESCO COLBER",
       "cat": "QUESOS DUROS",
       "pres": "HORMA",
-      "precio": 9516.0
+      "precio": 8784.0
     },
     {
       "cod": "2323",
@@ -2233,56 +2233,56 @@
       "desc": "CHEVROTIN CLASICO x120gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 190GRS",
-      "precio": 10224.9
+      "precio": 10487.7
     },
     {
       "cod": "2437",
       "desc": "CHEVORTIN SABOR FINAS HIERBAS x120gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 120GRS",
-      "precio": 10224.9
+      "precio": 10487.7
     },
     {
       "cod": "2438",
       "desc": "CHEVROTIN SABOR OREGANO x120gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 120GRS",
-      "precio": 10224.9
+      "precio": 10487.7
     },
     {
       "cod": "2439",
       "desc": "CHEVROTIN SABOR AJI MOLIDO x120gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 120GRS",
-      "precio": 10224.9
+      "precio": 10487.7
     },
     {
       "cod": "2440",
       "desc": "CHEVROTIN SABOR PIMIENTA NEGRA x120gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 120GRS",
-      "precio": 10224.9
+      "precio": 10487.7
     },
     {
       "cod": "2441",
       "desc": "FETA MEDALLA DE ORO x200gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 200GRS",
-      "precio": 14112.0
+      "precio": 14490.0
     },
     {
       "cod": "2443",
       "desc": "QUESO BRIE CUÑA x100gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "PORCION X 100GRS",
-      "precio": 5420.52
+      "precio": 5556.6
     },
     {
       "cod": "2448",
       "desc": "QUESO BOCCONCINOS x160gr \"WAPI\"",
       "cat": "ESPECIALIDADES",
       "pres": "DOY PACK",
-      "precio": 4155.3
+      "precio": 4264.65
     },
     {
       "cod": "2465",
@@ -2919,14 +2919,14 @@
       "desc": "FILETES DE ANCHOAS EN ACEITE \"BOCARTE\"",
       "cat": "ENCURTIDOS",
       "pres": "FRASCO X 90 GR",
-      "precio": 5659.5
+      "precio": 5865.3
     },
     {
       "cod": "4151",
       "desc": "FILETES DE ANCHOAS EN ACEITE \"BOCARTE\"",
       "cat": "ENCURTIDOS",
       "pres": "FRASCO X 60x3",
-      "precio": 41454.0
+      "precio": 42630.0
     },
     {
       "cod": "3203",
