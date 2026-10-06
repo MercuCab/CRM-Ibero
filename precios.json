@@ -1,5 +1,5 @@
 {
-  "fecha_actualizacion": "02/10/2026",
+  "fecha_actualizacion": "06/10/2026",
   "total_productos": 557,
   "productos": [
     {
@@ -168,7 +168,7 @@
       "desc": "BONDIOLA VACIO \"CALCHAQUI\"",
       "cat": "FIAMBRES CRUDOS",
       "pres": "PIEZA ENTERA",
-      "precio": 28721.73167325
+      "precio": 30157.82
     },
     {
       "cod": "1017",
@@ -2289,7 +2289,7 @@
       "desc": "QUESO BOCCONCINO MOZZARI X200G",
       "cat": "ESPECIALIDADES",
       "pres": "DOY PACK",
-      "precio": 4858.0974
+      "precio": 5246.75
     },
     {
       "cod": "2474",
@@ -2303,7 +2303,7 @@
       "desc": "QUESO BRIE MOZZARI HORMA X1,5KG",
       "cat": "ESPECIALIDADES",
       "pres": "HORMA",
-      "precio": 18666.994049999998
+      "precio": 20160.35
     },
     {
       "cod": "2456",
