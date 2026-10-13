@@ -1323,42 +1323,48 @@
       "desc": "MOZZARELLA CILINDRO \"TONUTTI\"",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X 3KG",
-      "precio": 9605.212500000001
+      "precio": 9605.212500000001,
+      "peso_pieza_kg": 3
     },
     {
       "cod": "2147",
       "desc": "MOZZARELLA FIUMELATTE",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X3KG",
-      "precio": 7575.0
+      "precio": 7575.0,
+      "peso_pieza_kg": 3
     },
     {
       "cod": "2148",
       "desc": "MOZZARELLA ABUELO MANOLO",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X5KG",
-      "precio": 5844.0
+      "precio": 5844.0,
+      "peso_pieza_kg": 5
     },
     {
       "cod": "2166",
       "desc": "MOZZARELLA CILINDRO BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X3KG",
-      "precio": 11805.486431062502
+      "precio": 11805.486431062502,
+      "peso_pieza_kg": 3
     },
     {
       "cod": "2167",
       "desc": "MOZZARELLA PLANCHA BARRAZA",
       "cat": "QUESOS BLANDOS",
       "pres": "PLANCHA X10KG",
-      "precio": 11118.756211200001
+      "precio": 11118.756211200001,
+      "peso_pieza_kg": 10
     },
     {
       "cod": "2101",
       "desc": "MOZZARELLA CILINDRO DOÑA AURORA",
       "cat": "QUESOS BLANDOS",
       "pres": "CILINDRO X3KG",
-      "precio": 11106.9000504
+      "precio": 11106.9000504,
+      "peso_pieza_kg": 3
     },
     {
       "cod": "2102",
