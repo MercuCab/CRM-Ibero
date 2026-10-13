@@ -103,7 +103,10 @@ body{
   height:100dvh;
 }
 .screen{display:none;flex-direction:column;height:100%;min-height:0}
-.screen.active{display:flex}
+.screen.active{display:flex;animation:fadeSlideIn .28s ease}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.tab-anim{animation:fadeSlideIn .26s ease}
 .header{
   background:linear-gradient(160deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.24) 100%),var(--paper-deep);
   color:var(--ink);
@@ -196,6 +199,7 @@ body{
 
 .pedido-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:8px}
 .pedido-item:last-child{border:none}
+.pedido-item-edit{padding:12px;margin:0 0 8px;background:var(--paper-sunk);border-radius:10px;animation:popIn .2s ease}
 .pi-cod{font-size:14px;font-weight:600;color:var(--ink)}
 .pi-meta{font-size:11.5px;color:var(--ink-dim);margin-top:2px;font-family:var(--font-mono)}
 .pi-del{background:none;border:none;color:var(--ink-faint);font-size:17px;padding:4px 6px;cursor:pointer}
@@ -267,6 +271,15 @@ body{
 .obj-bar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s ease}
 .obj-chip{display:inline-flex;align-items:center;gap:5px;background:var(--paper-sunk);color:var(--ink);font-size:11.5px;padding:5px 6px 5px 10px;border-radius:20px;border:1px solid var(--line)}
 .obj-chip button{background:none;border:none;color:var(--ink-faint);font-size:15px;line-height:1;cursor:pointer;padding:0 2px}
+
+.marca-grupo{border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.marca-grupo:last-child{margin-bottom:0}
+.marca-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:none;border:none;cursor:pointer;font-family:var(--font-display);font-size:13.5px;font-weight:700;color:var(--ink)}
+.marca-meta{display:flex;align-items:center;gap:7px}
+.marca-count{font-size:10.5px;color:var(--ink-faint);font-family:var(--font-mono)}
+.marca-chevron{display:inline-block;transition:transform .2s ease;color:var(--ink-faint)}
+.marca-chevron.abierto{transform:rotate(90deg)}
+.marca-chips{padding:0 12px 10px;display:flex;flex-wrap:wrap;gap:6px;animation:fadeSlideIn .2s ease}
 .obj-prod-result{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--paper-sunk);border-radius:8px;margin-bottom:4px;cursor:pointer;font-size:12.5px}
 .obj-prod-result:active{opacity:.7}
 .obj-prod-cod{color:var(--ink-faint);font-family:var(--font-mono);flex-shrink:0}
@@ -617,6 +630,8 @@ let pedidoSucio = false;
 let devolucionActual = [];
 let devolucionSucia = false;
 let historialProductosAbierto = false;
+let marcasAbiertas = {};
+let editandoItemIndex = null;
 let prodSeleccionado = null;
 let precioEditando = false;
 let precioNuevo = false;
@@ -638,6 +653,65 @@ function itemLineTxt(it){
 function esc(s){ return String(s).replace(/'/g,"\\'"); }
 function attrEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
 function htmlEsc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+const MARCAS_CONOCIDAS = ["SAN MICHELE VAL DEL CINGHIO","ILE DE FRANCE","LOS CALVOS 42","CAMPO AUSTRAL",
+  "EL GALAICO","EL ARTESANO","DOÑA AURORA","NONNA PIA","PONTE LUGO","CHACRA 43",
+  "LA ALDEA","LA RECOVA","ARCO DE ORO","PRE VERT","SANTA ROSA","STA ROSA",
+  "CASAPUEBLO","CASTELMAR","CALCHAQUÍ","CALCHAQUI","MONTESANO","GRASSETTO",
+  "ESQUESITO","MANICOL","LAZZARANO","CHIMBOTE","CORMILLOT","DELIPORK","ÑORQUINCO",
+  "ESNAOLA","BARRAZA","BOCARTE","BOCATTI","CAGNOLI","TONADITA","MOZZARI","ADLER",
+  "TONUTTI","LACTEAR","RAMOLAC","BAVARIA","MILKAUT","TREGAR","CHAMEN",
+  "COLBER","SARRIA","DOINA","MIGUE","WAPI","1284","1804","KRACHITOS","DULCOR"
+].sort((a,b)=>b.length-a.length);
+
+function marcaDeProducto(desc){
+  if(!desc) return "Otras marcas";
+  const m = desc.match(/"([^"]+)"/);
+  if(m) return tituloMarca(m[1]);
+  const up = desc.toUpperCase();
+  for(const marca of MARCAS_CONOCIDAS){
+    if(up.includes(marca)) return tituloMarca(marca);
+  }
+  return "Otras marcas";
+}
+function tituloMarca(s){
+  return s.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_,sp,c)=>sp+c.toUpperCase());
+}
+
+function agruparPorMarca(items){
+  const grupos = {};
+  items.forEach(it=>{
+    const marca = marcaDeProducto(getProd(it.cod)?.n);
+    (grupos[marca] = grupos[marca]||[]).push(it);
+  });
+  return Object.keys(grupos).sort((a,b)=>{
+    if(a==="Otras marcas") return 1;
+    if(b==="Otras marcas") return -1;
+    return a.localeCompare(b,"es");
+  }).map(marca=>({marca, items: grupos[marca]}));
+}
+
+function toggleMarca(key){ marcasAbiertas[key] = !marcasAbiertas[key]; renderTab(); }
+
+function renderGruposMarca(items, prefix){
+  return agruparPorMarca(items).map(g=>{
+    const key = `${prefix}:${g.marca}`;
+    const abierto = !!marcasAbiertas[key];
+    return `
+    <div class="marca-grupo">
+      <button class="marca-header" onclick="toggleMarca('${esc(key)}')">
+        <span class="marca-nombre">${htmlEsc(g.marca)}</span>
+        <span class="marca-meta"><span class="marca-count">${g.items.length}</span><span class="marca-chevron${abierto?' abierto':''}">›</span></span>
+      </button>
+      ${abierto?`<div class="marca-chips">
+        ${g.items.map(it=>{
+          const pi = getProd(it.cod);
+          return `<button class="obj-chip" style="cursor:pointer" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?htmlEsc(pi.n):it.cod} (${it.qty})${it.fecha?` · ${it.fecha}`:""}</button>`;
+        }).join("")}
+      </div>`:""}
+    </div>`;
+  }).join("");
+}
 function clonar(o){ return JSON.parse(JSON.stringify(o)); }
 
 function nsKey(base){ return `${base}__${vendedorActual||"sin_vendedor"}`; }
@@ -1361,6 +1435,8 @@ function selCliente(num, nom) {
   devolucionActual = cargarDevolucionDeHoy(num);
   devolucionSucia = false;
   historialProductosAbierto = false;
+  marcasAbiertas = {};
+  editandoItemIndex = null;
   cobranzaEditId = null;
   document.getElementById("cli-title").textContent = nom;
   document.getElementById("cli-sub").textContent = `N° ${num} · ${diaActual}`;
@@ -1389,6 +1465,8 @@ function setTab(tab, el) {
   if(tab==="pedido" && !pedidoSucio && clienteActual) pedidoActual = cargarPedidoDeHoy(clienteActual.num);
   if(tab==="devoluciones" && !devolucionSucia && clienteActual) devolucionActual = cargarDevolucionDeHoy(clienteActual.num);
   renderTab();
+  const tc = document.getElementById("tab-content");
+  if(tc){ tc.classList.remove("tab-anim"); void tc.offsetWidth; tc.classList.add("tab-anim"); }
 }
 
 function renderTab() {
@@ -1400,7 +1478,22 @@ function renderTab() {
   else el.innerHTML = renderPedido();
 }
 
-function eliminarItem(i) { pedidoActual.splice(i,1); pedidoSucio = true; guardarBorradorPedido(); renderTab(); }
+function eliminarItem(i) { pedidoActual.splice(i,1); pedidoSucio = true; editandoItemIndex = null; guardarBorradorPedido(); renderTab(); }
+
+function toggleEditarItem(i){ editandoItemIndex = editandoItemIndex===i ? null : i; renderTab(); }
+
+function guardarEdicionItem(i){
+  const qty = parseInt(document.getElementById(`ei-qty-${i}`)?.value)||0;
+  const desc = Math.min(100, Math.max(0, parseInt(document.getElementById(`ei-desc-${i}`)?.value)||0));
+  if(!(qty>0)){ mostrarAviso("Ingresá una cantidad válida."); return; }
+  pedidoActual[i].qty = qty;
+  pedidoActual[i].desc = desc;
+  pedidoSucio = true;
+  guardarBorradorPedido();
+  editandoItemIndex = null;
+  renderTab();
+  mostrarAviso("Actualizado");
+}
 
 function eliminarItemHistorial(cod, fecha){
   confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
@@ -1561,22 +1654,14 @@ function renderPedido() {
     ${faltantes?`
     <div class="card" style="border-color:var(--pending)">
       <div style="font-size:11.5px;color:var(--pending);font-weight:700;margin-bottom:8px">⚠️ Semana pasada (${faltantes.fecha}) y sin cargar hoy</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${faltantes.items.map(it=>{
-          const pi = getProd(it.cod);
-          return `<button class="obj-chip" style="cursor:pointer;background:var(--pending-bg);color:var(--pending);border-color:transparent" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?pi.n:it.cod} (${it.qty})</button>`;
-        }).join("")}
-      </div>
+      ${renderGruposMarca(faltantes.items, "semana")}
     </div>`:""}
     ${historial.length?`
     <div class="card">
       <button class="link-btn" style="font-size:12.5px;font-weight:700" onclick="toggleHistorialProductos()">${historialProductosAbierto?`▾ Ocultar`:`▸ Ver todo lo que compró antes`} (${historial.length})</button>
       ${historialProductosAbierto?`
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
-        ${historial.map(it=>{
-          const pi = getProd(it.cod);
-          return `<button class="obj-chip" style="cursor:pointer" onclick="agregarFaltanteRapido('${esc(it.cod)}',${it.qty})">+ ${pi?pi.n:it.cod} (${it.qty}) · ${it.fecha}</button>`;
-        }).join("")}
+      <div style="margin-top:10px">
+        ${renderGruposMarca(historial, "historial")}
       </div>`:""}
     </div>`:""}
     ${items.length?`
@@ -1584,13 +1669,24 @@ function renderPedido() {
         <div class="card-title">Pedido de hoy — ${hoy()}</div>
         ${items.map((it,i)=>{
           const pi=getProd(it.cod);
+          if(editandoItemIndex===i){
+            return `
+            <div class="pedido-item-edit">
+              <div class="pi-cod" style="margin-bottom:8px">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <div class="form-row" style="flex:1;margin-bottom:0"><label style="font-size:10px">Cant.<input type="number" id="ei-qty-${i}" inputmode="numeric" min="1" value="${it.qty}"></label></div>
+                <div class="form-row" style="flex:1;margin-bottom:0"><label style="font-size:10px">Desc %<input type="number" id="ei-desc-${i}" inputmode="numeric" min="0" max="100" value="${it.desc||0}"></label></div>
+              </div>
+              <button class="btn btn-accent" style="margin-top:0" onclick="guardarEdicionItem(${i})">Guardar cambios</button>
+            </div>`;
+          }
           return `
-          <div class="pedido-item">
+          <div class="pedido-item" style="cursor:pointer" onclick="toggleEditarItem(${i})">
             <div>
               <div class="pi-cod">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
               <div class="pi-meta">${it.qty} u.${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
             </div>
-            <button class="pi-del" title="Eliminar" onclick="eliminarItem(${i})">🗑️</button>
+            <button class="pi-del" title="Eliminar" onclick="event.stopPropagation();eliminarItem(${i})">🗑️</button>
           </div>`;
         }).join("")}
         <div style="padding:10px 0 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:13.5px">
