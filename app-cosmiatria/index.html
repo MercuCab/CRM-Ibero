@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Piel Serena</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Cosmiatría y cuidado de la piel, con turno previo.">
 <meta name="theme-color" content="#1D2A28">
 <link rel="manifest" href="manifest.json">
@@ -20,13 +21,6 @@
 <!-- Luces de fondo en movimiento -->
 <div class="fx" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
-<!-- Pantalla de carga -->
-<div class="splash" id="splash" aria-hidden="true">
-  <div class="splash-logo">
-    <svg viewBox="0 0 64 64" width="72" height="72"><use href="#ico-lotus"/></svg>
-    <span class="splash-name" data-bind="nombre">Piel Serena</span>
-  </div>
-</div>
 
 <!-- Encabezado -->
 <header class="topbar" id="topbar">
@@ -35,7 +29,7 @@
     <span data-bind="nombre">Cosmiatría</span>
   </a>
   <nav class="topnav" id="topnav"></nav>
-  <button class="icon-btn" id="btn-fotos" aria-label="Cargar fotos" title="Cargar fotos">
+  <button class="icon-btn" id="btn-fotos" hidden aria-label="Cargar fotos" title="Cargar fotos">
     <svg viewBox="0 0 24 24" width="22" height="22"><use href="#ico-camera"/></svg>
   </button>
 </header>
@@ -152,6 +146,11 @@
       </label>
 
       <div class="upload-progress" id="upload-progress" hidden><span></span></div>
+
+      <div class="publicar" id="fotos-publicar" hidden>
+        <span>Tenés cambios sin publicar. Las clientas los ven cuando publicás.</span>
+        <button class="btn btn-primary" id="btn-publicar">Publicar cambios</button>
+      </div>
 
       <div class="fotos-head">
         <strong id="fotos-count">0 fotos</strong>

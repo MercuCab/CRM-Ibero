@@ -23,11 +23,6 @@
     $("#consejo-texto").textContent = D.consejo.texto;
   } else $("#consejo").remove();
 
-  // ---------- Splash ----------
-  window.addEventListener("load", () => {
-    setTimeout(() => $("#splash").classList.add("out"), reduceMotion ? 0 : 1300);
-  });
-
   // ---------- Topbar compacto al scrollear ----------
   const topbar = $("#topbar");
   const onScroll = () => {
@@ -85,7 +80,12 @@
       }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" })
     : null;
   function observarReveal(root = document) {
-    $$(".reveal:not(.in)", root).forEach(el => revealObs ? revealObs.observe(el) : el.classList.add("in"));
+    $$(".reveal:not(.in)", root).forEach(el => {
+      // Lo que ya se ve al abrir queda quieto; solo anima lo que está más abajo
+      if (!revealObs || reduceMotion || el.getBoundingClientRect().top < innerHeight) return el.classList.add("in");
+      el.classList.add("pre");
+      revealObs.observe(el);
+    });
   }
 
   // ---------- Swipe genérico ----------
@@ -426,6 +426,7 @@
           </div>
         </div>`).join("") : `<div class="empty">Todavía no hay fotos acá. ¡Subí la primera!</div>`;
 
+      pintarPublicar();
       const conteos = await Fotos.conteos();
       armarSelect(conteos);
       const lista = destinos.filter(d => conteos[d.v]);
@@ -460,16 +461,42 @@
     grid.addEventListener("click", async e => {
       const b = e.target.closest("button[data-act]");
       if (!b) return;
-      const card = b.closest(".foto"), id = +card.dataset.id, target = sel.value;
+      const card = b.closest(".foto"), id = card.dataset.id, target = sel.value;
       const act = b.dataset.act;
       if (act === "izq") Fotos.mover(target, id, -1);
       else if (act === "der") Fotos.mover(target, id, 1);
       else if (act === "portada") { await Fotos.hacerPortada(target, id); toast("Portada actualizada"); }
       else if (act === "del" && await confirmar("¿Eliminar esta foto?")) {
         card.classList.add("removing");
-        setTimeout(async () => { await Fotos.eliminar(id); toast("Foto eliminada"); }, 280);
+        setTimeout(async () => { await Fotos.eliminar(id, target); toast("Foto quitada"); }, 280);
       }
     });
+
+    // Barra "Publicar cambios" (solo en el artefacto)
+    const barPub = $("#fotos-publicar"), btnPub = $("#btn-publicar");
+    function pintarPublicar() {
+      const hay = Fotos.pendiente();
+      barPub.hidden = !hay;
+      $("#btn-fotos").classList.toggle("con-cambios", hay);
+    }
+    btnPub.onclick = async () => {
+      btnPub.disabled = true;
+      btnPub.textContent = "Publicando…";
+      try {
+        await Fotos.publicar();
+        toast("Publicado. Las clientas ya ven las fotos nuevas.");
+      } catch (err) {
+        const code = err && err.code;
+        if (code === "conflict") toast("Había una versión más nueva. Se recarga la app, revisá y publicá de nuevo.");
+        else if (code === "not_writer" || code === "not_granted") toast("Esta cuenta no puede publicar la app.");
+        else if (code === "rate_limited") toast("Muchas publicaciones seguidas. Esperá un minuto y probá de nuevo.");
+        else if (code === "too_large") toast("La app quedó muy pesada para publicarse.");
+        else { console.error(err); toast("No se pudo publicar. Probá de nuevo en un momento."); }
+      } finally {
+        btnPub.disabled = false;
+        btnPub.textContent = "Publicar cambios";
+      }
+    };
 
     function abrir(target) {
       armarSelect();
@@ -478,10 +505,15 @@
       abrirSheet(sheet);
     }
 
-    return { abrir, render, visible: () => !sheet.hidden };
+    return { abrir, render, pintarPublicar, visible: () => !sheet.hidden };
   })();
 
   $("#btn-fotos").onclick = () => Panel.abrir();
+  // El botón de fotos aparece solo para quien puede editar la app
+  Fotos.permisos().then(p => {
+    $("#btn-fotos").hidden = !p.editable;
+    if (p.editable) Panel.pintarPublicar();
+  });
 
   // ======================================================
   //  PEDIDO DE TURNO (carrito → mensaje de WhatsApp)
@@ -570,7 +602,7 @@
   document.addEventListener("fotos:change", () => {
     Hero.render();
     aplicarFotos();
-    if (Panel.visible()) Panel.render();
+    if (Panel.visible()) Panel.render(); else Panel.pintarPublicar();
   });
 
   // ---------- Inicio ----------
@@ -581,7 +613,7 @@
   Hero.render();
   aplicarFotos();
 
-  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  if (Fotos.modo === "local" && "serviceWorker" in navigator && location.protocol !== "file:") {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 })();
