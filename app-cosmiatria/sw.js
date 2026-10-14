@@ -1,5 +1,5 @@
 // Red primero, caché como respaldo (funciona sin conexión)
-const CACHE = "cosmia-v1";
+const CACHE = "cosmia-v2";
 const FILES = ["./", "./index.html", "./styles.css", "./data.js", "./fotos.js", "./app.js", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", e => {

@@ -1,12 +1,12 @@
 {
-  "name": "Cosmiatría",
-  "short_name": "Cosmiatría",
-  "description": "Tratamientos faciales, corporales y aparatología.",
+  "name": "Piel Serena",
+  "short_name": "Piel Serena",
+  "description": "Cosmiatría y cuidado de la piel, con turno previo.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#FBF7F4",
-  "theme_color": "#2F2A3A",
+  "background_color": "#F1F4F1",
+  "theme_color": "#1D2A28",
   "orientation": "portrait",
   "icons": [
     {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}

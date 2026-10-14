@@ -3,22 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Cosmiatría</title>
-<meta name="description" content="Tratamientos faciales, corporales y aparatología.">
-<meta name="theme-color" content="#2F2A3A">
+<title>Piel Serena</title>
+<meta name="description" content="Cosmiatría y cuidado de la piel, con turno previo.">
+<meta name="theme-color" content="#1D2A28">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Cosmiatría">
+<meta name="apple-mobile-web-app-title" content="Piel Serena">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Figtree:wght@400;600&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Luces de fondo en movimiento -->
+<div class="fx" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
 <!-- Pantalla de carga -->
 <div class="splash" id="splash" aria-hidden="true">
   <div class="splash-logo">
     <svg viewBox="0 0 64 64" width="72" height="72"><use href="#ico-lotus"/></svg>
-    <span class="splash-name" data-bind="nombre">Cosmiatría</span>
+    <span class="splash-name" data-bind="nombre">Piel Serena</span>
   </div>
 </div>
 
@@ -54,16 +60,28 @@
   <!-- Secciones y servicios (se generan desde data.js) -->
   <div id="secciones"></div>
 
+  <!-- Consejo -->
+  <aside class="tip reveal" id="consejo">
+    <b id="consejo-titulo"></b>
+    <span id="consejo-texto"></span>
+  </aside>
+
   <!-- Contacto -->
   <section class="contacto reveal" id="contacto">
     <h2>¿Reservamos tu turno?</h2>
-    <p>Escribinos y te ayudamos a elegir el tratamiento ideal para vos.</p>
+    <p>Elegí uno o varios tratamientos y mandanos el pedido por WhatsApp.</p>
     <a class="btn btn-primary btn-lg" id="btn-wa-general" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" width="20" height="20"><use href="#ico-wa"/></svg>
-      Reservar por WhatsApp
+      Consultar por WhatsApp
     </a>
   </section>
 </main>
+
+<!-- Barra de turno (aparece al elegir tratamientos) -->
+<div class="turno-bar" id="turno-bar" aria-live="polite">
+  <span class="sum" id="turno-sum">Elegí un tratamiento para pedir turno</span>
+  <button class="btn btn-dark" id="btn-pedir" disabled>Pedir turno</button>
+</div>
 
 <footer class="footer">
   <span data-bind="nombre">Cosmiatría</span> · <span data-bind="eslogan"></span>
@@ -83,10 +101,31 @@
       <h3 id="srv-titulo"></h3>
       <div class="meta" id="srv-meta"></div>
       <p id="srv-desc"></p>
-      <a class="btn btn-primary btn-block" id="srv-reservar" target="_blank" rel="noopener">
+      <button class="btn btn-primary btn-block" id="srv-agregar">Agregar al turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pedido de turno -->
+<div class="sheet" id="sheet-turno" role="dialog" aria-modal="true" aria-labelledby="turno-titulo" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="sheet-panel">
+    <button class="sheet-close" data-close aria-label="Cerrar">×</button>
+    <div class="sheet-body">
+      <h3 id="turno-titulo">Tu turno</h3>
+      <ul class="picked" id="turno-lista"></ul>
+      <p class="total" id="turno-total"></p>
+      <label class="field"><span>Tu nombre</span>
+        <input id="turno-nombre" type="text" autocomplete="given-name" placeholder="Ej: Carla"></label>
+      <label class="field"><span>Día y horario que preferís</span>
+        <input id="turno-dia" type="text" placeholder="Ej: jueves a la tarde"></label>
+      <a class="btn btn-primary btn-block" id="turno-wa" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="20" height="20"><use href="#ico-wa"/></svg>
-        Reservar este servicio
+        Abrir WhatsApp con el pedido
       </a>
+      <p class="small">Si WhatsApp no se abre, copiá este mensaje y mandalo vos:</p>
+      <textarea class="msg" id="turno-msg" readonly aria-label="Mensaje del pedido"></textarea>
+      <button class="btn btn-ghost btn-block" id="turno-copiar">Copiar mensaje</button>
     </div>
   </div>
 </div>

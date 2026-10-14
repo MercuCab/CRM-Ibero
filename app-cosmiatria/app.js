@@ -8,14 +8,20 @@
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   function linkWhatsapp(texto) {
-    const msg = encodeURIComponent(texto || `Hola! Quiero reservar un turno en ${D.negocio.nombre}.`);
-    return `https://wa.me/${D.negocio.whatsapp}?text=${msg}`;
+    const msg = encodeURIComponent(texto || `Hola! Quiero consultar por un turno en ${D.negocio.nombre}.`);
+    return `https://wa.me/${String(D.negocio.whatsapp || "").replace(/\D/g, "")}?text=${msg}`;
   }
+  const money = n => "$ " + Number(n).toLocaleString("es-AR");
+  const dur = m => m < 60 ? m + " min" : Math.floor(m / 60) + " h" + (m % 60 ? " " + (m % 60) + " min" : "");
 
   // ---------- Textos generales ----------
   $$("[data-bind]").forEach(el => { el.textContent = D.negocio[el.dataset.bind] || ""; });
   document.title = D.negocio.nombre;
   $("#btn-wa-general").href = linkWhatsapp();
+  if (D.consejo) {
+    $("#consejo-titulo").textContent = D.consejo.titulo;
+    $("#consejo-texto").textContent = D.consejo.texto;
+  } else $("#consejo").remove();
 
   // ---------- Splash ----------
   window.addEventListener("load", () => {
@@ -118,6 +124,7 @@
         slide.innerHTML = `
           <div class="slide-bg ${f ? "" : "placeholder"}" ${f ? `style="background-image:url('${f.url}')"` : ""}></div>
           <div class="slide-content">
+            <span class="eyebrow">${esc(D.negocio.etiqueta || "")}</span>
             <h2>${esc(t.titulo)}</h2>
             <p>${esc(t.texto)}</p>
             <a class="btn btn-light btn-lg" href="#${D.secciones[0]?.id || "contacto"}">Ver servicios</a>
@@ -233,7 +240,8 @@
   D.secciones.forEach(sec => sec.servicios.forEach(s => { servicioPorId[s.id] = { ...s, seccion: sec }; }));
 
   function metaHTML(s) {
-    return [s.duracion && `<span>⏱ ${esc(s.duracion)}</span>`, s.precio && `<span>${esc(s.precio)}</span>`]
+    return [s.min && `<span>⏱ ${dur(s.min)}</span>`,
+            D.negocio.mostrarPrecios && s.precio && `<span class="price">${money(s.precio)}</span>`]
       .filter(Boolean).join("");
   }
 
@@ -259,6 +267,7 @@
                 <div class="card-foot">
                   <div class="meta">${metaHTML(s)}</div>
                   <span class="more">Ver más <i>→</i></span>
+                  <button class="add" data-add="${s.id}" aria-pressed="false">Agregar</button>
                 </div>
               </div>
             </article>`).join("")}
@@ -266,12 +275,14 @@
       </section>`).join("");
 
     cont.addEventListener("click", e => {
+      const add = e.target.closest(".add");
+      if (add) return Turno.alternar(add.dataset.add);
       const card = e.target.closest(".card");
       if (card) Detalle.abrir(card.dataset.srv);
     });
     cont.addEventListener("keydown", e => {
       const card = e.target.closest(".card");
-      if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); Detalle.abrir(card.dataset.srv); }
+      if (card && e.target === card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); Detalle.abrir(card.dataset.srv); }
     });
 
     observarReveal(cont);
@@ -331,7 +342,7 @@
   const Detalle = (() => {
     const sheet = $("#sheet-servicio");
     const track = $("#srv-gallery-track"), dots = $("#srv-gallery-dots");
-    let i = 0, n = 0;
+    let i = 0, n = 0, actual = null;
 
     function ir(k) {
       if (!n) return;
@@ -347,7 +358,8 @@
       $("#srv-titulo").textContent = s.nombre;
       $("#srv-meta").innerHTML = metaHTML(s);
       $("#srv-desc").textContent = s.descripcion;
-      $("#srv-reservar").href = linkWhatsapp(`Hola! Quiero reservar un turno para "${s.nombre}".`);
+      actual = id;
+      Turno.pintar();
 
       const fotos = await Fotos.listar("srv:" + id);
       n = Math.max(1, fotos.length);
@@ -363,8 +375,9 @@
 
     dots.addEventListener("click", e => { const b = e.target.closest("button"); if (b) ir(+b.dataset.k); });
     onSwipe($("#srv-gallery"), dir => ir(i + dir));
+    $("#srv-agregar").onclick = () => Turno.alternar(actual);
 
-    return { abrir };
+    return { abrir, actual: () => actual };
   })();
 
   // ======================================================
@@ -469,6 +482,89 @@
   })();
 
   $("#btn-fotos").onclick = () => Panel.abrir();
+
+  // ======================================================
+  //  PEDIDO DE TURNO (carrito → mensaje de WhatsApp)
+  // ======================================================
+  const Turno = (() => {
+    const elegidos = new Set();
+    const bar = $("#turno-bar"), sheet = $("#sheet-turno");
+    const nombre = $("#turno-nombre"), dia = $("#turno-dia");
+
+    const lista = () => Object.values(servicioPorId).filter(s => elegidos.has(s.id));
+    function totales() {
+      const l = lista();
+      return { n: l.length, min: l.reduce((a, s) => a + (s.min || 0), 0), p: l.reduce((a, s) => a + (s.precio || 0), 0) };
+    }
+    const resumen = t => dur(t.min) + (D.negocio.mostrarPrecios ? " · " + money(t.p) : "");
+
+    function mensaje() {
+      const quien = nombre.value.trim(), cuando = dia.value.trim();
+      return "Hola! " + (quien ? "Soy " + quien + ". " : "") + "Quiero pedir turno para:\n" +
+        lista().map(s => "• " + s.nombre + " (" + dur(s.min) + ")").join("\n") +
+        (cuando ? "\nDía que prefiero: " + cuando : "") +
+        "\n(Pedido desde la app de " + D.negocio.nombre + ")";
+    }
+
+    function alternar(id) {
+      if (!id) return;
+      const agregado = !elegidos.has(id);
+      agregado ? elegidos.add(id) : elegidos.delete(id);
+      pintar(id);
+      toast(agregado ? "Agregado a tu turno" : "Quitado de tu turno");
+    }
+
+    function pintar(cambiado) {
+      $$(".add[data-add]").forEach(b => {
+        const on = elegidos.has(b.dataset.add);
+        b.setAttribute("aria-pressed", on);
+        b.textContent = on ? "Agregado ✓" : "Agregar";
+        b.closest(".card").classList.toggle("elegida", on);
+        if (b.dataset.add === cambiado && !reduceMotion) {
+          b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+        }
+      });
+      const actual = Detalle.actual();
+      if (actual) $("#srv-agregar").textContent = elegidos.has(actual) ? "Quitar del turno" : "Agregar al turno";
+
+      const t = totales();
+      $("#turno-sum").textContent = t.n
+        ? t.n + (t.n === 1 ? " tratamiento" : " tratamientos") + " · " + resumen(t)
+        : "Elegí un tratamiento para pedir turno";
+      $("#btn-pedir").disabled = !t.n;
+      bar.classList.toggle("visible", t.n > 0);
+
+      if (!sheet.hidden) {
+        if (!t.n) return cerrarSheet(sheet);
+        $("#turno-lista").innerHTML = lista().map(s =>
+          `<li><span>${esc(s.nombre)}</span><button data-quitar="${s.id}">Quitar</button></li>`).join("");
+        $("#turno-total").textContent = "Total: " + resumen(t);
+        refrescarMensaje();
+      }
+    }
+
+    function refrescarMensaje() {
+      const m = mensaje();
+      $("#turno-msg").value = m;
+      $("#turno-wa").href = linkWhatsapp(m);
+    }
+
+    $("#btn-pedir").onclick = () => { sheet.hidden = false; pintar(); abrirSheet(sheet); };
+    $("#turno-lista").addEventListener("click", e => {
+      const b = e.target.closest("[data-quitar]");
+      if (b) { elegidos.delete(b.dataset.quitar); pintar(); }
+    });
+    nombre.addEventListener("input", refrescarMensaje);
+    dia.addEventListener("input", refrescarMensaje);
+    $("#turno-copiar").onclick = async e => {
+      const btn = e.currentTarget, area = $("#turno-msg");
+      try { await navigator.clipboard.writeText(area.value); btn.textContent = "Mensaje copiado ✓"; }
+      catch { area.focus(); area.select(); btn.textContent = "Texto seleccionado, copialo"; }
+      setTimeout(() => { btn.textContent = "Copiar mensaje"; }, 2500);
+    };
+
+    return { alternar, pintar };
+  })();
 
   // Cuando cambian las fotos, se actualiza todo lo que se ve
   document.addEventListener("fotos:change", () => {
