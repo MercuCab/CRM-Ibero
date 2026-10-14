@@ -118,6 +118,22 @@ body{
 .celebra-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1200;pointer-events:none}
 .celebra-badge{position:relative;width:76px;height:76px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;animation:badgePop .45s cubic-bezier(.34,1.56,.64,1)}
 .celebra-dot{position:absolute;top:34px;left:34px;width:8px;height:8px;border-radius:2px;animation:confettiFly .85s ease-out forwards}
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+.shimmer-row{background:linear-gradient(90deg,var(--paper-sunk) 25%,var(--paper-raised) 37%,var(--paper-sunk) 63%);background-size:400px 100%;animation:shimmer 1.3s linear infinite;border-radius:10px;height:54px;margin-bottom:8px}
+.header{transition:padding .18s ease}
+.header h1{transition:font-size .18s ease}
+.header-sub{transition:opacity .15s ease,max-height .15s ease}
+.header-compact{padding-top:9px;padding-bottom:9px}
+.header-compact h1{font-size:15px}
+.header-compact .header-sub{opacity:0;max-height:0;overflow:hidden;margin-top:0}
+.fab{position:fixed;right:20px;bottom:22px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:var(--accent-ink);border:none;font-size:26px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:60;transition:transform .2s ease}
+.fab.open{transform:rotate(45deg)}
+.fab-menu{position:fixed;right:22px;bottom:84px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:60;pointer-events:none}
+.fab-item{display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease;pointer-events:none}
+.fab-menu.open .fab-item{opacity:1;transform:translateY(0);pointer-events:auto}
+.fab-menu.open{pointer-events:auto}
+.fab-item-label{background:var(--ink);color:var(--header-ink);font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:7px;white-space:nowrap}
+.fab-item-btn{width:40px;height:40px;border-radius:50%;background:var(--paper-raised);border:1px solid var(--line-strong);box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;flex-shrink:0}
 .header{
   background:linear-gradient(160deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.24) 100%),var(--paper-deep);
   color:var(--ink);
@@ -379,11 +395,18 @@ body{
       <button class="header-icon" onclick="cambiarVendedor()" title="Cerrar sesión">🚪</button>
     </div>
     <div class="infobar" id="infobar"></div>
-    <div class="scroll">
+    <div class="scroll" onscroll="onScreenScroll(this)">
       <div class="dias-grid" id="dias-grid"></div>
       <input class="search-box" type="search" placeholder="Buscar cliente..." id="search" oninput="filtrarClientes(this.value)">
       <div id="lista-clientes"></div>
     </div>
+    <div class="fab-menu" id="fab-menu">
+      <div class="fab-item"><span class="fab-item-label">Lista de precios</span><button class="fab-item-btn" onclick="toggleFab();abrirPrecios()" title="Lista de precios">💲</button></div>
+      <div class="fab-item"><span class="fab-item-label">Promociones</span><button class="fab-item-btn" onclick="toggleFab();abrirPromociones()" title="Promociones">🎁</button></div>
+      <div class="fab-item"><span class="fab-item-label">Objetivos</span><button class="fab-item-btn" onclick="toggleFab();abrirObjetivos()" title="Objetivos">🎯</button></div>
+      <div class="fab-item"><span class="fab-item-label">Agregar cliente</span><button class="fab-item-btn" onclick="toggleFab();abrirNuevoCliente()" title="Agregar cliente">➕</button></div>
+    </div>
+    <button class="fab" id="fab-btn" onclick="toggleFab()" title="Accesos rápidos">+</button>
   </div>
 
   <!-- SCREEN 2: CLIENTE (pedido + historial + resumen) -->
@@ -402,7 +425,7 @@ body{
       <button class="tab" onclick="setTab('devoluciones',this)">Devol.</button>
       <button class="tab" onclick="setTab('info',this)">Info</button>
     </div>
-    <div class="scroll" id="tab-content"></div>
+    <div class="scroll" id="tab-content" onscroll="onScreenScroll(this)"></div>
   </div>
 
   <!-- SCREEN 3: LISTA DE PRECIOS -->
@@ -1542,6 +1565,24 @@ function showScreen(id) {
   document.getElementById(id).classList.add("active");
 }
 
+function onScreenScroll(el){
+  const header = el.closest(".screen")?.querySelector(".header");
+  if(header) header.classList.toggle("header-compact", el.scrollTop > 18);
+}
+
+let fabAbierto = false;
+function toggleFab(){
+  fabAbierto = !fabAbierto;
+  document.getElementById("fab-btn")?.classList.toggle("open", fabAbierto);
+  document.getElementById("fab-menu")?.classList.toggle("open", fabAbierto);
+}
+
+function mostrarEsqueletoLista(elId, filas){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = Array.from({length:filas||5}).map(()=>`<div class="shimmer-row"></div>`).join("");
+}
+
 // TABS
 function setTab(tab, el) {
   tabActual = tab;
@@ -2086,8 +2127,9 @@ function abrirPrecios() {
   document.getElementById("search-precios").value = "";
   document.getElementById("precio-detalle").innerHTML = "";
   document.getElementById("precios-count").textContent = `${Object.keys(PRECIOS).length} productos`;
-  filtrarPrecios("");
   showScreen("screen-precios");
+  mostrarEsqueletoLista("lista-precios", 6);
+  requestAnimationFrame(()=>filtrarPrecios(""));
 }
 
 function filtrarPrecios(q) {
@@ -2450,7 +2492,12 @@ function iniciarSesionVendedor(){
   diaActual = DIAS.includes(DIA_HOY) ? DIA_HOY : "Lunes";
   renderDias();
   document.getElementById("search").value = "";
-  filtrarClientes("");
+  if(Object.keys(DATA).length===0){
+    mostrarEsqueletoLista("lista-clientes", 6);
+    setTimeout(()=>filtrarClientes(document.getElementById("search")?.value||""), 1500);
+  } else {
+    filtrarClientes("");
+  }
   if(fsReady) fsEscucharTodo();
 }
 
