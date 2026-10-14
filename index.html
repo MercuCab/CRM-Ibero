@@ -1373,11 +1373,10 @@ function mostrarCelebracion(){
 
 function animarNumero(el, destino){
   if(!el) return;
-  const actual = parseInt(el.dataset.val||el.textContent)||0;
-  if(actual === destino){ el.textContent = destino; el.dataset.val = destino; return; }
+  const inicio = parseInt(el.textContent)||0;
+  if(inicio === destino){ el.textContent = destino; return; }
   const pasos = 14;
   let i = 0;
-  const inicio = actual;
   clearInterval(el._animTimer);
   el._animTimer = setInterval(()=>{
     i++;
@@ -1385,7 +1384,6 @@ function animarNumero(el, destino){
     el.textContent = v;
     if(i>=pasos){ clearInterval(el._animTimer); el.textContent = destino; }
   }, 22);
-  el.dataset.val = destino;
 }
 
 function copiarTexto(txt){
@@ -1454,6 +1452,8 @@ function marcarVisitadoSinPedido(num){
 }
 
 let infobarPendientesPrev = null;
+let infobarClientesPrev = null;
+let infobarVisitadosPrev = null;
 function renderInfobar(){
   const el = document.getElementById("infobar");
   if(!el) return;
@@ -1462,11 +1462,15 @@ function renderInfobar(){
   const visitados = lista.filter(c=>DATA[`${diaActual}-${c.num}`]?.some(v=>v.fecha===h)).length;
   const pendientes = lista.length - visitados;
   const pendientesCambio = infobarPendientesPrev!==null && infobarPendientesPrev!==pendientes;
+  const clientesDesde = infobarClientesPrev===null ? lista.length : infobarClientesPrev;
+  const visitadosDesde = infobarVisitadosPrev===null ? visitados : infobarVisitadosPrev;
   infobarPendientesPrev = pendientes;
+  infobarClientesPrev = lista.length;
+  infobarVisitadosPrev = visitados;
   el.innerHTML = `
     <span class="info-item"><span class="check">✓</span> Ruta: <b>${diaActual}</b></span>
-    <span class="info-item"><span class="check">✓</span> Clientes: <b id="info-clientes">${lista.length}</b></span>
-    <span class="info-item"><span class="check">✓</span> Visitados: <b id="info-visitados">${visitados}</b></span>
+    <span class="info-item"><span class="check">✓</span> Clientes: <b id="info-clientes">${clientesDesde}</b></span>
+    <span class="info-item"><span class="check">✓</span> Visitados: <b id="info-visitados">${visitadosDesde}</b></span>
     ${pendientes>0?`<span class="info-item warn" id="info-pendientes" style="${pendientesCambio?`display:inline-block;animation:badgePulse .4s ease`:``}">⚠ ${pendientes} pendientes</span>`:`<span class="info-item"><span class="check">✓</span> Ruta completa</span>`}
   `;
   animarNumero(document.getElementById("info-clientes"), lista.length);
