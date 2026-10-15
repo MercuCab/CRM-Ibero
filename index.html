@@ -1740,7 +1740,6 @@ function setDetalleEntrega(d){ detalleEntregaActual = d; pedidoSucio = true; ren
 function tagSistema(v, corto){
   if(v.pasado===undefined) return "";
   if(v.pasado && v.modificadoTrasPasar) return `<span class="sis-tag sis-warn">⚠️ Cambió después de pasarlo</span>`;
-  if(v.pasado && /^no/i.test(v.estadoSistema||"")) return `<span class="sis-tag sis-warn">⛔ No autorizado${!corto&&v.nroPedido?` · ${htmlEsc(v.nroPedido)}`:""}</span>`;
   if(v.pasado) return `<span class="sis-tag sis-ok">✔ Pasado${!corto&&v.nroPedido?` · ${htmlEsc(v.nroPedido)}`:""}</span>`;
   return `<span class="sis-tag sis-pend">📤 Sin pasar</span>`;
 }
