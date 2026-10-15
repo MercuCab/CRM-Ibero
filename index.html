@@ -206,6 +206,15 @@ body{
 .badge-pend{cursor:pointer}
 .badge-ok{background:var(--ok-bg);color:var(--ok)}
 .badge-pend{background:var(--pending-bg);color:var(--pending)}
+.sis-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.sis-pend{background:var(--pending-bg);color:var(--pending)}
+.sis-ok{background:var(--ok-bg);color:var(--ok)}
+.sis-warn{background:#FBD9D3;color:#B3261E}
+.sis-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-2px 0 8px;flex-wrap:wrap}
+.sis-btn{background:none;border:none;color:var(--ink-dim);font-size:11px;text-decoration:underline;cursor:pointer;padding:0}
+.det-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.det-chip{background:var(--paper-sunk);color:var(--ink);border:1px solid var(--line);border-radius:16px;font-size:11.5px;padding:5px 10px;cursor:pointer}
+.det-chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .cli-del{background:none;border:none;color:var(--ink-faint);font-size:15px;padding:4px 6px;cursor:pointer;flex-shrink:0}
 .cli-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);background:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;cursor:pointer;padding:0}
 .cli-check.checked{background:var(--ok);border-color:var(--ok)}
@@ -1447,7 +1456,7 @@ function filtrarClientes(q) {
     return `<div class="cli-card">
       <button class="cli-check ${revisado?'checked':''}" onclick="event.stopPropagation();toggleRevisado('${esc(c.num)}')" title="Marcar que revisé este pedido">${revisado?'✓':''}</button>
       <div class="cli-main" onclick="selCliente('${c.num}','${esc(c.nom)}')">
-        <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num}</div></div>
+        <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num} ${(()=>{const v=(DATA[`${diaActual}-${c.num}`]||[]).find(v=>v.fecha===h&&v.items&&v.items.length);return v?tagSistema(v,true):"";})()}</div></div>
         <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}" data-num="${esc(c.num)}" ${visitado?'':`onclick="event.stopPropagation();marcarVisitadoSinPedido('${esc(c.num)}')" title="Marcar como visitado sin pedido"`}>${visitado?'✅ Visitado':'⏳ Pendiente'}</span>
       </div>
       ${extra?`<button class="cli-del" title="Quitar cliente" onclick="eliminarClienteExtra('${diaActual}','${esc(c.num)}')">✕</button>`:""}
@@ -1538,6 +1547,7 @@ function selCliente(num, nom) {
   }
   devolucionActual = cargarDevolucionDeHoy(num);
   devolucionSucia = false;
+  detalleEntregaActual = detalleInicial(num);
   historialProductosAbierto = false;
   marcasAbiertas = {};
   editandoItemIndex = null;
@@ -1638,6 +1648,7 @@ function eliminarItemHistorial(cod, fecha){
       if(v.fecha!==fecha) return;
       const salen = v.items.filter(it=>it.cod===cod);
       quitados.push(...salen);
+      if(salen.length && v.pasado) v.modificadoTrasPasar = true;
       v.items = v.items.filter(it=>it.cod!==cod);
       v.total = v.items.reduce((s,i)=>s+i.qty,0);
       v.totalMoney = v.items.reduce((s,i)=>s+itemTotal(i),0);
@@ -1649,6 +1660,70 @@ function eliminarItemHistorial(cod, fecha){
     renderTab();
   });
 }
+
+// ENVÍO AL SISTEMA (administraNET) — Claude lee los pedidos "sin pasar",
+// los carga en el sistema y deja acá el N° de pedido y el estado.
+const DETALLES_RAPIDOS = ["Normal CE","Inmediata CE","Normal. Firma y paga al vendedor","INMEDIATA. Firma y paga al vendedor"];
+let detalleEntregaActual = "";
+function detalleInicial(num){
+  const hist = (DATA[`${diaActual}-${num}`]||[]).slice().sort((a,b)=>(b.fechaISO||"").localeCompare(a.fechaISO||""));
+  const deHoy = hist.find(v=>v.fecha===hoy());
+  if(deHoy && deHoy.detalle) return deHoy.detalle;
+  const ultimo = hist.find(v=>v.detalle);
+  return ultimo ? ultimo.detalle : "";
+}
+function renderDetalleEntrega(){
+  return `<div style="padding-top:10px">
+    <div style="font-size:11.5px;font-weight:700;color:var(--ink-dim)">Detalle de entrega (va al sistema)</div>
+    <div class="det-chips">${DETALLES_RAPIDOS.map(d=>`<button class="det-chip ${detalleEntregaActual===d?'on':''}" onclick="setDetalleEntrega('${esc(d)}')">${htmlEsc(d)}</button>`).join("")}</div>
+    <div class="form-row" style="margin-bottom:0"><label>Otro detalle
+      <input type="text" id="ped-detalle" value="${attrEsc(detalleEntregaActual)}" placeholder="Ej: Normal CE" oninput="detalleEntregaActual=this.value;pedidoSucio=true">
+    </label></div>
+  </div>`;
+}
+function setDetalleEntrega(d){ detalleEntregaActual = d; pedidoSucio = true; renderTab(); }
+function tagSistema(v, corto){
+  if(v.pasado===undefined) return "";
+  if(v.pasado && v.modificadoTrasPasar) return `<span class="sis-tag sis-warn">⚠️ Cambió después de pasarlo</span>`;
+  if(v.pasado && /^no/i.test(v.estadoSistema||"")) return `<span class="sis-tag sis-warn">⛔ No autorizado${!corto&&v.nroPedido?` · ${htmlEsc(v.nroPedido)}`:""}</span>`;
+  if(v.pasado) return `<span class="sis-tag sis-ok">✔ Pasado${!corto&&v.nroPedido?` · ${htmlEsc(v.nroPedido)}`:""}</span>`;
+  return `<span class="sis-tag sis-pend">📤 Sin pasar</span>`;
+}
+function toggleSistemaManual(fecha){
+  const v = (DATA[`${diaActual}-${clienteActual?.num}`]||[]).find(v=>v.fecha===fecha);
+  if(!v) return;
+  if(v.pasado){ v.pasado=false; v.modificadoTrasPasar=false; delete v.nroPedido; delete v.estadoSistema; }
+  else { v.pasado=true; v.modificadoTrasPasar=false; v.estadoSistema = v.estadoSistema||"Cargado a mano"; }
+  saveData(DATA);
+  renderTab();
+}
+// Para Claude: lista de pedidos sin pasar y marcado de los ya cargados.
+window.crmPedidosSinPasar = function(){
+  const out = [];
+  Object.keys(DATA).forEach(key=>{
+    const [dia, ...resto] = key.split("-"); const num = resto.join("-");
+    const cli = clientesDelDia(dia).find(c=>c.num===num);
+    (DATA[key]||[]).forEach(v=>{
+      if(!v.items || !v.items.length) return;
+      if(v.pasado===undefined) return;
+      if(v.pasado && !v.modificadoTrasPasar) return;
+      out.push({key, dia, num, nom: cli?cli.nom:"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
+        modificado: !!v.modificadoTrasPasar, nroAnterior: v.nroPedido||"",
+        items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""})), totalMoney:v.totalMoney||0});
+    });
+  });
+  return out.sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
+};
+window.crmMarcarPasado = function(key, fecha, nroPedido, estado, nota){
+  const v = (DATA[key]||[]).find(v=>v.fecha===fecha);
+  if(!v) return false;
+  v.pasado = true; v.modificadoTrasPasar = false;
+  v.nroPedido = nroPedido||""; v.estadoSistema = estado||""; v.notaSistema = nota||"";
+  v.pasadoTs = new Date().toISOString();
+  saveData(DATA);
+  try{ refrescarTrasSyncRemoto(); }catch(e){}
+  return true;
+};
 
 function guardarPedidoBtnClick(){
   const btn = document.getElementById("btn-guardar-pedido");
@@ -1680,11 +1755,14 @@ function guardarPedidoConfirmado() {
   const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
   const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
   if(visita){
+    if(visita.pasado && JSON.stringify(visita.items)!==JSON.stringify(pedidoActual)) visita.modificadoTrasPasar = true;
     visita.items = pedidoActual.map(it=>({...it}));
     visita.total = totalUnidades;
     visita.totalMoney = totalMoney;
+    visita.detalle = detalleEntregaActual;
+    if(visita.pasado===undefined) visita.pasado = false;
   } else {
-    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:pedidoActual.map(it=>({...it})),total:totalUnidades,totalMoney});
+    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:pedidoActual.map(it=>({...it})),total:totalUnidades,totalMoney,detalle:detalleEntregaActual,pasado:false});
   }
   saveData(DATA);
   ajustarObjetivosPorDiferencia(itemsAntes, pedidoActual);
@@ -1849,6 +1927,7 @@ function renderPedido() {
           <span style="color:var(--ink-dim)">Total</span>
           <span style="font-weight:700;font-family:var(--font-mono)">${items.reduce((s,i)=>s+i.qty,0)} unidades · ${money(totalMoney)}</span>
         </div>
+        ${renderDetalleEntrega()}
         <button class="btn btn-ok" id="btn-guardar-pedido" onclick="guardarPedidoBtnClick()">Guardar visita</button>
       </div>`:""}
   `;
@@ -2024,6 +2103,9 @@ function fichaHistorial(hist){
           <div class="planilla-card-money">${money(v.totalMoney||0)}</div>
         </div>
       </div>
+      ${v.items.length && v.pasado!==undefined ? `<div class="sis-row">${tagSistema(v)}
+        <button class="sis-btn" onclick="toggleSistemaManual('${esc(v.fecha)}')">${v.pasado?'Marcar sin pasar':'Ya lo pasé yo'}</button></div>
+        ${v.detalle?`<div style="font-size:11px;color:var(--ink-dim);margin-bottom:6px">📝 ${htmlEsc(v.detalle)}</div>`:""}` : ""}
       ${v.items.length ? v.items.map(it=>{
         const pi = getProd(it.cod);
         return `<div class="planilla-item">
