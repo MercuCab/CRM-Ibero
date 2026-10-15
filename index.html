@@ -772,7 +772,7 @@ const firebaseConfig = {
   appId: "1:509803219367:web:6e36e3a1d74187a7f98e82"
 };
 const FS_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1","crm_ibero_devoluciones_v1","crm_ibero_revisados_v1"];
-let fsDB = null, fsReady = false, fsUnsubs = [], fsBootstrapped = new Set();
+let fsDB = null, fsReady = false, fsUnsubs = [];
 
 try{
   firebase.initializeApp(firebaseConfig);
@@ -824,6 +824,73 @@ function fsAplicarRemoto(base, valor){
   try{ localStorage.setItem(nsKey(base), JSON.stringify(fsValorLocalActual(base))); }catch(e){}
 }
 
+// FUSIÓN DE DATOS ENTRE DISPOSITIVOS
+// En vez de quedarse con la versión "más grande" de todo el documento (lo que
+// podía pisar pedidos reales de un dispositivo con los de otro), cada tipo de
+// dato se combina registro por registro, usando su identificador propio
+// (fecha de visita, id de cobranza/objetivo/promoción, número de cliente).
+function fusionarListaPorFecha(a, b){
+  const out = {};
+  new Set([...Object.keys(a||{}), ...Object.keys(b||{})]).forEach(k=>{
+    const porFecha = new Map();
+    (a?.[k]||[]).forEach(v=>porFecha.set(v.fecha, v));
+    (b?.[k]||[]).forEach(v=>{
+      const existente = porFecha.get(v.fecha);
+      if(!existente || (v.items?.length||0) > (existente.items?.length||0)) porFecha.set(v.fecha, v);
+    });
+    out[k] = Array.from(porFecha.values()).sort((x,y)=>(y.fechaISO||"").localeCompare(x.fechaISO||""));
+  });
+  return out;
+}
+function fusionarListaPorId(a, b){
+  const out = {};
+  new Set([...Object.keys(a||{}), ...Object.keys(b||{})]).forEach(k=>{
+    const porId = new Map();
+    (a?.[k]||[]).forEach(v=>porId.set(v.id, v));
+    (b?.[k]||[]).forEach(v=>{ if(!porId.has(v.id)) porId.set(v.id, v); });
+    out[k] = Array.from(porId.values());
+  });
+  return out;
+}
+function fusionarArrayTopPorId(a, b){
+  const porId = new Map();
+  (a||[]).forEach(v=>porId.set(v.id, v));
+  (b||[]).forEach(v=>{ if(!porId.has(v.id)) porId.set(v.id, v); });
+  return Array.from(porId.values());
+}
+function fusionarClientesExtra(a, b){
+  const out = {};
+  new Set([...Object.keys(a||{}), ...Object.keys(b||{})]).forEach(dia=>{
+    const porNum = new Map();
+    (a?.[dia]||[]).forEach(v=>porNum.set(v.num, v));
+    (b?.[dia]||[]).forEach(v=>{ if(!porNum.has(v.num)) porNum.set(v.num, v); });
+    out[dia] = Array.from(porNum.values());
+  });
+  return out;
+}
+function fusionarClientesInfo(a, b){
+  const out = {...(b||{})};
+  Object.entries(a||{}).forEach(([num, info])=>{ out[num] = {...(out[num]||{}), ...info}; });
+  return out;
+}
+function fusionarRevisados(a, b){ return {...(b||{}), ...(a||{})}; }
+
+function fsFusionar(base, local, remoto){
+  if(remoto===null || remoto===undefined) return local;
+  if(local===null || local===undefined) return remoto;
+  switch(base){
+    case "crm_ibero_prototipo":
+    case "crm_ibero_devoluciones_v1": return fusionarListaPorFecha(local, remoto);
+    case "crm_ibero_cobranzas_v1": return fusionarListaPorId(local, remoto);
+    case "crm_ibero_clientes_extra_v1": return fusionarClientesExtra(local, remoto);
+    case "crm_ibero_clientes_info_v1": return fusionarClientesInfo(local, remoto);
+    case "crm_ibero_revisados_v1": return fusionarRevisados(local, remoto);
+    case "crm_ibero_objetivos_v1":
+    case "crm_ibero_promociones_v1": return fusionarArrayTopPorId(local, remoto);
+    default: return local;
+  }
+}
+
 function fsEscucharTodo(){
   fsDetenerTodo();
   FS_KEYS_VENDEDOR.forEach(base=>{
@@ -832,25 +899,14 @@ function fsEscucharTodo(){
     const unsub = ref.onSnapshot(snap=>{
       const remotoExiste = snap.exists && typeof snap.data().json === "string";
       const remoto = remotoExiste ? JSON.parse(snap.data().json) : null;
-      if(!fsBootstrapped.has(base)){
-        fsBootstrapped.add(base);
-        const local = fsValorLocalActual(base);
-        const tamRemoto = remoto ? JSON.stringify(remoto).length : 0;
-        const tamLocal = JSON.stringify(local).length;
-        // Primera vez que este dispositivo sincroniza esta clave: se queda con
-        // el lado más "grande" (con más info) para no pisar historial real con
-        // datos vacíos de un dispositivo que nunca los tuvo cargados.
-        if(remotoExiste && tamRemoto >= tamLocal){
-          fsAplicarRemoto(base, remoto);
-          refrescarTrasSyncRemoto();
-        } else {
-          fsGuardar(base, local);
-        }
-        return;
-      }
-      if(remotoExiste){
-        fsAplicarRemoto(base, remoto);
+      const local = fsValorLocalActual(base);
+      const fusionado = fsFusionar(base, local, remoto);
+      if(JSON.stringify(fusionado) !== JSON.stringify(local)){
+        fsAplicarRemoto(base, fusionado);
         refrescarTrasSyncRemoto();
+      }
+      if(JSON.stringify(fusionado) !== JSON.stringify(remoto)){
+        fsGuardar(base, fusionado);
       }
     }, err=>console.warn("fsEscuchar", base, err.message));
     fsUnsubs.push(unsub);
@@ -860,7 +916,6 @@ function fsEscucharTodo(){
 function fsDetenerTodo(){
   fsUnsubs.forEach(u=>{ try{ u(); }catch(e){} });
   fsUnsubs = [];
-  fsBootstrapped = new Set();
 }
 
 function refrescarTrasSyncRemoto(){
