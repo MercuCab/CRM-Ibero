@@ -911,6 +911,14 @@ function fsEscucharTodo(){
     }, err=>console.warn("fsEscuchar", base, err.message));
     fsUnsubs.push(unsub);
   });
+  const refP = fsPasadosRef(vendedorActual);
+  if(refP){
+    fsUnsubs.push(refP.onSnapshot(snap=>{
+      PASADOS = snap.exists ? (snap.data()||{}) : {};
+      try{ localStorage.setItem(nsKey("crm_ibero_pasados_v2"), JSON.stringify(PASADOS)); }catch(e){}
+      refrescarTrasSyncRemoto();
+    }, err=>console.warn("fsPasados", err.message)));
+  }
 }
 
 function fsDetenerTodo(){
@@ -1511,7 +1519,7 @@ function filtrarClientes(q) {
     return `<div class="cli-card">
       <button class="cli-check ${revisado?'checked':''}" onclick="event.stopPropagation();toggleRevisado('${esc(c.num)}')" title="Marcar que revisé este pedido">${revisado?'✓':''}</button>
       <div class="cli-main" onclick="selCliente('${c.num}','${esc(c.nom)}')">
-        <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num} ${(()=>{const v=(DATA[`${diaActual}-${c.num}`]||[]).find(v=>v.fecha===h&&v.items&&v.items.length);return v?tagSistema(v,true):"";})()}</div></div>
+        <div><div class="cli-nom">${dot}${c.nom}</div><div class="cli-num">${c.num} ${(()=>{const k=`${diaActual}-${c.num}`;const v=(DATA[k]||[]).find(v=>v.fecha===h&&v.items&&v.items.length);return v?tagSistema(k,v,true):"";})()}</div></div>
         <span class="cli-badge ${visitado?'badge-ok':'badge-pend'}" data-num="${esc(c.num)}" ${visitado?'':`onclick="event.stopPropagation();marcarVisitadoSinPedido('${esc(c.num)}')" title="Marcar como visitado sin pedido"`}>${visitado?'✅ Visitado':'⏳ Pendiente'}</span>
       </div>
       ${extra?`<button class="cli-del" title="Quitar cliente" onclick="eliminarClienteExtra('${diaActual}','${esc(c.num)}')">✕</button>`:""}
@@ -1737,79 +1745,90 @@ function renderDetalleEntrega(){
   </div>`;
 }
 function setDetalleEntrega(d){ detalleEntregaActual = d; pedidoSucio = true; renderTab(); }
-function tagSistema(v, corto){
-  if(v.pasado===undefined) return "";
-  if(v.pasado && v.modificadoTrasPasar) return `<span class="sis-tag sis-warn">⚠️ Cambió después de pasarlo</span>`;
-  if(v.pasado) return `<span class="sis-tag sis-ok">✔ Pasado${!corto&&v.nroPedido?` · ${htmlEsc(v.nroPedido)}`:""}</span>`;
+// Estado "pasado al sistema": se guarda en un documento aparte (vendedores/{v}/datos/pasados),
+// un campo por visita, para que ningún dispositivo lo pise al sincronizar pedidos.
+let PASADOS = (()=>{ try{ return JSON.parse(localStorage.getItem(nsKey("crm_ibero_pasados_v2"))||"{}"); }catch(e){ return {}; } })();
+function fsPasadosRef(vend){ return (fsDB && vend) ? fsDB.collection("vendedores").doc(vend).collection("datos").doc("pasados") : null; }
+function idVisita(key, v){ return `${key}__${String(v.fecha||"").replace(/\//g,"-")}`; }
+function hashItems(items){ return (items||[]).map(i=>`${i.cod}:${i.qty}:${i.desc||0}`).join(","); }
+function infoSistema(key, v, pasados){
+  const p = (pasados||PASADOS)[idVisita(key, v)];
+  if(p) return {pasado:true, nro:p.nro||"", estado:p.estado||"", modificado: p.h!==undefined && p.h!==hashItems(v.items)};
+  if(v.pasado===true) return {pasado:true, nro:v.nroPedido||"", estado:v.estadoSistema||"", modificado:!!v.modificadoTrasPasar};
+  if(v.pasado===false) return {pasado:false};
+  return null;
+}
+function tagSistema(key, v, corto){
+  const i = infoSistema(key, v);
+  if(!i) return "";
+  if(i.pasado && i.modificado) return `<span class="sis-tag sis-warn">⚠️ Cambió después de pasarlo</span>`;
+  if(i.pasado) return `<span class="sis-tag sis-ok">✔ Pasado${!corto&&i.nro?` · ${htmlEsc(i.nro)}`:""}</span>`;
   return `<span class="sis-tag sis-pend">📤 Sin pasar</span>`;
 }
+async function escribirPasado(vend, id, valor){
+  const ref = fsPasadosRef(vend);
+  if(!ref) return false;
+  await ref.set({[id]: valor===null ? firebase.firestore.FieldValue.delete() : valor}, {merge:true});
+  return true;
+}
 function toggleSistemaManual(fecha){
-  const v = (DATA[`${diaActual}-${clienteActual?.num}`]||[]).find(v=>v.fecha===fecha);
+  const key = `${diaActual}-${clienteActual?.num}`;
+  const v = (DATA[key]||[]).find(v=>v.fecha===fecha);
   if(!v) return;
-  if(v.pasado){ v.pasado=false; v.modificadoTrasPasar=false; delete v.nroPedido; delete v.estadoSistema; }
-  else { v.pasado=true; v.modificadoTrasPasar=false; v.estadoSistema = v.estadoSistema||"Cargado a mano"; }
-  saveData(DATA);
+  const id = idVisita(key, v);
+  const i = infoSistema(key, v);
+  if(i && i.pasado){
+    delete PASADOS[id];
+    if(v.pasado===true){ v.pasado=false; v.modificadoTrasPasar=false; saveData(DATA); }
+    escribirPasado(vendedorActual, id, null).catch(e=>console.warn(e));
+  } else {
+    PASADOS[id] = {nro:"", estado:"Cargado a mano", h:hashItems(v.items), ts:new Date().toISOString()};
+    escribirPasado(vendedorActual, id, PASADOS[id]).catch(e=>console.warn(e));
+  }
+  try{ localStorage.setItem(nsKey("crm_ibero_pasados_v2"), JSON.stringify(PASADOS)); }catch(e){}
   renderTab();
 }
-// Para Claude: lista de pedidos sin pasar y marcado de los ya cargados.
-window.crmPedidosSinPasar = function(){
-  const out = [];
-  Object.keys(DATA).forEach(key=>{
-    const [dia, ...resto] = key.split("-"); const num = resto.join("-");
-    const cli = clientesDelDia(dia).find(c=>c.num===num);
-    (DATA[key]||[]).forEach(v=>{
-      if(!v.items || !v.items.length) return;
-      if(v.pasado===undefined) return;
-      if(v.pasado && !v.modificadoTrasPasar) return;
-      out.push({key, dia, num, nom: cli?cli.nom:"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
-        modificado: !!v.modificadoTrasPasar, nroAnterior: v.nroPedido||"",
-        items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""})), totalMoney:v.totalMoney||0});
-    });
-  });
-  return out.sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
-};
-window.crmMarcarPasado = function(key, fecha, nroPedido, estado, nota){
-  const v = (DATA[key]||[]).find(v=>v.fecha===fecha);
-  if(!v) return false;
-  v.pasado = true; v.modificadoTrasPasar = false;
-  v.nroPedido = nroPedido||""; v.estadoSistema = estado||""; v.notaSistema = nota||"";
-  v.pasadoTs = new Date().toISOString();
-  saveData(DATA);
-  try{ refrescarTrasSyncRemoto(); }catch(e){}
-  return true;
-};
-
-// Para Claude: leer/marcar pedidos de otra sesión (vendedor) directo en Firestore.
-async function _fsDatosDe(vend){
-  const ref = fsDB.collection("vendedores").doc(vend).collection("datos").doc("crm_ibero_prototipo");
-  const snap = await ref.get();
-  return {ref, D: snap.exists && typeof snap.data().json==="string" ? JSON.parse(snap.data().json) : {}};
+// Para Claude: leer pedidos sin pasar (de cualquier sesión) y marcarlos como pasados.
+async function _datosYPasadosDe(vend){
+  const [d, p] = await Promise.all([
+    fsDB.collection("vendedores").doc(vend).collection("datos").doc("crm_ibero_prototipo").get(),
+    fsPasadosRef(vend).get()
+  ]);
+  return {D: d.exists && typeof d.data().json==="string" ? JSON.parse(d.data().json) : {}, P: p.exists ? (p.data()||{}) : {}};
 }
 window.crmPedidosSinPasarDe = async function(vend){
-  const {D} = await _fsDatosDe(vend);
+  vend = vend || vendedorActual;
+  const {D, P} = await _datosYPasadosDe(vend);
   const base = CLIENTES_POR_VENDEDOR[vend]||{};
+  const extra = vend===vendedorActual ? CLIENTES_EXTRA : {};
   const out = [];
   Object.keys(D).forEach(key=>{
     const [dia, ...resto] = key.split("-"); const num = resto.join("-");
-    const cli = (base[dia]||[]).find(c=>c.num===num);
+    const cli = [...(base[dia]||[]), ...(extra[dia]||[])].find(c=>c.num===num);
     (D[key]||[]).forEach(v=>{
-      if(!v.items || !v.items.length || v.pasado===undefined) return;
-      if(v.pasado && !v.modificadoTrasPasar) return;
+      if(!v.items || !v.items.length) return;
+      const i = infoSistema(key, v, P);
+      if(!i) return;
+      if(i.pasado && !i.modificado) return;
       out.push({vendedor:vend, key, dia, num, nom: cli?cli.nom:"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
-        modificado: !!v.modificadoTrasPasar, items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""}))});
+        modificado: !!i.modificado, nroAnterior: i.nro||"",
+        items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""}))});
     });
   });
   return out.sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
 };
+window.crmPedidosSinPasar = ()=>window.crmPedidosSinPasarDe(vendedorActual);
 window.crmMarcarPasadoDe = async function(vend, key, fecha, nroPedido, estado, nota){
-  if(vend===vendedorActual) return window.crmMarcarPasado(key, fecha, nroPedido, estado, nota);
-  const {ref, D} = await _fsDatosDe(vend);
+  const {D} = await _datosYPasadosDe(vend);
   const v = (D[key]||[]).find(v=>v.fecha===fecha);
   if(!v) return false;
-  Object.assign(v, {pasado:true, modificadoTrasPasar:false, nroPedido:nroPedido||"", estadoSistema:estado||"", notaSistema:nota||"", pasadoTs:new Date().toISOString()});
-  await ref.set({ json: JSON.stringify(D), ts: firebase.firestore.FieldValue.serverTimestamp() });
+  const id = idVisita(key, v);
+  const valor = {nro:nroPedido||"", estado:estado||"", nota:nota||"", h:hashItems(v.items), ts:new Date().toISOString()};
+  await escribirPasado(vend, id, valor);
+  if(vend===vendedorActual){ PASADOS[id]=valor; try{ refrescarTrasSyncRemoto(); }catch(e){} }
   return true;
 };
+window.crmMarcarPasado = (key, fecha, nro, estado, nota)=>window.crmMarcarPasadoDe(vendedorActual, key, fecha, nro, estado, nota);
 
 function guardarPedidoBtnClick(){
   const btn = document.getElementById("btn-guardar-pedido");
@@ -2189,9 +2208,9 @@ function fichaHistorial(hist){
           <div class="planilla-card-money">${money(v.totalMoney||0)}</div>
         </div>
       </div>
-      ${v.items.length && v.pasado!==undefined ? `<div class="sis-row">${tagSistema(v)}
-        <button class="sis-btn" onclick="toggleSistemaManual('${esc(v.fecha)}')">${v.pasado?'Marcar sin pasar':'Ya lo pasé yo'}</button></div>
-        ${v.detalle?`<div style="font-size:11px;color:var(--ink-dim);margin-bottom:6px">📝 ${htmlEsc(v.detalle)}</div>`:""}` : ""}
+      ${(()=>{const k=`${diaActual}-${clienteActual?.num}`;const i=v.items.length?infoSistema(k,v):null;return i?`<div class="sis-row">${tagSistema(k,v)}
+        <button class="sis-btn" onclick="toggleSistemaManual('${esc(v.fecha)}')">${i.pasado?'Marcar sin pasar':'Ya lo pasé yo'}</button></div>`:"";})()}
+        ${v.detalle?`<div style="font-size:11px;color:var(--ink-dim);margin-bottom:6px">📝 ${htmlEsc(v.detalle)}</div>`:""}
       ${v.items.length ? v.items.map(it=>{
         const pi = getProd(it.cod);
         return `<div class="planilla-item">
