@@ -1779,6 +1779,38 @@ window.crmMarcarPasado = function(key, fecha, nroPedido, estado, nota){
   return true;
 };
 
+// Para Claude: leer/marcar pedidos de otra sesión (vendedor) directo en Firestore.
+async function _fsDatosDe(vend){
+  const ref = fsDB.collection("vendedores").doc(vend).collection("datos").doc("crm_ibero_prototipo");
+  const snap = await ref.get();
+  return {ref, D: snap.exists && typeof snap.data().json==="string" ? JSON.parse(snap.data().json) : {}};
+}
+window.crmPedidosSinPasarDe = async function(vend){
+  const {D} = await _fsDatosDe(vend);
+  const base = CLIENTES_POR_VENDEDOR[vend]||{};
+  const out = [];
+  Object.keys(D).forEach(key=>{
+    const [dia, ...resto] = key.split("-"); const num = resto.join("-");
+    const cli = (base[dia]||[]).find(c=>c.num===num);
+    (D[key]||[]).forEach(v=>{
+      if(!v.items || !v.items.length || v.pasado===undefined) return;
+      if(v.pasado && !v.modificadoTrasPasar) return;
+      out.push({vendedor:vend, key, dia, num, nom: cli?cli.nom:"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
+        modificado: !!v.modificadoTrasPasar, items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""}))});
+    });
+  });
+  return out.sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
+};
+window.crmMarcarPasadoDe = async function(vend, key, fecha, nroPedido, estado, nota){
+  if(vend===vendedorActual) return window.crmMarcarPasado(key, fecha, nroPedido, estado, nota);
+  const {ref, D} = await _fsDatosDe(vend);
+  const v = (D[key]||[]).find(v=>v.fecha===fecha);
+  if(!v) return false;
+  Object.assign(v, {pasado:true, modificadoTrasPasar:false, nroPedido:nroPedido||"", estadoSistema:estado||"", notaSistema:nota||"", pasadoTs:new Date().toISOString()});
+  await ref.set({ json: JSON.stringify(D), ts: firebase.firestore.FieldValue.serverTimestamp() });
+  return true;
+};
+
 function guardarPedidoBtnClick(){
   const btn = document.getElementById("btn-guardar-pedido");
   if(btn){ btn.disabled = true; btn.innerHTML = `<span class="btn-spinner"></span>Guardando...`; }
