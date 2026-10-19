@@ -41,7 +41,18 @@
     return blob || file;
   }
 
-  const soloImagenes = files => [...files].filter(f => f.type.startsWith("image/"));
+  // El destino "hero-video" lleva videos (mp4/webm); el resto, fotos.
+  const MAX_VIDEO = 20 * 1024 * 1024;
+  const esVideo = target => target === "hero-video";
+  function soloImagenes(files, target) {
+    const lista = [...files];
+    if (!esVideo(target)) return lista.filter(f => f.type.startsWith("image/"));
+    const videos = lista.filter(f => f.type === "video/mp4" || f.type === "video/webm");
+    if (videos.some(f => f.size > MAX_VIDEO)) throw { code: "video_grande" };
+    return videos;
+  }
+  // Las fotos se achican; los videos se suben tal cual.
+  const preparar = (f, target) => esVideo(target) ? Promise.resolve(f) : comprimir(f);
 
   // ======================================================
   //  MODO ARTEFACTO
@@ -91,11 +102,11 @@
 
     async function agregar(target, files, onProgress) {
       if (!assets) throw { code: "not_granted" };
-      const imgs = soloImagenes(files);
+      const imgs = soloImagenes(files, target);
       let hechas = 0;
       for (const f of imgs) {
-        const blob = await comprimir(f);
-        const r = await assets.upload(blob, { type: "image/jpeg" });
+        const blob = await preparar(f, target);
+        const r = await assets.upload(blob, { type: esVideo(target) ? f.type : "image/jpeg" });
         fijar(target, [...ids(target), r.id]);
         hechas++;
         onProgress && onProgress(hechas / imgs.length);
@@ -192,11 +203,11 @@
     }
 
     async function agregar(target, files, onProgress) {
-      const imgs = soloImagenes(files);
+      const imgs = soloImagenes(files, target);
       let orden = (await listar(target)).length;
       let hechas = 0;
       for (const f of imgs) {
-        const blob = await comprimir(f);
+        const blob = await preparar(f, target);
         await tx("readwrite", s => s.add({ target, blob, orden: orden++, creada: Date.now() }));
         hechas++;
         onProgress && onProgress(hechas / imgs.length);

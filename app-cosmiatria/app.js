@@ -109,8 +109,22 @@
     const track = $("#hero-track"), dots = $("#hero-dots"), bar = $("#hero-progress");
     let i = 0, n = 0, timer = null, anim = null, pausado = false;
 
+    // Diapositiva con video de fondo, texto vertical y botón (estilo "face")
+    function slideVideo(t, video, foto) {
+      const fondo = video
+        ? `<video class="slide-video" src="${video.url}" ${reduceMotion ? "" : "autoplay"} loop muted playsinline preload="metadata" aria-hidden="true"></video>`
+        : `<div class="slide-bg ${foto ? "" : "placeholder"}" ${foto ? `style="background-image:url('${foto.url}')"` : ""}></div>`;
+      return `${fondo}
+        <div class="slide-overlay"></div>
+        <div class="slide-face">
+          <h2 class="vertical" aria-label="${esc(t.titulo || t.vertical)}">${esc(t.vertical)}</h2>
+          <a class="btn btn-light btn-shine" href="#${esc(t.destino || D.secciones[0]?.id || "contacto")}">${esc(t.boton)}</a>
+        </div>`;
+    }
+
     async function render() {
       const fotos = await Fotos.listar("hero");
+      const [video] = await Fotos.listar("hero-video");
       const textos = D.hero.length ? D.hero : [{ titulo: D.negocio.nombre, texto: D.negocio.eslogan }];
       n = Math.max(textos.length, fotos.length);
       track.innerHTML = "";
@@ -121,7 +135,10 @@
         const slide = document.createElement("div");
         slide.className = "slide";
         slide.setAttribute("aria-roledescription", "slide");
-        slide.innerHTML = `
+        if (t.tipo === "video" && k < textos.length) {
+          slide.classList.add("face");
+          slide.innerHTML = slideVideo(t, video, f);
+        } else slide.innerHTML = `
           <div class="slide-bg ${f ? "" : "placeholder"}" ${f ? `style="background-image:url('${f.url}')"` : ""}></div>
           <div class="slide-content">
             <span class="eyebrow">${esc(D.negocio.etiqueta || "")}</span>
@@ -143,7 +160,12 @@
     function ir(k, inmediato) {
       if (!n) return;
       i = (k + n) % n;
-      $$(".slide", track).forEach((s, idx) => s.classList.toggle("active", idx === i));
+      $$(".slide", track).forEach((s, idx) => {
+        s.classList.toggle("active", idx === i);
+        // El video solo corre mientras su diapositiva está a la vista
+        const v = $("video", s);
+        if (v) idx === i && !reduceMotion ? v.play().catch(() => {}) : v.pause();
+      });
       $$("button", dots).forEach((d, idx) => {
         d.classList.toggle("active", idx === i);
         d.setAttribute("aria-selected", idx === i);
@@ -389,7 +411,10 @@
     const drop = $("#dropzone"), prog = $("#upload-progress");
 
     // Lista de destinos posibles
-    const destinos = [{ v: "hero", t: "🏠 Carrusel de inicio", g: "General" }];
+    const destinos = [
+      { v: "hero", t: "🏠 Carrusel de inicio", g: "General" },
+      { v: "hero-video", t: "🎬 Video de fondo (rostro)", g: "General" }
+    ];
     D.secciones.forEach(sec => {
       destinos.push({ v: "sec:" + sec.id, t: `Portada de la sección`, g: `${sec.icono} ${sec.nombre}` });
       sec.servicios.forEach(s => destinos.push({ v: "srv:" + s.id, t: s.nombre, g: `${sec.icono} ${sec.nombre}` }));
@@ -412,11 +437,17 @@
 
     async function render() {
       const target = sel.value;
+      const esVid = target === "hero-video";
+      input.accept = esVid ? "video/mp4,video/webm" : "image/*";
+      $("#dropzone strong").textContent = esVid ? "Tocá para elegir el video" : "Tocá para elegir fotos";
+      $("#dropzone span").textContent = esVid ? "MP4 o WEBM, hasta 20 MB · se usa el primero" : "o arrastralas acá · JPG, PNG o WEBP";
       const fotos = await Fotos.listar(target);
       $("#fotos-count").textContent = `${fotos.length} ${fotos.length === 1 ? "foto" : "fotos"} en ${nombreDestino(target)}`;
       grid.innerHTML = fotos.length ? fotos.map((f, k) => `
         <div class="foto" data-id="${f.id}" style="animation-delay:${k * 0.04}s">
-          <img src="${f.url}" alt="">
+          ${target === "hero-video"
+            ? `<video src="${f.url}" muted loop playsinline preload="metadata"></video>`
+            : `<img src="${f.url}" alt="">`}
           ${k === 0 ? `<span class="badge">Portada</span>` : ""}
           <div class="acts">
             <button data-act="izq" title="Mover a la izquierda" ${k === 0 ? "disabled" : ""}>←</button>
@@ -442,10 +473,14 @@
       bar.style.width = "0";
       try {
         const n = await Fotos.agregar(sel.value, files, p => { bar.style.width = (p * 100) + "%"; });
-        toast(n ? `✓ ${n} ${n === 1 ? "foto cargada" : "fotos cargadas"}` : "No se encontraron imágenes");
+        const vid = sel.value === "hero-video";
+        toast(n ? `✓ ${n} ${vid ? (n === 1 ? "video cargado" : "videos cargados") : (n === 1 ? "foto cargada" : "fotos cargadas")}`
+                : vid ? "Elegí un video MP4 o WEBM" : "No se encontraron imágenes");
       } catch (err) {
+        if (err && err.code === "video_grande") return toast("El video pesa más de 20 MB. Probá con uno más corto o comprimido.");
+        if (err && err.code === "too_large") return toast("El archivo es demasiado pesado para subirlo.");
         console.error(err);
-        toast("No se pudo guardar la foto. Probá con otra imagen.");
+        toast("No se pudo guardar el archivo. Probá con otro.");
       } finally {
         setTimeout(() => { prog.hidden = true; }, 400);
         input.value = "";

@@ -12,8 +12,11 @@ window.COSMIA_DATA = {
   },
 
   // Slides del carrusel principal (las fotos se cargan desde el panel)
+  // La primera diapositiva lleva el video "rostro" de fondo (se sube desde
+  // el panel de fotos, en "Video de fondo") y el texto en vertical.
   hero: [
-    { titulo: "Piel Serena", texto: "Cosmiatría y cuidado de la piel, con turno previo." },
+    { tipo: "video", vertical: "rostro", boton: "Ver tratamientos faciales", destino: "limpieza",
+      titulo: "Tratamientos faciales" },
     { titulo: "Tu piel, renovada", texto: "Limpiezas, peelings e hidratación según tu tipo de piel." },
     { titulo: "Aparatología", texto: "Punta de diamante, radiofrecuencia y dermapen." }
   ],

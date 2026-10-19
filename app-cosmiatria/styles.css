@@ -40,7 +40,7 @@ button{font:inherit;color:inherit}
 .icon-btn:active{transform:scale(.92)}
 
 /* ---------- Hero slider ---------- */
-.hero{position:relative;height:min(72vh,600px);min-height:440px;overflow:hidden;background:var(--ink);touch-action:pan-y}
+.hero{position:relative;height:400px;overflow:hidden;background:var(--ink);touch-action:pan-y}
 .hero-track{position:absolute;inset:0}
 .slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 1s var(--ease),visibility 1s}
 .slide.active{opacity:1;visibility:visible}
@@ -65,6 +65,37 @@ button{font:inherit;color:inherit}
 .hero-dots button.active{width:30px;background:#fff}
 .hero-progress{position:absolute;z-index:3;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.15)}
 .hero-progress span{display:block;height:100%;width:0;background:var(--accent)}
+@media (min-width:640px){.hero{height:500px}}
+@media (min-width:860px){.hero{height:600px}}
+
+/* Diapositiva "rostro": video de fondo, texto vertical y botón */
+.slide.face::after{display:none}
+.slide-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
+.slide-overlay{position:absolute;inset:0;z-index:1;background:rgba(0,0,0,.1);transition:background-color .5s}
+.slide-face{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
+  padding:24px max(24px,env(safe-area-inset-right,0px)) 64px max(24px,env(safe-area-inset-left,0px));color:#fff}
+@media (min-width:640px){.slide-face{padding-top:32px;padding-left:max(32px,env(safe-area-inset-left,0px))}}
+@media (min-width:860px){.slide-face{padding:48px 6vw 72px}}
+.vertical{margin:calc(var(--topbar-h) - 16px) 0 0;font-size:48px;font-weight:500;line-height:1;letter-spacing:-.01em;
+  writing-mode:vertical-lr;transform:rotate(180deg);text-shadow:0 2px 24px rgba(0,0,0,.25);
+  opacity:0;transition:transform .5s var(--ease),opacity .9s .2s var(--ease)}
+@media (min-width:640px){.vertical{font-size:60px}}
+@media (min-width:860px){.vertical{font-size:72px}}
+@media (min-width:1100px){.vertical{font-size:96px}}
+.slide.face.active .vertical{opacity:1}
+.slide-face .btn{margin-top:auto;padding:12px 32px;font-size:14px;opacity:0;transform:translateY(20px);transition:opacity .8s .45s var(--ease),transform .3s ease,box-shadow .3s ease}
+.slide.face.active .slide-face .btn{opacity:1;transform:none}
+@media (hover:hover){
+  .slide.face:hover .slide-video{transform:scale(1.05)}
+  .slide.face:hover .slide-overlay{background:rgba(0,0,0,.2)}
+  .slide.face:hover .vertical{transform:rotate(180deg) translateY(8px)}
+}
+/* Brillo que cruza el botón al pasar el mouse */
+.btn-shine::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(0,0,0,.06) 50%,transparent 100%);transform:translateX(-100%);transition:transform .5s ease}
+.slide.face.active .btn-shine:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn-shine:hover::before{transform:translateX(100%)}
+.slide.face.active .btn-shine:active{transform:none;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.foto video{width:100%;height:100%;object-fit:cover}
 
 /* ---------- Chips ---------- */
 .chips-wrap{position:sticky;top:var(--topbar-h);z-index:20;background:rgba(241,244,241,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);transition:top .35s var(--ease)}
