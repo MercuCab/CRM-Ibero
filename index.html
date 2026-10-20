@@ -809,7 +809,7 @@ const firebaseConfig = {
   messagingSenderId: "509803219367",
   appId: "1:509803219367:web:6e36e3a1d74187a7f98e82"
 };
-const FS_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1","crm_ibero_devoluciones_v1","crm_ibero_revisados_v1","crm_ibero_descuentos_cliente_v1"];
+const FS_KEYS_VENDEDOR = ["crm_ibero_prototipo","crm_ibero_clientes_extra_v1","crm_ibero_clientes_info_v1","crm_ibero_cobranzas_v1","crm_ibero_objetivos_v1","crm_ibero_promociones_v1","crm_ibero_devoluciones_v1","crm_ibero_revisados_v1","crm_ibero_descuentos_cliente_v1","crm_ibero_clientes_renombrados_v1"];
 let fsDB = null, fsReady = false, fsUnsubs = [];
 
 try{
@@ -847,6 +847,7 @@ function fsValorLocalActual(base){
     case "crm_ibero_devoluciones_v1": return DEVOLUCIONES;
     case "crm_ibero_revisados_v1": return REVISADOS;
     case "crm_ibero_descuentos_cliente_v1": return DESCUENTOS_CLIENTE;
+    case "crm_ibero_clientes_renombrados_v1": return CLIENTES_RENOMBRADOS;
   }
 }
 function fsAplicarRemoto(base, valor){
@@ -860,6 +861,7 @@ function fsAplicarRemoto(base, valor){
     case "crm_ibero_devoluciones_v1": DEVOLUCIONES = valor||{}; break;
     case "crm_ibero_revisados_v1": REVISADOS = valor||{}; break;
     case "crm_ibero_descuentos_cliente_v1": DESCUENTOS_CLIENTE = valor||{}; break;
+    case "crm_ibero_clientes_renombrados_v1": CLIENTES_RENOMBRADOS = valor||{}; break;
   }
   try{ localStorage.setItem(nsKey(base), JSON.stringify(fsValorLocalActual(base))); }catch(e){}
 }
@@ -929,7 +931,8 @@ function fsFusionar(base, local, remoto){
     case "crm_ibero_cobranzas_v1": return fusionarListaPorId(local, remoto);
     case "crm_ibero_clientes_extra_v1": return fusionarClientesExtra(local, remoto);
     case "crm_ibero_clientes_info_v1":
-    case "crm_ibero_descuentos_cliente_v1": return fusionarClientesInfo(local, remoto);
+    case "crm_ibero_descuentos_cliente_v1":
+    case "crm_ibero_clientes_renombrados_v1": return fusionarClientesInfo(local, remoto);
     case "crm_ibero_revisados_v1": return fusionarRevisados(local, remoto);
     case "crm_ibero_objetivos_v1":
     case "crm_ibero_promociones_v1": return fusionarArrayTopPorId(local, remoto);
@@ -1399,8 +1402,30 @@ let PRECIOS = loadPrecios();
 function loadClientesExtra(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_clientes_extra_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
 function saveClientesExtra(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_extra_v1"), JSON.stringify(CLIENTES_EXTRA)); }catch(e){} fsGuardar("crm_ibero_clientes_extra_v1", CLIENTES_EXTRA); }
 let CLIENTES_EXTRA = loadClientesExtra();
-function clientesDelDia(dia){ const base=CLIENTES_POR_VENDEDOR[vendedorActual]||{}; return [...(base[dia]||[]), ...(CLIENTES_EXTRA[dia]||[])]; }
+// CLIENTES_RENOMBRADOS permite corregir desde la app el número o el nombre de
+// un cliente "de base" (el que viene cargado de fábrica para cada vendedor),
+// sin tener que editar el código. Se guarda con la clave `${dia}-${numOriginal}`
+// apuntando al {num, nom} corregido; clientesDelDia() lo aplica al armar la
+// lista del día. Los clientes "extra" (agregados a mano) se editan directo.
+function loadClientesRenombrados(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_clientes_renombrados_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
+function saveClientesRenombrados(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_renombrados_v1"), JSON.stringify(CLIENTES_RENOMBRADOS)); }catch(e){} fsGuardar("crm_ibero_clientes_renombrados_v1", CLIENTES_RENOMBRADOS); }
+let CLIENTES_RENOMBRADOS = loadClientesRenombrados();
+function clientesDelDia(dia){
+  const base=CLIENTES_POR_VENDEDOR[vendedorActual]||{};
+  const baseClientes = (base[dia]||[]).map(c=>{
+    const ov = CLIENTES_RENOMBRADOS[`${dia}-${c.num}`];
+    return ov ? {num: ov.num, nom: ov.nom} : c;
+  });
+  return [...baseClientes, ...(CLIENTES_EXTRA[dia]||[])];
+}
 function esClienteExtra(dia,num){ return (CLIENTES_EXTRA[dia]||[]).some(c=>c.num===num); }
+// Encuentra la clave de CLIENTES_RENOMBRADOS para un num actual: si ya fue
+// renombrado antes, devuelve la clave original (para poder re-renombrarlo de
+// nuevo); si no, asume que "num" todavía es el original.
+function claveRenombreParaNum(dia, num){
+  const existente = Object.entries(CLIENTES_RENOMBRADOS).find(([k,v])=>k.startsWith(`${dia}-`) && v.num===num);
+  return existente ? existente[0] : `${dia}-${num}`;
+}
 
 function loadClientesInfo(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_clientes_info_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
 function saveClientesInfo(){ try{ localStorage.setItem(nsKey("crm_ibero_clientes_info_v1"), JSON.stringify(CLIENTES_INFO)); }catch(e){} fsGuardar("crm_ibero_clientes_info_v1", CLIENTES_INFO); }
@@ -3477,8 +3502,16 @@ function renderPromocionesScreen(){ renderPromocionesForm(); renderPromocionesLi
 // INFO DEL CLIENTE (ficha + anotador)
 function renderInfoCliente(){
   const num = clienteActual?.num;
+  const nom = clienteActual?.nom || "";
   const info = CLIENTES_INFO[num] || {};
   return `
+    <div class="card">
+      <div class="card-title">Número y nombre</div>
+      <div class="form-row"><label>Número de cliente<input type="text" id="ci-num" value="${attrEsc(num||'')}" placeholder="Ej: 28072"></label></div>
+      <div class="form-row"><label>Nombre / Razón social<input type="text" id="ci-nom" value="${attrEsc(nom)}" placeholder="Ej: Las Tres Primas"></label></div>
+      <div id="ci-id-error" style="color:var(--pending);font-size:12px;margin-bottom:6px"></div>
+      <button class="btn btn-ok" onclick="guardarEditarClienteActual()">Guardar número y nombre</button>
+    </div>
     <div class="card">
       <div class="card-title">Datos del cliente</div>
       <div class="form-row"><label>Nombre de fantasía<input type="text" id="ci-fantasia" value="${attrEsc(info.fantasia||'')}" placeholder="Nombre comercial"></label></div>
@@ -3518,6 +3551,78 @@ function guardarInfoCliente(){
   };
   saveClientesInfo();
   mostrarAviso("Datos del cliente guardados.");
+}
+
+// Mueve las claves "crm_ibero_pasados_v2" (estado "pasado al sistema") de un
+// número de cliente viejo a uno nuevo, tanto local como en Firestore.
+function migrarPasadosCliente(keyViejo, keyNuevo){
+  const prefijo = keyViejo+"__";
+  const claves = Object.keys(PASADOS).filter(k=>k.startsWith(prefijo));
+  if(!claves.length) return;
+  claves.forEach(k=>{
+    const nuevaClave = keyNuevo+"__"+k.slice(prefijo.length);
+    PASADOS[nuevaClave] = PASADOS[k];
+    delete PASADOS[k];
+    escribirPasado(vendedorActual, nuevaClave, PASADOS[nuevaClave]).catch(e=>console.warn(e));
+    escribirPasado(vendedorActual, k, null).catch(e=>console.warn(e));
+  });
+  try{ localStorage.setItem(nsKey("crm_ibero_pasados_v2"), JSON.stringify(PASADOS)); }catch(e){}
+}
+
+// Mueve todos los datos guardados bajo el número de cliente viejo (pedidos,
+// cobros, devoluciones, revisados, borradores, datos del cliente, descuentos
+// recordados y estado "pasado al sistema") al número nuevo, para que al
+// corregir un número de cliente no se pierda ni se desconecte su historial.
+function migrarDatosClienteNum(dia, numViejo, numNuevo){
+  if(numViejo===numNuevo) return;
+  const keyViejo = `${dia}-${numViejo}`;
+  const keyNuevo = `${dia}-${numNuevo}`;
+  if(DATA[keyViejo]){ DATA[keyNuevo] = [...(DATA[keyNuevo]||[]), ...DATA[keyViejo]]; delete DATA[keyViejo]; saveData(DATA); }
+  if(COBRANZAS[keyViejo]){ COBRANZAS[keyNuevo] = [...(COBRANZAS[keyNuevo]||[]), ...COBRANZAS[keyViejo]]; delete COBRANZAS[keyViejo]; saveCobranzas(); }
+  if(DEVOLUCIONES[keyViejo]){ DEVOLUCIONES[keyNuevo] = [...(DEVOLUCIONES[keyNuevo]||[]), ...DEVOLUCIONES[keyViejo]]; delete DEVOLUCIONES[keyViejo]; saveDevoluciones(); }
+  if(REVISADOS[keyViejo] && !REVISADOS[keyNuevo]){ REVISADOS[keyNuevo] = REVISADOS[keyViejo]; delete REVISADOS[keyViejo]; saveRevisados(); }
+  if(BORRADORES[keyViejo] && !BORRADORES[keyNuevo]){ BORRADORES[keyNuevo] = BORRADORES[keyViejo]; delete BORRADORES[keyViejo]; saveBorradores(); }
+  if(CLIENTES_INFO[numViejo]){ CLIENTES_INFO[numNuevo] = {...(CLIENTES_INFO[numNuevo]||{}), ...CLIENTES_INFO[numViejo]}; delete CLIENTES_INFO[numViejo]; saveClientesInfo(); }
+  if(DESCUENTOS_CLIENTE[numViejo]){ DESCUENTOS_CLIENTE[numNuevo] = {...(DESCUENTOS_CLIENTE[numNuevo]||{}), ...DESCUENTOS_CLIENTE[numViejo]}; delete DESCUENTOS_CLIENTE[numViejo]; saveDescuentosCliente(); }
+  migrarPasadosCliente(keyViejo, keyNuevo);
+}
+
+function guardarEditarClienteActual(){
+  if(!clienteActual) return;
+  const dia = diaActual;
+  const numViejo = clienteActual.num;
+  const nomViejo = clienteActual.nom;
+  const nuevoNum = document.getElementById("ci-num").value.trim();
+  const nuevoNom = document.getElementById("ci-nom").value.trim();
+  const err = document.getElementById("ci-id-error");
+  if(err) err.textContent = "";
+  if(!nuevoNum || !nuevoNom){ if(err) err.textContent = "Completá número y nombre."; return; }
+  if(nuevoNum===numViejo && nuevoNom===nomViejo){ mostrarAviso("Sin cambios."); return; }
+  if(nuevoNum!==numViejo && clientesDelDia(dia).some(c=>c.num===nuevoNum)){
+    if(err) err.textContent = `Ya existe otro cliente con el número ${nuevoNum} el día ${dia}.`;
+    return;
+  }
+  const aplicar = ()=>{
+    if(esClienteExtra(dia, numViejo)){
+      const entrada = (CLIENTES_EXTRA[dia]||[]).find(c=>c.num===numViejo);
+      if(entrada){ entrada.num = nuevoNum; entrada.nom = nuevoNom; saveClientesExtra(); }
+    } else {
+      const claveBase = claveRenombreParaNum(dia, numViejo);
+      CLIENTES_RENOMBRADOS[claveBase] = {num: nuevoNum, nom: nuevoNom};
+      saveClientesRenombrados();
+    }
+    if(nuevoNum!==numViejo) migrarDatosClienteNum(dia, numViejo, nuevoNum);
+    clienteActual = {num: nuevoNum, nom: nuevoNom};
+    document.getElementById("cli-title").textContent = nuevoNom;
+    document.getElementById("cli-sub").textContent = `N° ${nuevoNum} · ${dia}`;
+    mostrarAviso("Cliente actualizado.");
+    renderTab();
+  };
+  if(nuevoNum!==numViejo){
+    confirmarAccion(`¿Confirmás cambiar el número de cliente de ${numViejo} a ${nuevoNum}? Todo el historial de hoy (pedidos, cobros, notas) pasa a quedar bajo el número nuevo.`, aplicar);
+  } else {
+    aplicar();
+  }
 }
 
 // INIT
