@@ -701,6 +701,10 @@ let clienteActual = null;
 let tabActual = "pedido";
 let pedidoActual = [];
 let pedidoSucio = false;
+// id de la visita (pedido) que se está editando; null = al guardar se crea una
+// visita nueva en vez de pisar la que ya existe hoy para este cliente. Así se
+// pueden cargar 2 o más pedidos distintos al mismo cliente el mismo día.
+let pedidoEditandoId = null;
 let devolucionActual = [];
 let devolucionSucia = false;
 let historialProductosAbierto = false;
@@ -788,6 +792,7 @@ function renderGruposMarca(items, prefix){
   }).join("");
 }
 function clonar(o){ return JSON.parse(JSON.stringify(o)); }
+function nuevoId(){ return `${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`; }
 
 function nsKey(base){ return `${base}__${vendedorActual||"sin_vendedor"}`; }
 
@@ -865,15 +870,20 @@ function fsAplicarRemoto(base, valor){
 // dato se combina registro por registro, usando su identificador propio
 // (fecha de visita, id de cobranza/objetivo/promoción, número de cliente).
 function fusionarListaPorFecha(a, b){
+  // Clave de fusión: el id propio de la visita si lo tiene (para que 2 pedidos
+  // del mismo cliente el mismo día, con distinto id, no se pisen entre sí), y
+  // si no tiene id (visitas viejas, de antes de esta función) se usa la fecha
+  // como antes, que para esos registros sí era única.
+  const clave = v => v.id || v.fecha;
   const out = {};
   new Set([...Object.keys(a||{}), ...Object.keys(b||{})]).forEach(k=>{
-    const porFecha = new Map();
-    (a?.[k]||[]).forEach(v=>porFecha.set(v.fecha, v));
+    const porClave = new Map();
+    (a?.[k]||[]).forEach(v=>porClave.set(clave(v), v));
     (b?.[k]||[]).forEach(v=>{
-      const existente = porFecha.get(v.fecha);
-      if(!existente || (v.items?.length||0) > (existente.items?.length||0)) porFecha.set(v.fecha, v);
+      const existente = porClave.get(clave(v));
+      if(!existente || (v.items?.length||0) > (existente.items?.length||0)) porClave.set(clave(v), v);
     });
-    out[k] = Array.from(porFecha.values()).sort((x,y)=>(y.fechaISO||"").localeCompare(x.fechaISO||""));
+    out[k] = Array.from(porClave.values()).sort((x,y)=>(y.fechaISO||"").localeCompare(x.fechaISO||""));
   });
   return out;
 }
@@ -1628,10 +1638,18 @@ function renderInfobar(){
   animarNumero(document.getElementById("info-visitados"), visitados);
 }
 
-function cargarPedidoDeHoy(num){
+function visitasDeHoy(num){
   const key = `${diaActual}-${num}`;
-  const visitaHoy = (DATA[key]||[]).find(v=>v.fecha===hoy());
-  return visitaHoy ? visitaHoy.items.map(it=>({...it})) : [];
+  return (DATA[key]||[]).filter(v=>v.fecha===hoy());
+}
+
+function cargarPedidoDeHoy(num){
+  const visitasHoy = visitasDeHoy(num);
+  if(!visitasHoy.length){ pedidoEditandoId = null; return []; }
+  const visitaHoy = visitasHoy[0];
+  if(!visitaHoy.id) visitaHoy.id = nuevoId();
+  pedidoEditandoId = visitaHoy.id;
+  return visitaHoy.items.map(it=>({...it}));
 }
 
 function loadBorradores(){ try{ const s=localStorage.getItem(nsKey("crm_ibero_borrador_pedido_v1")); return s?JSON.parse(s):{}; }catch(e){ return {}; } }
@@ -1642,7 +1660,7 @@ function guardarBorradorPedido(){
   if(!clienteActual) return;
   const key = `${diaActual}-${clienteActual.num}`;
   if(pedidoActual.length){
-    BORRADORES[key] = {fecha: hoy(), items: pedidoActual.map(it=>({...it}))};
+    BORRADORES[key] = {fecha: hoy(), items: pedidoActual.map(it=>({...it})), editId: pedidoEditandoId};
   } else {
     delete BORRADORES[key];
   }
@@ -1652,7 +1670,7 @@ function guardarBorradorPedido(){
 function borradorPendiente(num){
   const key = `${diaActual}-${num}`;
   const b = BORRADORES[key];
-  if(b && b.fecha===hoy()) return b.items.map(it=>({...it}));
+  if(b && b.fecha===hoy()){ pedidoEditandoId = b.editId ?? null; return b.items.map(it=>({...it})); }
   if(b){ delete BORRADORES[key]; saveBorradores(); }
   return null;
 }
@@ -1681,6 +1699,29 @@ function selCliente(num, nom) {
   document.querySelectorAll("#screen-cliente .tab").forEach((t,i)=>t.classList.toggle("active", i===0));
   tabActual = "pedido";
   renderTab();
+}
+
+// Arranca un pedido nuevo e independiente para hoy, aunque ya exista otro
+// pedido guardado hoy para este cliente (p. ej. uno normal y otro contra
+// entrega). El pedido ya guardado queda intacto, como una visita aparte.
+function nuevoPedidoDesdeHoy(){
+  if(!clienteActual) return;
+  const iniciar = ()=>{
+    pedidoActual = [];
+    pedidoEditandoId = null;
+    pedidoSucio = false;
+    detalleEntregaActual = "";
+    editandoItemIndex = null;
+    delete BORRADORES[`${diaActual}-${clienteActual.num}`];
+    saveBorradores();
+    renderTab();
+    mostrarAviso("Nuevo pedido para hoy — el anterior queda guardado aparte");
+  };
+  if(pedidoActual.length && pedidoSucio){
+    confirmarAccion("Tenés cambios sin guardar en este pedido. ¿Descartarlos y empezar uno nuevo?", iniciar);
+  } else {
+    iniciar();
+  }
 }
 
 function volverMain() {
@@ -1763,13 +1804,13 @@ function guardarEdicionItem(i){
   mostrarAviso("Actualizado");
 }
 
-function eliminarItemHistorial(cod, fecha){
+function eliminarItemHistorial(cod, fecha, clave){
   confirmarAccion(`¿Eliminar el código ${cod} del pedido del ${fecha}? No se puede deshacer.`, ()=>{
     const key = `${diaActual}-${clienteActual?.num}`;
     const hist = DATA[key]||[];
     const quitados = [];
     hist.forEach(v=>{
-      if(v.fecha!==fecha) return;
+      if((v.id||v.fecha)!==clave) return;
       const salen = v.items.filter(it=>it.cod===cod);
       quitados.push(...salen);
       if(salen.length && v.pasado) v.modificadoTrasPasar = true;
@@ -1810,7 +1851,7 @@ function setDetalleEntrega(d){ detalleEntregaActual = d; pedidoSucio = true; ren
 // un campo por visita, para que ningún dispositivo lo pise al sincronizar pedidos.
 let PASADOS = (()=>{ try{ return JSON.parse(localStorage.getItem(nsKey("crm_ibero_pasados_v2"))||"{}"); }catch(e){ return {}; } })();
 function fsPasadosRef(vend){ return (fsDB && vend) ? fsDB.collection("vendedores").doc(vend).collection("datos").doc("pasados") : null; }
-function idVisita(key, v){ return `${key}__${String(v.fecha||"").replace(/\//g,"-")}`; }
+function idVisita(key, v){ return `${key}__${v.id || String(v.fecha||"").replace(/\//g,"-")}`; }
 function hashItems(items){ return (items||[]).map(i=>`${i.cod}:${i.qty}:${i.desc||0}`).join(","); }
 function infoSistema(key, v, pasados){
   const p = (pasados||PASADOS)[idVisita(key, v)];
@@ -1832,9 +1873,9 @@ async function escribirPasado(vend, id, valor){
   await ref.set({[id]: valor===null ? firebase.firestore.FieldValue.delete() : valor}, {merge:true});
   return true;
 }
-function toggleSistemaManual(fecha){
+function toggleSistemaManual(clave){
   const key = `${diaActual}-${clienteActual?.num}`;
-  const v = (DATA[key]||[]).find(v=>v.fecha===fecha);
+  const v = (DATA[key]||[]).find(v=>(v.id||v.fecha)===clave);
   if(!v) return;
   const id = idVisita(key, v);
   const i = infoSistema(key, v);
@@ -1871,7 +1912,7 @@ window.crmPedidosSinPasarDe = async function(vend){
       const i = infoSistema(key, v, P);
       if(!i) return;
       if(i.pasado && !i.modificado) return;
-      out.push({vendedor:vend, key, dia, num, nom: cli?cli.nom:"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
+      out.push({vendedor:vend, key, dia, num, nom: cli?cli.nom:"", id:v.id||"", fecha:v.fecha, fechaISO:v.fechaISO, detalle:v.detalle||"",
         modificado: !!i.modificado, nroAnterior: i.nro||"",
         items: v.items.map(it=>({cod:it.cod, qty:it.qty, desc:it.desc||0, n:(getProd(it.cod)||{}).n||""}))});
     });
@@ -1879,9 +1920,12 @@ window.crmPedidosSinPasarDe = async function(vend){
   return out.sort((a,b)=>(a.fechaISO||"").localeCompare(b.fechaISO||""));
 };
 window.crmPedidosSinPasar = ()=>window.crmPedidosSinPasarDe(vendedorActual);
-window.crmMarcarPasadoDe = async function(vend, key, fecha, nroPedido, estado, nota){
+// idVisitaDeseado es opcional: si el cliente tuvo 2+ pedidos el mismo día
+// (mismo "fecha"), crmPedidosSinPasarDe ya devuelve el campo "id" de cada uno
+// para pasarlo acá y marcar exactamente ese pedido, no cualquiera con esa fecha.
+window.crmMarcarPasadoDe = async function(vend, key, fecha, nroPedido, estado, nota, idVisitaDeseado){
   const {D} = await _datosYPasadosDe(vend);
-  const v = (D[key]||[]).find(v=>v.fecha===fecha);
+  const v = idVisitaDeseado ? (D[key]||[]).find(v=>v.id===idVisitaDeseado) : (D[key]||[]).find(v=>v.fecha===fecha);
   if(!v) return false;
   const id = idVisita(key, v);
   const valor = {nro:nroPedido||"", estado:estado||"", nota:nota||"", h:hashItems(v.items), ts:new Date().toISOString()};
@@ -1889,7 +1933,7 @@ window.crmMarcarPasadoDe = async function(vend, key, fecha, nroPedido, estado, n
   if(vend===vendedorActual){ PASADOS[id]=valor; try{ refrescarTrasSyncRemoto(); }catch(e){} }
   return true;
 };
-window.crmMarcarPasado = (key, fecha, nro, estado, nota)=>window.crmMarcarPasadoDe(vendedorActual, key, fecha, nro, estado, nota);
+window.crmMarcarPasado = (key, fecha, nro, estado, nota, idVisitaDeseado)=>window.crmMarcarPasadoDe(vendedorActual, key, fecha, nro, estado, nota, idVisitaDeseado);
 
 function guardarPedidoBtnClick(){
   const btn = document.getElementById("btn-guardar-pedido");
@@ -1916,7 +1960,11 @@ function guardarPedidoConfirmado() {
   const key = `${diaActual}-${clienteActual.num}`;
   if(!DATA[key]) DATA[key]=[];
   const fechaHoy = hoy();
-  let visita = DATA[key].find(v=>v.fecha===fechaHoy);
+  // Se edita la visita de pedidoEditandoId si hay una (pedido ya existente que
+  // se sigue completando); si es null (recién llegado a este cliente sin
+  // pedido de hoy, o tras tocar "+ Otro pedido") se crea una visita nueva en
+  // vez de pisar otro pedido que ya exista hoy para este cliente.
+  let visita = pedidoEditandoId ? DATA[key].find(v=>v.id===pedidoEditandoId) : null;
   const itemsAntes = visita ? visita.items.map(it=>({...it})) : [];
   const totalUnidades = pedidoActual.reduce((s,i)=>s+i.qty,0);
   const totalMoney = pedidoActual.reduce((s,i)=>s+itemTotal(i),0);
@@ -1928,7 +1976,9 @@ function guardarPedidoConfirmado() {
     visita.detalle = detalleEntregaActual;
     if(visita.pasado===undefined) visita.pasado = false;
   } else {
-    DATA[key].unshift({fecha:fechaHoy,fechaISO:new Date().toISOString().slice(0,10),items:pedidoActual.map(it=>({...it})),total:totalUnidades,totalMoney,detalle:detalleEntregaActual,pasado:false});
+    const nueva = {id:nuevoId(), fecha:fechaHoy, fechaISO:new Date().toISOString().slice(0,10), items:pedidoActual.map(it=>({...it})), total:totalUnidades, totalMoney, detalle:detalleEntregaActual, pasado:false};
+    DATA[key].unshift(nueva);
+    pedidoEditandoId = nueva.id;
   }
   saveData(DATA);
   ajustarObjetivosPorDiferencia(itemsAntes, pedidoActual);
@@ -2051,6 +2101,7 @@ function renderPedido() {
   const totalMoney = items.reduce((s,i)=>s+itemTotal(i),0);
   const faltantes = clienteActual ? faltantesSemanaPasada(clienteActual.num) : null;
   const historial = clienteActual ? historialCompletoProductos(clienteActual.num) : [];
+  const visitasHoyCount = clienteActual ? visitasDeHoy(clienteActual.num).length : 0;
   return `
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
@@ -2058,6 +2109,11 @@ function renderPedido() {
       </label></div>
       <div id="ped-resultados" class="resultados-buscador"></div>
     </div>
+    ${visitasHoyCount?`
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div style="font-size:11.5px;color:var(--ink-dim)">${pedidoEditandoId?"Editando un pedido de hoy":"Vas a crear un pedido nuevo para hoy"}${visitasHoyCount>1?` · ${visitasHoyCount} pedidos ya guardados hoy`:""}</div>
+      <button class="link-btn" style="font-size:12px;font-weight:700;flex-shrink:0" onclick="nuevoPedidoDesdeHoy()">+ Otro pedido</button>
+    </div>`:""}
     ${faltantes?`
     <div class="card" style="border-color:var(--pending)">
       <div style="font-size:11.5px;color:var(--pending);font-weight:700;margin-bottom:8px">⚠️ Semana pasada (${faltantes.fecha}) y sin cargar hoy</div>
@@ -2267,27 +2323,42 @@ function renderHistorial() {
 }
 
 function fichaHistorial(hist){
+  // Si hubo 2+ pedidos el mismo día para este cliente, se numeran ("Pedido 1",
+  // "Pedido 2"...) en el orden en que se cargaron, para distinguirlos.
+  const porFecha = {};
+  hist.forEach(v=>{ porFecha[v.fecha] = (porFecha[v.fecha]||0)+1; });
+  const numero = new Map();
+  const contador = {};
+  hist.slice().reverse().forEach(v=>{
+    if(porFecha[v.fecha]>1){
+      contador[v.fecha] = (contador[v.fecha]||0)+1;
+      numero.set(v, contador[v.fecha]);
+    }
+  });
   const visitas = hist.slice().sort((a,b)=>(b.fechaISO||"").localeCompare(a.fechaISO||""));
-  return visitas.map(v=>`
+  return visitas.map(v=>{
+    const clave = v.id||v.fecha;
+    const etiquetaFecha = numero.has(v) ? `${v.fecha} · Pedido ${numero.get(v)}` : v.fecha;
+    return `
     <div class="card planilla-card">
       <div class="planilla-card-head">
-        <div class="planilla-card-nom">${v.fecha}</div>
+        <div class="planilla-card-nom">${etiquetaFecha}</div>
         <div class="planilla-card-total">
           <div class="planilla-card-money">${money(v.totalMoney||0)}</div>
         </div>
       </div>
       ${(()=>{const k=`${diaActual}-${clienteActual?.num}`;const i=v.items.length?infoSistema(k,v):null;return i?`<div class="sis-row">${tagSistema(k,v)}
-        <button class="sis-btn" onclick="toggleSistemaManual('${esc(v.fecha)}')">${i.pasado?'Marcar sin pasar':'Ya lo pasé yo'}</button></div>`:"";})()}
+        <button class="sis-btn" onclick="toggleSistemaManual('${esc(clave)}')">${i.pasado?'Marcar sin pasar':'Ya lo pasé yo'}</button></div>`:"";})()}
         ${v.detalle?`<div style="font-size:11px;color:var(--ink-dim);margin-bottom:6px">📝 ${htmlEsc(v.detalle)}</div>`:""}
       ${v.items.length ? v.items.map(it=>{
         const pi = getProd(it.cod);
         return `<div class="planilla-item">
           <span class="planilla-item-nom">${it.cod}${pi?` · ${htmlEsc(pi.n)}`:""}${it.desc?` <span class="ficha-pct">-${it.desc}%</span>`:""}</span>
-          <span class="planilla-item-qty">${it.qty}u. <button class="ficha-del" title="Eliminar" onclick="eliminarItemHistorial('${esc(it.cod)}','${esc(v.fecha)}')">🗑️</button></span>
+          <span class="planilla-item-qty">${it.qty}u. <button class="ficha-del" title="Eliminar" onclick="eliminarItemHistorial('${esc(it.cod)}','${esc(v.fecha)}','${esc(clave)}')">🗑️</button></span>
         </div>`;
       }).join("") : `<div class="planilla-item-vacio">Visita sin pedido</div>`}
     </div>
-  `).join("");
+  `;}).join("");
 }
 
 // RENDER COBRANZAS
