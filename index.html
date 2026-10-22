@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>CRM La Ibero</title>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Instrument+Sans:wght@500;600;700&display=swap">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#3C4F5C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -377,6 +380,38 @@ body{
   .planilla-table th{background:#fff;position:static}
   .planilla-table tfoot td{background:#fff}
 }
+
+/* Promos con flyer */
+.promo-seccion{margin:6px 2px 10px}
+.promo-seccion h2{font-family:var(--font-display);font-size:17px;color:var(--ink);margin:0}
+.promo-seccion p{font-size:12px;color:var(--ink-dim);margin:2px 0 0}
+.promo-regla{font-size:12.5px;color:var(--ink-dim);line-height:1.35}
+.promo-fotos{display:flex;gap:8px;margin:10px 0 8px;overflow-x:auto}
+.promo-fotos img,.pr-sinfoto{height:84px;width:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex-shrink:0}
+.pr-sinfoto{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10.5px;font-weight:700;color:#3a3a3a;padding:4px;line-height:1.15}
+.promo-precio{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.promo-precio span{font-size:12.5px;color:var(--ink-dim)}
+.promo-precio b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.promo-precio b small{font-size:12px;font-weight:600;color:var(--ink-dim)}
+.promo-precio em,.pr-preview em{font-style:normal;font-weight:800;font-size:12px;background:#FFDD3C;color:#000;padding:2px 7px;border-radius:6px}
+.promo-acciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.pr-resultados{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.pr-res{text-align:left;background:var(--paper-sunk);border:1px solid var(--line);border-radius:9px;padding:8px 10px;color:var(--ink);font-family:var(--font-body);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.pr-res span{font-size:13.5px;font-weight:600}
+.pr-res small,.pr-item small{font-size:11.5px;color:var(--ink-dim)}
+.pr-vacio{font-size:12.5px;color:var(--ink-faint);padding:4px 2px}
+.pr-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.pr-item-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+.pr-cant{display:flex;flex-direction:column;font-size:10.5px;color:var(--ink-dim);font-weight:600}
+.pr-cant input{width:58px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper-sunk);color:var(--ink);font-size:14px}
+.pr-precio{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:10px}
+.pr-preview{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-dim);background:var(--paper-sunk);border-radius:9px;padding:9px 11px;margin-bottom:10px}
+.pr-preview b{font-size:18px;color:var(--ink)}
+.flyer-overlay{position:fixed;inset:0;background:rgba(10,12,16,.72);z-index:999;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}
+.flyer-box{background:var(--paper-raised);border-radius:16px;padding:14px;width:min(440px,100%);max-height:100%;overflow:auto}
+.flyer-box img{width:100%;height:auto;border-radius:10px;display:block}
+.flyer-acciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.flyer-cargando{padding:40px 10px;text-align:center;color:var(--ink-dim);font-size:14px}
 </style>
 </head>
 <body>
@@ -626,7 +661,7 @@ body{
       <button class="header-back" onclick="showScreen('screen-main')">&lsaquo;</button>
       <div style="flex:1">
         <h1>Promociones</h1>
-        <div class="header-sub">Para tener a mano y mandar por WhatsApp</div>
+        <div class="header-sub">Flyers y textos listos para WhatsApp</div>
       </div>
     </div>
     <div class="scroll">
@@ -3385,34 +3420,290 @@ function renderObjetivosLista(){
 
 function renderObjetivosScreen(){ renderObjetivosForm(); renderObjetivosLista(); }
 
-// PROMOCIONES
+// PROMOCIONES (con flyer)
+// Una promo puede ser de texto (como antes) o tener productos de la lista.
+// Modelo: {id, nombre, regla, descripcion, desde, hasta, items:[{cod,cant}], modo:'descuento'|'fijo', descuento, precio}
+// Las promos que arma Claude llegan en promos.json (mismo formato, origen:"claude").
+let PROMOS_CLAUDE = [];
+let PROMOS_CLAUDE_FECHA = "";
+let promoItemsForm = [];
+const PROMO_OCULTAS_KEY = "crm_ibero_promos_claude_ocultas_v1";
+function loadPromosOcultas(){ try{ return JSON.parse(localStorage.getItem(nsKey(PROMO_OCULTAS_KEY))||"[]"); }catch(e){ return []; } }
+function savePromosOcultas(a){ try{ localStorage.setItem(nsKey(PROMO_OCULTAS_KEY), JSON.stringify(a)); }catch(e){} }
+
+let FOTOS_CATALOGO = null;
+function cargarFotosCatalogo(){
+  if(FOTOS_CATALOGO) return Promise.resolve();
+  return fetch("fotos/index.json").then(r=>r.ok?r.json():[]).then(a=>{ FOTOS_CATALOGO=new Set(a); }).catch(()=>{ FOTOS_CATALOGO=new Set(); });
+}
+// Foto para promos: la que cargaste vos, si no la del catálogo 2026, si no la de la app
+function fotoPromo(cod){
+  if(FOTOS_CUSTOM && FOTOS_CUSTOM[cod]) return FOTOS_CUSTOM[cod];
+  if(FOTOS_CATALOGO && FOTOS_CATALOGO.has(String(cod))) return `fotos/${cod}.jpg`;
+  return FOTOS[cod] || null;
+}
+function nombreItem(it){ return it.nombre || nombreLindo(it.prod.n); }
+
+function cargarPromosClaude(){
+  cargarFotosCatalogo();
+  return fetch("promos.json?t="+Date.now(), {cache:"no-store"})
+    .then(r=>r.ok?r.json():{promos:[]})
+    .then(j=>{ PROMOS_CLAUDE = (j.promos||[]).map(p=>Object.assign({origen:"claude"},p)); PROMOS_CLAUDE_FECHA = j.actualizado||""; })
+    .catch(()=>{});
+}
+
+function buscarPromo(id){ return PROMOCIONES.find(x=>x.id===id) || PROMOS_CLAUDE.find(x=>x.id===id); }
+function promoTieneProductos(p){ return Array.isArray(p.items) && p.items.length>0; }
+
+function fmtPesos(n){ return "$ "+Math.round(n||0).toLocaleString("es-AR"); }
+function nombreLindo(s){
+  return String(s||"").toLowerCase().replace(/"/g,"").replace(/\s+/g," ").trim()
+    .replace(/(^|[\s(\/])([a-záéíóúñü])/g,(m,a,b)=>a+b.toUpperCase())
+    .replace(/\b(X|C|Al|De|Del|La|Las|El|Los|En|Con|Y|A)\b/g,w=>w.toLowerCase())
+    .replace(/^./,c=>c.toUpperCase());
+}
+function presLinda(s){
+  return String(s||"").toLowerCase().replace(/\s+/g," ").trim().replace(/grs?\.?\b/g,"g").replace(/kgs?\b/g,"kg").replace(/^./,c=>c.toUpperCase());
+}
+function esPorKilo(prod){ return /HORMA|PIEZA|BARRA|CILINDRO|CUÑA|BOCHA|PLANCHA/i.test(prod?.p||""); }
+
+// Calcula precios de una promo con la lista vigente del CRM
+function calcularPromo(p){
+  const items = (p.items||[]).map(it=>({...it, prod:getProd(it.cod)})).filter(it=>it.prod);
+  if(!items.length) return null;
+  const unico = items.length===1;
+  const unidad = unico ? (esPorKilo(items[0].prod) ? "el kg" : "c/u") : "el combo";
+  const lista = unico ? items[0].prod.v : items.reduce((s,it)=>s+it.prod.v*(it.cant||1),0);
+  let promo;
+  if(p.modo==="fijo" && p.precio) promo = Number(p.precio);
+  else {
+    const d = Number(p.descuento||0);
+    const paso = unico ? 10 : 50;
+    promo = Math.floor(lista*(1-d/100)/paso)*paso;
+  }
+  const ahorro = lista>0 ? Math.round((1-promo/lista)*100) : 0;
+  return {items, unico, unidad, lista, promo, ahorro};
+}
+
+function textoPromo(p){
+  if(!promoTieneProductos(p)) return `${p.nombre}\n\n${p.descripcion||""}`.trim();
+  const c = calcularPromo(p); if(!c) return p.nombre;
+  const lineas = c.items.map(it=>`• ${it.cant>1?it.cant+" x ":""}${nombreItem(it)} (${presLinda(it.prod.p)})`).join("\n");
+  const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
+  const extra = p.descripcion ? `\n${p.descripcion}` : "";
+  return `*${p.nombre}*${p.regla?`\n${p.regla}`:""}\n\n${lineas}\n\nLista: ${fmtPesos(c.lista)} ${c.unidad}\n*Promo: ${fmtPesos(c.promo)} ${c.unidad}*${c.ahorro>0?` (ahorrás ${c.ahorro}%)`:""}${extra}${hasta}\n\n¿Te lo sumo al pedido?`;
+}
+
+// ---------- Flyer (canvas 1080x1350) ----------
+const FLYER_TEMAS = [
+  {re:/QUESO|LACTEO|LÁCTEO|MOZZ|ESPECIALIDAD/i, fondo:"#1D3557", papel:"#F6EFE3"},
+  {re:/ENCURTIDO|ACEITE/i, fondo:"#3B4A1C", papel:"#F3EEDC"},
+  {re:/DULCE|ALFAJOR/i, fondo:"#4E2414", papel:"#F7ECDD"},
+  {re:/SNACK/i, fondo:"#22313A", papel:"#F1EEE8"},
+  {re:/./, fondo:"#6E1A26", papel:"#F7EDE4"}
+];
+function temaFlyer(c){ const cat = c.items[0].prod.c||""; return FLYER_TEMAS.find(t=>t.re.test(cat)); }
+
+function cargarImagen(src){ return new Promise(res=>{ if(!src) return res(null); const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src; }); }
+function rrect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function lineasQueEntran(ctx, texto, maxW){
+  const pal = String(texto).split(" "); const out=[]; let cur="";
+  pal.forEach(w=>{ const t=cur?cur+" "+w:w; if(ctx.measureText(t).width>maxW && cur){ out.push(cur); cur=w; } else cur=t; });
+  if(cur) out.push(cur); return out;
+}
+const F_DISPLAY = '"Big Shoulders Display", Impact, "Arial Narrow", sans-serif';
+const F_BODY = '"Instrument Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+
+async function dibujarFlyer(p){
+  const c = calcularPromo(p); if(!c) return null;
+  try{ await Promise.all([document.fonts.load(`800 120px "Big Shoulders Display"`), document.fonts.load(`600 40px "Instrument Sans"`), document.fonts.load(`700 40px "Instrument Sans"`)]); }catch(e){}
+  const W=1080,H=1350, M=72;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  const ctx=cv.getContext("2d"); const tema=temaFlyer(c);
+  ctx.fillStyle=tema.fondo; ctx.fillRect(0,0,W,H);
+
+  // Cabecera: marca y vigencia
+  ctx.fillStyle=tema.papel; ctx.globalAlpha=.85;
+  ctx.font=`700 30px ${F_BODY}`; ctx.textBaseline="top"; ctx.textAlign="left";
+  ctx.fillText("La Ibero Española", M, 64);
+  ctx.textAlign="right"; ctx.font=`600 28px ${F_BODY}`;
+  ctx.fillText(p.hasta?`Hasta el ${fechaDisplay(p.hasta)}`:"Distribuidora mayorista", W-M, 66);
+  ctx.globalAlpha=1; ctx.textAlign="left";
+
+  // Título grande condensado
+  let fs=150; ctx.font=`800 ${fs}px ${F_DISPLAY}`;
+  let tl=lineasQueEntran(ctx,(p.nombre||"").toUpperCase(),W-2*M);
+  while((tl.length>2 || tl.some(l=>ctx.measureText(l).width>W-2*M)) && fs>80){ fs-=8; ctx.font=`800 ${fs}px ${F_DISPLAY}`; tl=lineasQueEntran(ctx,(p.nombre||"").toUpperCase(),W-2*M); }
+  let y=128; ctx.fillStyle=tema.papel;
+  tl.slice(0,2).forEach(l=>{ ctx.fillText(l,M-4,y); y+=fs*0.9; });
+  if(p.regla){ ctx.font=`600 38px ${F_BODY}`; ctx.globalAlpha=.9; lineasQueEntran(ctx,p.regla,W-2*M).slice(0,2).forEach(l=>{ ctx.fillText(l,M,y+14); y+=48; }); ctx.globalAlpha=1; y+=14; }
+
+  // Plato blanco con productos
+  const plY=y+40, plH=H-plY-330;
+  ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
+  const n=c.items.length, gap=24, inX=M, inW=W-2*M;
+  const colW=(inW-gap*(n-1))/n;
+  await cargarFotosCatalogo();
+  const imgs=await Promise.all(c.items.map(it=>cargarImagen(fotoPromo(it.cod))));
+  c.items.forEach((it,i)=>{
+    const x=inX+i*(colW+gap); const im=imgs[i];
+    const txtH = n===1 ? 130 : 120; const boxH=plH-60-txtH; const boxY=plY+30;
+    if(im){
+      const s=Math.min(colW/im.width, boxH/im.height); const w=im.width*s, h=im.height*s;
+      ctx.drawImage(im, x+(colW-w)/2, boxY+(boxH-h)/2, w, h);
+    } else {
+      ctx.fillStyle=tema.papel; rrect(ctx,x,boxY,colW,boxH,22); ctx.fill();
+      ctx.fillStyle=tema.fondo; ctx.textAlign="center";
+      let f=n===1?96:54; ctx.font=`800 ${f}px ${F_DISPLAY}`;
+      const ls=lineasQueEntran(ctx,nombreItem(it).toUpperCase(),colW-40).slice(0,4);
+      const total=ls.length*f*0.95; let yy=boxY+(boxH-total)/2;
+      ls.forEach(l=>{ ctx.fillText(l,x+colW/2,yy); yy+=f*0.95; });
+      ctx.textAlign="left";
+    }
+    if(n>1){
+      ctx.fillStyle="#1B1B1B"; ctx.textAlign="center";
+      ctx.font=`700 25px ${F_BODY}`;
+      const ls=lineasQueEntran(ctx,(it.cant>1?it.cant+" × ":"")+nombreItem(it),colW).slice(0,2);
+      let yy=plY+plH-30-txtH+6; ls.forEach(l=>{ ctx.fillText(l,x+colW/2,yy); yy+=30; });
+      ctx.font=`500 22px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),x+colW/2,yy+4);
+      ctx.textAlign="left";
+    }
+  });
+  if(n===1){
+    const it=c.items[0];
+    ctx.fillStyle="#1B1B1B"; ctx.font=`700 34px ${F_BODY}`;
+    ctx.fillText(nombreItem(it), M+4, plY+plH-100);
+    ctx.font=`500 28px ${F_BODY}`; ctx.fillStyle="#6A6A6A";
+    ctx.fillText(`${presLinda(it.prod.p)} · Cód. ${it.cod}`, M+4, plY+plH-56);
+  }
+
+  // Cartel de precio (cartulina amarilla, inclinada)
+  const tw=560, th=270, tx=W-M-tw+24, ty=H-th-44;
+  ctx.save(); ctx.translate(tx+tw/2, ty+th/2); ctx.rotate(-0.045);
+  ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=30; ctx.shadowOffsetY=12;
+  ctx.fillStyle="#FFDD3C";
+  ctx.beginPath(); const L=-tw/2, T=-th/2, R=tw/2, B=th/2;
+  ctx.moveTo(L+56,T); ctx.lineTo(R-14,T); ctx.arcTo(R,T,R,T+14,14); ctx.lineTo(R,B-14); ctx.arcTo(R,B,R-14,B,14);
+  ctx.lineTo(L+56,B); ctx.lineTo(L,0); ctx.closePath(); ctx.fill();
+  ctx.shadowColor="transparent";
+  ctx.fillStyle=tema.fondo; ctx.beginPath(); ctx.arc(L+40,0,13,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#000"; ctx.textAlign="right";
+  ctx.font=`600 30px ${F_BODY}`;
+  const antes=`Lista ${fmtPesos(c.lista)}`; ctx.fillText(antes, R-34, T+28);
+  const aw=ctx.measureText(antes).width; ctx.fillRect(R-34-aw, T+46, aw, 3);
+  let pf=150; ctx.font=`800 ${pf}px ${F_DISPLAY}`; const pt=fmtPesos(c.promo);
+  while(ctx.measureText(pt).width>tw-120 && pf>90){ pf-=6; ctx.font=`800 ${pf}px ${F_DISPLAY}`; }
+  ctx.fillText(pt, R-30, T+74);
+  ctx.font=`700 34px ${F_BODY}`; ctx.fillText(c.unidad, R-34, B-58);
+  ctx.restore();
+
+  // Pie: ahorro y vendedor
+  ctx.textAlign="left"; ctx.fillStyle=tema.papel;
+  if(c.ahorro>0){ ctx.font=`800 110px ${F_DISPLAY}`; ctx.fillText(`-${c.ahorro}%`, M, H-285); }
+  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.85;
+  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
+  ctx.fillText("Precios mayoristas de la lista vigente", M, H-108);
+  ctx.globalAlpha=1;
+  return cv;
+}
+
+function nombreArchivoPromo(p){ return "promo-"+String(p.nombre||"ibero").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+".png"; }
+
+async function verFlyer(id){
+  const p=buscarPromo(id); if(!p) return;
+  const ov=document.createElement("div"); ov.className="flyer-overlay";
+  ov.innerHTML=`<div class="flyer-box"><div class="flyer-cargando">Armando el flyer…</div></div>`;
+  document.body.appendChild(ov);
+  ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+  const cv=await dibujarFlyer(p);
+  if(!cv){ ov.remove(); mostrarAviso("Esta promo no tiene productos de la lista."); return; }
+  const url=cv.toDataURL("image/png");
+  ov.querySelector(".flyer-box").innerHTML=`
+    <img src="${url}" alt="Flyer de ${attrEsc(p.nombre)}">
+    <div class="flyer-acciones">
+      <button class="btn btn-accent" style="margin-top:0" id="fl-compartir">Compartir</button>
+      <button class="btn btn-ghost" style="margin-top:0" id="fl-guardar">Guardar imagen</button>
+    </div>
+    <button class="link-btn" id="fl-cerrar" style="margin:10px auto 0;display:block">Cerrar</button>`;
+  ov.querySelector("#fl-cerrar").onclick=()=>ov.remove();
+  ov.querySelector("#fl-guardar").onclick=()=>{ const a=document.createElement("a"); a.href=url; a.download=nombreArchivoPromo(p); document.body.appendChild(a); a.click(); a.remove(); };
+  ov.querySelector("#fl-compartir").onclick=()=>compartirFlyer(p, cv);
+}
+
+function compartirFlyer(p, cv){
+  const texto=textoPromo(p);
+  cv.toBlob(async blob=>{
+    const file=new File([blob], nombreArchivoPromo(p), {type:"image/png"});
+    try{
+      if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:texto}); return; }
+    }catch(e){ if(e && e.name==="AbortError") return; }
+    copiarTexto(texto);
+    mostrarAviso("Tu celular no permite compartir la imagen desde acá: guardala y pegá el texto copiado.");
+  }, "image/png");
+}
+
+// ---------- Pantalla ----------
 function abrirPromociones(){
   promoEditando = null; promoNueva = false;
   renderPromocionesScreen();
   showScreen("screen-promociones");
+  Promise.all([cargarPromosClaude(), cargarFotosCatalogo()]).then(renderPromocionesLista);
 }
 
 function nuevaPromocion(){
-  promoNueva = true; promoEditando = null;
+  promoNueva = true; promoEditando = null; promoItemsForm = [];
   renderPromocionesForm();
   document.getElementById("promociones-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
 function editarPromocion(id){
-  promoEditando = id; promoNueva = false;
+  const p=PROMOCIONES.find(x=>x.id===id);
+  promoEditando = id; promoNueva = false; promoItemsForm = p&&p.items ? clonar(p.items) : [];
   renderPromocionesForm();
   document.getElementById("promociones-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
-function cancelarFormularioPromocion(){ promoNueva=false; promoEditando=null; renderPromocionesForm(); }
+function guardarComoMia(id){
+  const p=PROMOS_CLAUDE.find(x=>x.id===id); if(!p) return;
+  const copia=clonar(p); delete copia.origen;
+  copia.id=(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()));
+  PROMOCIONES.push(copia); savePromociones();
+  editarPromocion(copia.id);
+  mostrarAviso("Copiada a tus promociones. Ya la podés editar.");
+}
+
+function ocultarPromoClaude(id){
+  const a=loadPromosOcultas(); if(!a.includes(id)) a.push(id); savePromosOcultas(a);
+  renderPromocionesLista();
+  mostrarAvisoConDeshacer("Promo ocultada.", ()=>{ savePromosOcultas(loadPromosOcultas().filter(x=>x!==id)); renderPromocionesLista(); });
+}
+
+function cancelarFormularioPromocion(){ promoNueva=false; promoEditando=null; promoItemsForm=[]; renderPromocionesForm(); }
 
 function formularioPromocion(id){
   const p = id ? PROMOCIONES.find(x=>x.id===id) : null;
+  const modo = p&&p.modo==="fijo" ? "fijo" : "descuento";
   return `
     <div class="card" style="border-color:var(--accent)">
       <div class="card-title">${id?"Editar promoción":"Nueva promoción"}</div>
-      <div class="form-row"><label>Título<input type="text" id="pr-nombre" value="${p?attrEsc(p.nombre):''}" placeholder="Ej: 2x1 en Salame Milán"></label></div>
-      <div class="form-row"><label>Detalle (esto es lo que se copia para WhatsApp)<textarea id="pr-descripcion" rows="4" placeholder="Ej: Llevando 2 unidades de Salame Milán Cagnoli, pagás solo 1. Válido hasta fin de mes.">${p?attrEsc(p.descripcion):''}</textarea></label></div>
+      <div class="form-row"><label>Título<input type="text" id="pr-nombre" value="${p?attrEsc(p.nombre):''}" placeholder="Ej: Cremoso Tregar"></label></div>
+      <div class="form-row"><label>Condición<input type="text" id="pr-regla" value="${p?attrEsc(p.regla||''):''}" placeholder="Ej: Llevando la caja de 4 hormas"></label></div>
+      <div class="form-row"><label>Productos de la lista
+        <input type="search" id="pr-buscar" placeholder="Buscá por nombre o código" oninput="buscarProductoPromo(this.value)" autocomplete="off">
+      </label><div id="pr-resultados" class="pr-resultados"></div></div>
+      <div id="pr-items"></div>
+      <div class="form-row pr-precio">
+        <label>Precio
+          <select id="pr-modo" onchange="actualizarPreviewPromo()">
+            <option value="descuento" ${modo==="descuento"?"selected":""}>Descuento sobre la lista (%)</option>
+            <option value="fijo" ${modo==="fijo"?"selected":""}>Precio final fijo ($)</option>
+          </select>
+        </label>
+        <label>Valor<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento??"")):""}" placeholder="Ej: 5" oninput="actualizarPreviewPromo()"></label>
+      </div>
+      <div id="pr-preview" class="pr-preview"></div>
+      <div class="form-row"><label>Detalle extra para WhatsApp (opcional)<textarea id="pr-descripcion" rows="3" placeholder="Si lo dejás vacío, el mensaje se arma solo con productos y precios.">${p?htmlEsc(p.descripcion||''):''}</textarea></label></div>
       <div class="form-row"><label>Vigente desde (opcional)<input type="date" id="pr-desde" value="${p&&p.desde?p.desde:''}"></label></div>
       <div class="form-row"><label>Vigente hasta (opcional)<input type="date" id="pr-hasta" value="${p&&p.hasta?p.hasta:''}"></label></div>
       <div id="pr-error" style="color:var(--pending);font-size:12px;margin-bottom:4px"></div>
@@ -3423,23 +3714,67 @@ function formularioPromocion(id){
     </div>`;
 }
 
+function buscarProductoPromo(q){
+  const el=document.getElementById("pr-resultados"); q=(q||"").trim().toUpperCase();
+  if(q.length<2){ el.innerHTML=""; return; }
+  const palabras=q.split(/\s+/);
+  const res=Object.entries(PRECIOS).filter(([cod,p])=>{ const t=(cod+" "+p.n).toUpperCase(); return palabras.every(w=>t.includes(w)); }).slice(0,8);
+  el.innerHTML = res.length ? res.map(([cod,p])=>`<button type="button" class="pr-res" onclick="agregarProductoPromo('${cod}')"><span>${htmlEsc(nombreLindo(p.n))}</span><small>${cod} · ${htmlEsc(presLinda(p.p))} · ${fmtPesos(p.v)}</small></button>`).join("") : `<div class="pr-vacio">No hay productos con “${htmlEsc(q)}”.</div>`;
+}
+
+function agregarProductoPromo(cod){
+  const ex=promoItemsForm.find(i=>i.cod===cod);
+  if(ex) ex.cant=(ex.cant||1)+1; else promoItemsForm.push({cod, cant:1});
+  document.getElementById("pr-buscar").value=""; document.getElementById("pr-resultados").innerHTML="";
+  renderItemsPromoForm();
+}
+function quitarProductoPromo(cod){ promoItemsForm=promoItemsForm.filter(i=>i.cod!==cod); renderItemsPromoForm(); }
+function cantProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ it.cant=Math.max(1,parseInt(v)||1); } actualizarPreviewPromo(); }
+
+function renderItemsPromoForm(){
+  const el=document.getElementById("pr-items"); if(!el) return;
+  el.innerHTML = promoItemsForm.map(it=>{ const p=getProd(it.cod);
+    return `<div class="pr-item"><div class="pr-item-n"><b>${htmlEsc(p?nombreLindo(p.n):it.cod)}</b><small>${it.cod} · ${htmlEsc(p?presLinda(p.p):"")} · ${p?fmtPesos(p.v):""}</small></div>
+      <label class="pr-cant">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>
+      <button type="button" class="link-btn link-danger" onclick="quitarProductoPromo('${it.cod}')">Quitar</button></div>`; }).join("");
+  actualizarPreviewPromo();
+}
+
+function promoDesdeForm(){
+  const modo=document.getElementById("pr-modo")?.value||"descuento";
+  const val=parseFloat(document.getElementById("pr-valor")?.value);
+  return { items:promoItemsForm, modo, descuento: modo==="descuento"&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null };
+}
+function actualizarPreviewPromo(){
+  const el=document.getElementById("pr-preview"); if(!el) return;
+  if(!promoItemsForm.length){ el.innerHTML=`<span>Sumá productos para armar el flyer. Sin productos, la promo queda solo como texto.</span>`; return; }
+  const c=calcularPromo(promoDesdeForm()); if(!c){ el.innerHTML=""; return; }
+  el.innerHTML=`<span>Lista <s>${fmtPesos(c.lista)}</s> ${c.unidad}</span><b>${fmtPesos(c.promo)} ${c.unidad}</b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}`;
+}
+
 function guardarPromocion(id){
   const nombre = document.getElementById("pr-nombre").value.trim();
+  const regla = document.getElementById("pr-regla").value.trim();
   const descripcion = document.getElementById("pr-descripcion").value.trim();
   const desde = document.getElementById("pr-desde").value || null;
   const hasta = document.getElementById("pr-hasta").value || null;
   const err = document.getElementById("pr-error");
-  if(!nombre || !descripcion){ err.textContent = "Completá el título y el detalle."; return; }
+  const f = promoDesdeForm();
+  if(!nombre){ err.textContent = "Poné un título para la promo."; return; }
+  if(!promoItemsForm.length && !descripcion){ err.textContent = "Sumá al menos un producto o escribí el detalle."; return; }
+  if(f.modo==="fijo" && promoItemsForm.length && !(f.precio>0)){ err.textContent = "Escribí el precio final de la promo."; return; }
+  const datos = {nombre, regla, descripcion, desde, hasta, items:clonar(promoItemsForm), modo:f.modo, descuento:f.descuento, precio:f.precio};
   if(id){
     const p = PROMOCIONES.find(x=>x.id===id);
-    if(p){ p.nombre=nombre; p.descripcion=descripcion; p.desde=desde; p.hasta=hasta; }
+    if(p) Object.assign(p, datos);
   } else {
     const newId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()));
-    PROMOCIONES.push({id:newId, nombre, descripcion, desde, hasta});
+    PROMOCIONES.push(Object.assign({id:newId}, datos));
   }
   savePromociones();
-  promoNueva=false; promoEditando=null;
+  promoNueva=false; promoEditando=null; promoItemsForm=[];
   renderPromocionesScreen();
+  mostrarAviso("Promoción guardada.");
 }
 
 function borrarPromocion(id){
@@ -3452,9 +3787,9 @@ function borrarPromocion(id){
 }
 
 function copiarPromocion(id){
-  const p = PROMOCIONES.find(x=>x.id===id);
+  const p = buscarPromo(id);
   if(!p) return;
-  copiarTexto(`${p.nombre}\n\n${p.descripcion}`);
+  copiarTexto(textoPromo(p));
 }
 
 function estadoPromocion(p){
@@ -3467,34 +3802,54 @@ function estadoPromocion(p){
 
 function renderPromocionesForm(){
   const el = document.getElementById("promociones-form");
-  if(promoNueva){ el.innerHTML = formularioPromocion(null); return; }
-  if(promoEditando){ el.innerHTML = formularioPromocion(promoEditando); return; }
+  if(promoNueva){ el.innerHTML = formularioPromocion(null); renderItemsPromoForm(); return; }
+  if(promoEditando){ el.innerHTML = formularioPromocion(promoEditando); renderItemsPromoForm(); return; }
   el.innerHTML = "";
+}
+
+function tarjetaPromo(p){
+  const estado = estadoPromocion(p);
+  const c = promoTieneProductos(p) ? calcularPromo(p) : null;
+  const esClaude = p.origen==="claude";
+  const fotos = c ? c.items.slice(0,4).map(it=>{ const f=fotoPromo(it.cod); return f?`<img src="${f}" alt="">`:`<span class="pr-sinfoto">${htmlEsc(nombreItem(it).split(" ").slice(0,2).join(" "))}</span>`; }).join("") : "";
+  const acciones = esClaude
+    ? `<button class="link-btn" onclick="guardarComoMia('${p.id}')">Editar una copia</button><button class="link-btn link-danger" onclick="ocultarPromoClaude('${p.id}')">Ocultar</button>`
+    : `<button class="link-btn" onclick="editarPromocion('${p.id}')">Editar</button><button class="link-btn link-danger" onclick="borrarPromocion('${p.id}')">Eliminar</button>`;
+  return `
+    <div class="card promo-card" style="${estado.vencida?'opacity:.6':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="min-width:0"><div class="card-title" style="margin-bottom:2px">${htmlEsc(p.nombre)}</div>${p.regla?`<div class="promo-regla">${htmlEsc(p.regla)}</div>`:""}</div>
+        <div style="display:flex;gap:10px;flex-shrink:0">${acciones}</div>
+      </div>
+      ${c?`<div class="promo-fotos">${fotos}</div>
+      <div class="promo-precio"><span>Lista <s>${fmtPesos(c.lista)}</s></span><b>${fmtPesos(c.promo)} <small>${c.unidad}</small></b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}</div>`
+      :`<div style="font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.4;margin:6px 0 8px">${htmlEsc(p.descripcion||"")}</div>`}
+      ${c&&p.descripcion?`<div class="promo-regla" style="margin-top:4px">${htmlEsc(p.descripcion)}</div>`:""}
+      <div style="font-size:11.5px;font-weight:700;color:${estado.color};margin-top:6px">${estado.texto}</div>
+      <div class="promo-acciones">
+        ${c?`<button class="btn btn-accent" style="margin-top:0" onclick="verFlyer('${p.id}')">Ver flyer</button>`:""}
+        <button class="btn btn-ok" style="margin-top:0" onclick="copiarPromocion('${p.id}')">Copiar texto</button>
+      </div>
+    </div>`;
 }
 
 function renderPromocionesLista(){
   const el = document.getElementById("promociones-lista");
-  if(!PROMOCIONES.length){ el.innerHTML = `<div class="empty">Todavía no cargaste promociones.<br>Tocá "+ Nueva promoción" para cargar la primera.</div>`; return; }
+  const ocultas = loadPromosOcultas();
+  const deClaude = PROMOS_CLAUDE.filter(p=>!ocultas.includes(p.id) && !estadoPromocion(p).vencida);
   const ordenadas = PROMOCIONES.slice().sort((a,b)=>{
     const va = estadoPromocion(a).vencida, vb = estadoPromocion(b).vencida;
     return (va===vb) ? 0 : (va?1:-1);
   });
-  el.innerHTML = ordenadas.map(p=>{
-    const estado = estadoPromocion(p);
-    return `
-    <div class="card" style="${estado.vencida?'opacity:.6':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div class="card-title" style="margin-bottom:6px">${p.nombre}</div>
-        <div style="display:flex;gap:10px;flex-shrink:0">
-          <button class="link-btn" onclick="editarPromocion('${p.id}')">Editar</button>
-          <button class="link-btn link-danger" onclick="borrarPromocion('${p.id}')">Eliminar</button>
-        </div>
-      </div>
-      <div style="font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.4;margin-bottom:8px">${p.descripcion}</div>
-      <div style="font-size:11.5px;font-weight:700;color:${estado.color}">${estado.texto}</div>
-      <button class="btn btn-ok" style="margin-top:10px" onclick="copiarPromocion('${p.id}')">Copiar para WhatsApp ↗</button>
-    </div>`;
-  }).join("");
+  let html = "";
+  if(deClaude.length){
+    html += `<div class="promo-seccion"><h2>Armadas por Claude</h2><p>Se actualizan solas con tu lista de precios${PROMOS_CLAUDE_FECHA?` · ${htmlEsc(PROMOS_CLAUDE_FECHA)}`:""}.</p></div>`;
+    html += deClaude.map(tarjetaPromo).join("");
+    html += `<div class="promo-seccion"><h2>Mis promociones</h2></div>`;
+  }
+  if(!ordenadas.length) html += `<div class="empty">Todavía no armaste promociones propias.<br>Tocá "+ Nueva promoción" para elegir productos y precio.</div>`;
+  else html += ordenadas.map(tarjetaPromo).join("");
+  el.innerHTML = html;
 }
 
 function renderPromocionesScreen(){ renderPromocionesForm(); renderPromocionesLista(); }

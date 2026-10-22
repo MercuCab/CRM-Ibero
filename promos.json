@@ -1,0 +1,135 @@
+{
+  "actualizado": "22/10/2026",
+  "promos": [
+    {
+      "id": "claude-cremoso-tregar-caja4",
+      "nombre": "Cremoso Tregar",
+      "regla": "Llevando la caja de 4 hormas",
+      "items": [
+        {
+          "cod": "2108",
+          "cant": 4,
+          "nombre": "Queso Cremoso Tregar"
+        }
+      ],
+      "modo": "descuento",
+      "descuento": 5,
+      "desde": "2026-10-22"
+    },
+    {
+      "id": "claude-picada-bocatti",
+      "nombre": "Picada Bocatti",
+      "regla": "Cuatro feteados, uno de cada",
+      "items": [
+        {
+          "cod": "1327",
+          "cant": 1,
+          "nombre": "Salamín Bocatti"
+        },
+        {
+          "cod": "1328",
+          "cant": 1,
+          "nombre": "Salame Milán Bocatti"
+        },
+        {
+          "cod": "1210",
+          "cant": 1,
+          "nombre": "Lomo c/hierbas Bocatti"
+        },
+        {
+          "cod": "1115",
+          "cant": 1,
+          "nombre": "Mortadela c/pistacho Bocatti"
+        }
+      ],
+      "modo": "descuento",
+      "descuento": 5,
+      "desde": "2026-10-22"
+    },
+    {
+      "id": "claude-picada-gourmet",
+      "nombre": "Picada Gourmet",
+      "regla": "Crudo, bondiola, camembert y chips",
+      "items": [
+        {
+          "cod": "1034",
+          "cant": 1,
+          "nombre": "Crudo El Artesano 12 meses"
+        },
+        {
+          "cod": "1038",
+          "cant": 1,
+          "nombre": "Bondiola El Artesano"
+        },
+        {
+          "cod": "2458",
+          "cant": 1,
+          "nombre": "Camembert Pre Vert"
+        },
+        {
+          "cod": "5101",
+          "cant": 1,
+          "nombre": "Pita Chips Original"
+        }
+      ],
+      "modo": "descuento",
+      "descuento": 5,
+      "desde": "2026-10-22"
+    },
+    {
+      "id": "claude-aperitivo-norquinco",
+      "nombre": "Aperitivo Ñorquinco",
+      "regla": "Cuatro frascos para armar la picada",
+      "items": [
+        {
+          "cod": "4123",
+          "cant": 1,
+          "nombre": "Aceitunas rellenas c/morrón"
+        },
+        {
+          "cod": "4135",
+          "cant": 1,
+          "nombre": "Pepinitos en vinagre"
+        },
+        {
+          "cod": "4127",
+          "cant": 1,
+          "nombre": "Cebollitas en vinagre"
+        },
+        {
+          "cod": "4126",
+          "cant": 1,
+          "nombre": "Berenjenas en aceite"
+        }
+      ],
+      "modo": "descuento",
+      "descuento": 5,
+      "desde": "2026-10-22"
+    },
+    {
+      "id": "claude-trio-esnaola",
+      "nombre": "Trío Esnaola",
+      "regla": "Batata, membrillo y postre de DDL en lata de 700 g",
+      "items": [
+        {
+          "cod": "3331",
+          "cant": 1,
+          "nombre": "Dulce de batata Esnaola"
+        },
+        {
+          "cod": "3332",
+          "cant": 1,
+          "nombre": "Dulce de membrillo Esnaola"
+        },
+        {
+          "cod": "3334",
+          "cant": 1,
+          "nombre": "Postre de DDL c/chocolate Esnaola"
+        }
+      ],
+      "modo": "descuento",
+      "descuento": 5,
+      "desde": "2026-10-22"
+    }
+  ]
+}
