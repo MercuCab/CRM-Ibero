@@ -3485,6 +3485,7 @@ function cargarPromosClaude(){
 function buscarPromo(id){ return PROMOCIONES.find(x=>x.id===id) || PROMOS_CLAUDE.find(x=>x.id===id); }
 function promoTieneProductos(p){ return Array.isArray(p.items) && p.items.length>0; }
 
+function fmtPct(n){ return (Math.round(n*10)/10).toString().replace('.',','); }
 function fmtPesos(n){ return "$ "+Math.round(n||0).toLocaleString("es-AR"); }
 function nombreLindo(s){
   return String(s||"").toLowerCase().replace(/"/g,"").replace(/\s+/g," ").trim()
@@ -3503,8 +3504,12 @@ function calcularPromo(p){
   if(!items.length) return null;
   if(p.modo==="lista"){
     const d = Number(p.descuento||0);
-    const its = items.map(it=>({...it, pu: d>0 ? Math.floor(it.prod.v*(1-d/100)/10)*10 : Math.round(it.prod.v), un: esPorKilo(it.prod)?"x kg":"c/u"}));
-    return {items:its, esLista:true, unico:false, unidad:"", lista:its.reduce((s,it)=>s+it.prod.v,0), promo:0, ahorro:d>0?Math.round(d):0, desc:d>0?d:0};
+    const its = items.map(it=>{
+      const propio = it.d!==undefined && it.d!==null && it.d!=="" && !isNaN(Number(it.d));
+      const dd = propio ? Math.max(0,Number(it.d)) : d;
+      return {...it, dd, pu: dd>0 ? Math.floor(it.prod.v*(1-dd/100)/10)*10 : Math.round(it.prod.v), un: esPorKilo(it.prod)?"x kg":"c/u"};
+    });
+    return {items:its, esLista:true, unico:false, unidad:"", lista:its.reduce((s,it)=>s+it.prod.v,0), promo:0, ahorro:0, desc:0};
   }
   const unico = items.length===1;
   const unidad = unico ? (esPorKilo(items[0].prod) ? "el kg" : "c/u") : "el combo";
@@ -3524,9 +3529,9 @@ function textoPromo(p){
   if(!promoTieneProductos(p)) return `${p.nombre}\n\n${p.descripcion||""}`.trim();
   const c = calcularPromo(p); if(!c) return p.nombre;
   if(c.esLista){
-    const ls = c.items.map(it=>`• ${nombreItem(it)}: *${fmtPesos(it.pu)} ${it.un}*`).join("\n");
+    const ls = c.items.map(it=>`• ${nombreItem(it)}: *${fmtPesos(it.pu)} ${it.un}*${it.dd>0?` (-${fmtPct(it.dd)}%)`:""}`).join("\n");
     const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
-    return `*${p.nombre}*${p.regla?`\n${p.regla}`:""}\n\n${ls}${c.desc>0?`\n\n(${c.desc}% de descuento ya aplicado)`:""}${p.descripcion?`\n${p.descripcion}`:""}${hasta}`;
+    return `*${p.nombre}*${p.regla?`\n${p.regla}`:""}\n\n${ls}${p.descripcion?`\n${p.descripcion}`:""}${hasta}`;
   }
   const lineas = c.items.map(it=>`• ${it.cant>1?it.cant+" x ":""}${nombreItem(it)} (${presLinda(it.prod.p)})`).join("\n");
   const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
@@ -3574,18 +3579,25 @@ async function flyerLista(ctx,cv,c,p,tema,y,W,H,M){
     ctx.textAlign="right"; ctx.textBaseline="alphabetic"; ctx.fillStyle=tema.fondo;
     ctx.font=`800 ${pf}px ${F_DISPLAY}`; const pt=fmtPesos(it.pu); const pw=ctx.measureText(pt).width;
     ctx.fillText(pt,xR,cy+pf*0.22);
+    let chipW=0;
+    if(it.dd>0){
+      const tx="-"+(Math.round(it.dd*10)/10).toString().replace(".",",")+"%"; const cf=Math.max(24,Math.round(nf*0.85));
+      ctx.font=`800 ${cf}px ${F_BODY}`; chipW=ctx.measureText(tx).width+26;
+      const cx=xR-pw-chipW-16, chH=cf+14;
+      ctx.fillStyle="#FFDD3C"; rrect(ctx,cx,cy-chH/2-2,chipW,chH,chH/2); ctx.fill();
+      ctx.fillStyle="#000"; ctx.textAlign="center"; ctx.fillText(tx,cx+chipW/2,cy+cf*0.33); ctx.textAlign="right";
+    }
     ctx.font=`700 ${Math.round(nf*0.8)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A";
     ctx.fillText(it.un,xR,cy+pf*0.22+Math.round(nf*0.95));
     // nombre
     ctx.textAlign="left"; ctx.fillStyle="#1B1B1B"; ctx.font=`700 ${nf}px ${F_BODY}`;
-    const xN=xL+th+22, maxW=xR-pw-xN-24;
+    const xN=xL+th+22, maxW=xR-pw-chipW-(chipW?16:0)-xN-24;
     const ls=lineasQueEntran(ctx,nombreItem(it),Math.max(maxW,200)).slice(0,2);
     const bloque=ls.length*(nf+4)+(big?30:0); let yy=cy-bloque/2+nf*0.85;
     ls.forEach(l=>{ ctx.fillText(l,xN,yy); yy+=nf+4; });
     if(big){ ctx.font=`500 ${Math.round(nf*0.72)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),xN,yy+2); }
   });
   ctx.textBaseline="top"; ctx.textAlign="left"; ctx.fillStyle=tema.papel;
-  if(c.desc>0){ ctx.font=`800 70px ${F_DISPLAY}`; ctx.fillText(`-${c.desc}%`, W-M-190, H-168); ctx.font=`600 22px ${F_BODY}`; ctx.globalAlpha=.8; ctx.fillText("ya aplicado",W-M-190,H-98); ctx.globalAlpha=1; }
   ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.9;
   ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
   ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
@@ -3782,7 +3794,7 @@ function formularioPromocion(id){
             <option value="lista" ${modo==="lista"?"selected":""}>Lista por producto</option>
           </select>
         </label>
-        <label>Valor (en Lista: % opcional)<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="actualizarPreviewPromo()"></label>
+        <label>Valor (en Lista: % para todos)<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="renderItemsPromoForm()"></label>
       </div>
       <div id="pr-preview" class="pr-preview"></div>
       <div class="form-row"><label>Detalle extra para WhatsApp (opcional)<textarea id="pr-descripcion" rows="3" placeholder="Si lo dejás vacío, el mensaje se arma solo con productos y precios.">${p?htmlEsc(p.descripcion||''):''}</textarea></label></div>
@@ -3811,13 +3823,16 @@ function agregarProductoPromo(cod){
   renderItemsPromoForm();
 }
 function quitarProductoPromo(cod){ promoItemsForm=promoItemsForm.filter(i=>i.cod!==cod); renderItemsPromoForm(); }
+function descProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ const n=parseFloat(String(v).replace(',','.')); if(isNaN(n)) delete it.d; else it.d=Math.max(0,n); } actualizarPreviewPromo(); }
 function cantProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ it.cant=Math.max(1,parseInt(v)||1); } actualizarPreviewPromo(); }
 
 function renderItemsPromoForm(){
   const el=document.getElementById("pr-items"); if(!el) return;
   el.innerHTML = promoItemsForm.map(it=>{ const p=getProd(it.cod);
     return `<div class="pr-item"><div class="pr-item-n"><b>${htmlEsc(p?nombreLindo(p.n):it.cod)}</b><small>${it.cod} · ${htmlEsc(p?presLinda(p.p):"")} · ${p?fmtPesos(p.v):""}</small></div>
-      <label class="pr-cant" style="${document.getElementById("pr-modo")?.value==="lista"?"display:none":""}">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>
+      ${document.getElementById("pr-modo")?.value==="lista"
+        ? `<label class="pr-cant">Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${it.d===undefined||it.d===null?"":it.d}" placeholder="${document.getElementById("pr-valor")?.value||"0"}" oninput="descProductoPromo('${it.cod}',this.value)"></label>`
+        : `<label class="pr-cant">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>`}
       <button type="button" class="link-btn link-danger" onclick="quitarProductoPromo('${it.cod}')">Quitar</button></div>`; }).join("");
   actualizarPreviewPromo();
 }
@@ -3831,7 +3846,7 @@ function actualizarPreviewPromo(){
   const el=document.getElementById("pr-preview"); if(!el) return;
   if(!promoItemsForm.length){ el.innerHTML=`<span>Sumá productos para armar el flyer. Sin productos, la promo queda solo como texto.</span>`; return; }
   const c=calcularPromo(promoDesdeForm()); if(!c){ el.innerHTML=""; return; }
-  if(c.esLista){ el.innerHTML=c.items.map(it=>`<span>${htmlEsc(nombreItem(it))}</span><b>${fmtPesos(it.pu)} ${it.un}</b>`).join("")+(c.desc>0?`<em>-${c.desc}%</em>`:""); return; }
+  if(c.esLista){ el.innerHTML=c.items.map(it=>`<div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${htmlEsc(nombreItem(it))}</span><b>${fmtPesos(it.pu)} ${it.un}${it.dd>0?` <em>-${fmtPct(it.dd)}%</em>`:""}</b></div>`).join(""); return; }
   el.innerHTML=`<span>Lista <s>${fmtPesos(c.lista)}</s> ${c.unidad}</span><b>${fmtPesos(c.promo)} ${c.unidad}</b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}`;
 }
 
@@ -3905,7 +3920,7 @@ function tarjetaPromo(p){
         <div style="display:flex;gap:10px;flex-shrink:0">${acciones}</div>
       </div>
       ${c&&c.esLista?`<div class="promo-fotos">${fotos}</div>
-      <div class="promo-regla" style="line-height:1.5">${c.items.map(it=>`${htmlEsc(nombreItem(it))}: <b>${fmtPesos(it.pu)} ${it.un}</b>`).join("<br>")}</div>`
+      <div class="promo-regla" style="line-height:1.5">${c.items.map(it=>`${htmlEsc(nombreItem(it))}: <b>${fmtPesos(it.pu)} ${it.un}</b>${it.dd>0?` (-${fmtPct(it.dd)}%)`:""}`).join("<br>")}</div>`
       :c?`<div class="promo-fotos">${fotos}</div>
       <div class="promo-precio"><span>Lista <s>${fmtPesos(c.lista)}</s></span><b>${fmtPesos(c.promo)} <small>${c.unidad}</small></b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}</div>`
       :`<div style="font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.4;margin:6px 0 8px">${htmlEsc(p.descripcion||"")}</div>`}
