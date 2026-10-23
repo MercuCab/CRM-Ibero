@@ -3807,6 +3807,7 @@ function nuevaPromocion(){
 function editarPromocion(id){
   const p=PROMOCIONES.find(x=>x.id===id);
   promoEditando = id; promoNueva = false; promoItemsForm = p&&p.items ? clonar(p.items) : []; promoEscalasForm = p&&p.escalas ? clonar(p.escalas) : [];
+  if(p&&p.modo==="lista"&&Number(p.descuento)>0) promoItemsForm.forEach(i=>{ if(i.d===undefined&&!(i.pf>0)) i.d=Number(p.descuento); });
   renderPromocionesForm();
   document.getElementById("promociones-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
@@ -3830,7 +3831,7 @@ function cancelarFormularioPromocion(){ promoNueva=false; promoEditando=null; pr
 
 function formularioPromocion(id){
   const p = id ? PROMOCIONES.find(x=>x.id===id) : null;
-  const modo = p&&(p.modo==="fijo"||p.modo==="lista"||p.modo==="escalas") ? p.modo : "descuento";
+  const modo = p ? ((p.modo==="fijo"||p.modo==="lista"||p.modo==="escalas") ? p.modo : "descuento") : "lista";
   return `
     <div class="card" style="border-color:var(--accent)">
       <div class="card-title">${id?"Editar promoción":"Nueva promoción"}</div>
@@ -3843,13 +3844,13 @@ function formularioPromocion(id){
       <div class="form-row pr-precio">
         <label>Precio
           <select id="pr-modo" onchange="renderItemsPromoForm()">
-            <option value="descuento" ${modo==="descuento"?"selected":""}>Descuento sobre la lista (%)</option>
-            <option value="fijo" ${modo==="fijo"?"selected":""}>Precio final fijo ($)</option>
-            <option value="lista" ${modo==="lista"?"selected":""}>Lista por producto</option>
-            <option value="escalas" ${modo==="escalas"?"selected":""}>Escalas por cantidad (1 producto)</option>
+            <option value="lista" ${modo==="lista"?"selected":""}>Por producto (lista)</option>
+            <option value="descuento" ${modo==="descuento"?"selected":""}>Combo: % sobre total</option>
+            <option value="fijo" ${modo==="fijo"?"selected":""}>Combo: precio fijo</option>
+            <option value="escalas" ${modo==="escalas"?"selected":""}>Escalas por cantidad</option>
           </select>
         </label>
-        <label>Valor (en Lista: % para todos)<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="renderItemsPromoForm()"></label>
+        <label><span id="pr-valor-lbl">Valor</span><input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="renderItemsPromoForm()"></label>
       </div>
       <div id="pr-escalas" style="display:none"></div>
       <div id="pr-preview" class="pr-preview"></div>
@@ -3889,7 +3890,7 @@ function renderItemsPromoForm(){
     return `<div class="pr-item"><div class="pr-item-n"><b>${htmlEsc(p?nombreLindo(p.n):it.cod)}</b><small>${it.cod} · ${htmlEsc(p?presLinda(p.p):"")} · ${p?fmtPesos(p.v):""}</small></div>
       ${document.getElementById("pr-modo")?.value==="escalas" ? ""
         : document.getElementById("pr-modo")?.value==="lista"
-        ? `<label class="pr-cant">Precio $<input type="number" min="0" step="any" inputmode="decimal" value="${it.pf>0?it.pf:""}" placeholder="lista" oninput="precioProductoPromo('${it.cod}',this.value)"></label><label class="pr-cant">Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${it.d===undefined||it.d===null?"":it.d}" placeholder="${document.getElementById("pr-valor")?.value||"0"}" oninput="descProductoPromo('${it.cod}',this.value)"></label>`
+        ? `<label class="pr-cant">Precio $<input type="number" min="0" step="any" inputmode="decimal" value="${it.pf>0?it.pf:""}" placeholder="lista" oninput="precioProductoPromo('${it.cod}',this.value)"></label><label class="pr-cant">Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${it.d===undefined||it.d===null?"":it.d}" placeholder="0" oninput="descProductoPromo('${it.cod}',this.value)"></label>`
         : `<label class="pr-cant">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>`}
       <button type="button" class="link-btn link-danger" onclick="quitarProductoPromo('${it.cod}')">Quitar</button></div>`; }).join("");
   renderEscalasForm();
@@ -3899,7 +3900,9 @@ let promoEscalasForm = [];
 function renderEscalasForm(){
   const el=document.getElementById("pr-escalas"); if(!el) return;
   const esc=document.getElementById("pr-modo")?.value==="escalas";
-  const valor=document.getElementById("pr-valor"); if(valor) valor.closest("label").style.display = esc?"none":"";
+  const mo=document.getElementById("pr-modo")?.value;
+  const valor=document.getElementById("pr-valor"); if(valor) valor.closest("label").style.display = (mo==="escalas"||mo==="lista")?"none":"";
+  const lbl=document.getElementById("pr-valor-lbl"); if(lbl) lbl.textContent = mo==="fijo"?"Precio final ($)":"Descuento (%)";
   if(!esc){ el.style.display="none"; el.innerHTML=""; return; }
   while(promoEscalasForm.length<4) promoEscalasForm.push({label:"",d:""});
   el.style.display="block";
@@ -3909,7 +3912,7 @@ function renderEscalasForm(){
 function promoDesdeForm(){
   const modo=document.getElementById("pr-modo")?.value||"descuento";
   const val=parseFloat(document.getElementById("pr-valor")?.value);
-  return { items:promoItemsForm, modo, descuento: (modo==="descuento"||modo==="lista")&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null,
+  return { items:promoItemsForm, modo, descuento: modo==="descuento"&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null,
     escalas: modo==="escalas" ? promoEscalasForm.filter(t=>t.label&&String(t.label).trim()&&t.d!==""&&!isNaN(parseFloat(t.d))).map(t=>({label:String(t.label).trim(), d:parseFloat(t.d)})) : undefined };
 }
 function actualizarPreviewPromo(){
