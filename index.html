@@ -3501,6 +3501,11 @@ function esPorKilo(prod){ return /HORMA|PIEZA|BARRA|CILINDRO|CUÑA|BOCHA|PLANCHA
 function calcularPromo(p){
   const items = (p.items||[]).map(it=>({...it, prod:getProd(it.cod)})).filter(it=>it.prod);
   if(!items.length) return null;
+  if(p.modo==="lista"){
+    const d = Number(p.descuento||0);
+    const its = items.map(it=>({...it, pu: d>0 ? Math.floor(it.prod.v*(1-d/100)/10)*10 : Math.round(it.prod.v), un: esPorKilo(it.prod)?"x kg":"c/u"}));
+    return {items:its, esLista:true, unico:false, unidad:"", lista:its.reduce((s,it)=>s+it.prod.v,0), promo:0, ahorro:d>0?Math.round(d):0, desc:d>0?d:0};
+  }
   const unico = items.length===1;
   const unidad = unico ? (esPorKilo(items[0].prod) ? "el kg" : "c/u") : "el combo";
   const lista = unico ? items[0].prod.v : items.reduce((s,it)=>s+it.prod.v*(it.cant||1),0);
@@ -3518,6 +3523,11 @@ function calcularPromo(p){
 function textoPromo(p){
   if(!promoTieneProductos(p)) return `${p.nombre}\n\n${p.descripcion||""}`.trim();
   const c = calcularPromo(p); if(!c) return p.nombre;
+  if(c.esLista){
+    const ls = c.items.map(it=>`• ${nombreItem(it)}: *${fmtPesos(it.pu)} ${it.un}*`).join("\n");
+    const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
+    return `*${p.nombre}*${p.regla?`\n${p.regla}`:""}\n\n${ls}${c.desc>0?`\n\n(${c.desc}% de descuento ya aplicado)`:""}${p.descripcion?`\n${p.descripcion}`:""}${hasta}`;
+  }
   const lineas = c.items.map(it=>`• ${it.cant>1?it.cant+" x ":""}${nombreItem(it)} (${presLinda(it.prod.p)})`).join("\n");
   const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
   const extra = p.descripcion ? `\n${p.descripcion}` : "";
@@ -3544,6 +3554,46 @@ function lineasQueEntran(ctx, texto, maxW){
 const F_DISPLAY = '"Big Shoulders Display", Impact, "Arial Narrow", sans-serif';
 const F_BODY = '"Instrument Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
 
+// Flyer en formato lista: cada producto con su propio precio (ej. por kg)
+async function flyerLista(ctx,cv,c,p,tema,y,W,H,M){
+  const items=c.items.slice(0,10), n=items.length;
+  const plY=y+30, plMax=H-plY-200, pad=14;
+  const rowH=Math.min(170,(plMax-2*pad)/n), plH=Math.min(plMax, rowH*n+2*pad);
+  ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
+  await cargarFotosCatalogo();
+  const imgs=await Promise.all(items.map(it=>cargarImagen(fotoPromo(it.cod))));
+  const th=rowH-18, xL=M-4, xR=W-M+4;
+  const big=rowH>=112, nf=big?34:rowH>=88?29:25, pf=Math.min(84,Math.round(rowH*0.58));
+  items.forEach((it,i)=>{
+    const ry=plY+pad+i*rowH, cy=ry+rowH/2;
+    if(i>0){ ctx.fillStyle="#E7E2DA"; ctx.fillRect(xL,ry,xR-xL,2); }
+    const im=imgs[i];
+    if(im){ const s=Math.min(th/im.width,th/im.height), w=im.width*s, h=im.height*s; ctx.drawImage(im,xL+(th-w)/2,cy-h/2,w,h); }
+    else { ctx.fillStyle=tema.papel; rrect(ctx,xL,cy-th/2,th,th,14); ctx.fill(); }
+    // precio a la derecha
+    ctx.textAlign="right"; ctx.textBaseline="alphabetic"; ctx.fillStyle=tema.fondo;
+    ctx.font=`800 ${pf}px ${F_DISPLAY}`; const pt=fmtPesos(it.pu); const pw=ctx.measureText(pt).width;
+    ctx.fillText(pt,xR,cy+pf*0.22);
+    ctx.font=`700 ${Math.round(nf*0.8)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A";
+    ctx.fillText(it.un,xR,cy+pf*0.22+Math.round(nf*0.95));
+    // nombre
+    ctx.textAlign="left"; ctx.fillStyle="#1B1B1B"; ctx.font=`700 ${nf}px ${F_BODY}`;
+    const xN=xL+th+22, maxW=xR-pw-xN-24;
+    const ls=lineasQueEntran(ctx,nombreItem(it),Math.max(maxW,200)).slice(0,2);
+    const bloque=ls.length*(nf+4)+(big?30:0); let yy=cy-bloque/2+nf*0.85;
+    ls.forEach(l=>{ ctx.fillText(l,xN,yy); yy+=nf+4; });
+    if(big){ ctx.font=`500 ${Math.round(nf*0.72)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),xN,yy+2); }
+  });
+  ctx.textBaseline="top"; ctx.textAlign="left"; ctx.fillStyle=tema.papel;
+  if(c.desc>0){ ctx.font=`800 70px ${F_DISPLAY}`; ctx.fillText(`-${c.desc}%`, W-M-190, H-168); ctx.font=`600 22px ${F_BODY}`; ctx.globalAlpha=.8; ctx.fillText("ya aplicado",W-M-190,H-98); ctx.globalAlpha=1; }
+  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.9;
+  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
+  ctx.fillText("Precios mayoristas de la lista vigente", M, H-108);
+  ctx.globalAlpha=1;
+  return cv;
+}
+
 async function dibujarFlyer(p){
   const c = calcularPromo(p); if(!c) return null;
   try{ await Promise.all([document.fonts.load(`800 120px "Big Shoulders Display"`), document.fonts.load(`600 40px "Instrument Sans"`), document.fonts.load(`700 40px "Instrument Sans"`)]); }catch(e){}
@@ -3561,13 +3611,14 @@ async function dibujarFlyer(p){
   ctx.globalAlpha=1; ctx.textAlign="left";
 
   // Título grande condensado
-  let fs=150; ctx.font=`800 ${fs}px ${F_DISPLAY}`;
+  let fs=c.esLista?112:150; ctx.font=`800 ${fs}px ${F_DISPLAY}`;
   let tl=lineasQueEntran(ctx,(p.nombre||"").toUpperCase(),W-2*M);
   while((tl.length>2 || tl.some(l=>ctx.measureText(l).width>W-2*M)) && fs>80){ fs-=8; ctx.font=`800 ${fs}px ${F_DISPLAY}`; tl=lineasQueEntran(ctx,(p.nombre||"").toUpperCase(),W-2*M); }
   let y=128; ctx.fillStyle=tema.papel;
   tl.slice(0,2).forEach(l=>{ ctx.fillText(l,M-4,y); y+=fs*0.9; });
   if(p.regla){ ctx.font=`600 38px ${F_BODY}`; ctx.globalAlpha=.9; lineasQueEntran(ctx,p.regla,W-2*M).slice(0,2).forEach(l=>{ ctx.fillText(l,M,y+14); y+=48; }); ctx.globalAlpha=1; y+=14; }
 
+  if(c.esLista) return await flyerLista(ctx,cv,c,p,tema,y,W,H,M);
   // Plato blanco con productos
   const plY=y+40, plH=H-plY-330;
   ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
@@ -3713,7 +3764,7 @@ function cancelarFormularioPromocion(){ promoNueva=false; promoEditando=null; pr
 
 function formularioPromocion(id){
   const p = id ? PROMOCIONES.find(x=>x.id===id) : null;
-  const modo = p&&p.modo==="fijo" ? "fijo" : "descuento";
+  const modo = p&&(p.modo==="fijo"||p.modo==="lista") ? p.modo : "descuento";
   return `
     <div class="card" style="border-color:var(--accent)">
       <div class="card-title">${id?"Editar promoción":"Nueva promoción"}</div>
@@ -3725,12 +3776,13 @@ function formularioPromocion(id){
       <div id="pr-items"></div>
       <div class="form-row pr-precio">
         <label>Precio
-          <select id="pr-modo" onchange="actualizarPreviewPromo()">
+          <select id="pr-modo" onchange="renderItemsPromoForm()">
             <option value="descuento" ${modo==="descuento"?"selected":""}>Descuento sobre la lista (%)</option>
             <option value="fijo" ${modo==="fijo"?"selected":""}>Precio final fijo ($)</option>
+            <option value="lista" ${modo==="lista"?"selected":""}>Lista por producto</option>
           </select>
         </label>
-        <label>Valor<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento??"")):""}" placeholder="Ej: 5" oninput="actualizarPreviewPromo()"></label>
+        <label>Valor (en Lista: % opcional)<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="actualizarPreviewPromo()"></label>
       </div>
       <div id="pr-preview" class="pr-preview"></div>
       <div class="form-row"><label>Detalle extra para WhatsApp (opcional)<textarea id="pr-descripcion" rows="3" placeholder="Si lo dejás vacío, el mensaje se arma solo con productos y precios.">${p?htmlEsc(p.descripcion||''):''}</textarea></label></div>
@@ -3765,7 +3817,7 @@ function renderItemsPromoForm(){
   const el=document.getElementById("pr-items"); if(!el) return;
   el.innerHTML = promoItemsForm.map(it=>{ const p=getProd(it.cod);
     return `<div class="pr-item"><div class="pr-item-n"><b>${htmlEsc(p?nombreLindo(p.n):it.cod)}</b><small>${it.cod} · ${htmlEsc(p?presLinda(p.p):"")} · ${p?fmtPesos(p.v):""}</small></div>
-      <label class="pr-cant">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>
+      <label class="pr-cant" style="${document.getElementById("pr-modo")?.value==="lista"?"display:none":""}">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>
       <button type="button" class="link-btn link-danger" onclick="quitarProductoPromo('${it.cod}')">Quitar</button></div>`; }).join("");
   actualizarPreviewPromo();
 }
@@ -3773,12 +3825,13 @@ function renderItemsPromoForm(){
 function promoDesdeForm(){
   const modo=document.getElementById("pr-modo")?.value||"descuento";
   const val=parseFloat(document.getElementById("pr-valor")?.value);
-  return { items:promoItemsForm, modo, descuento: modo==="descuento"&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null };
+  return { items:promoItemsForm, modo, descuento: (modo==="descuento"||modo==="lista")&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null };
 }
 function actualizarPreviewPromo(){
   const el=document.getElementById("pr-preview"); if(!el) return;
   if(!promoItemsForm.length){ el.innerHTML=`<span>Sumá productos para armar el flyer. Sin productos, la promo queda solo como texto.</span>`; return; }
   const c=calcularPromo(promoDesdeForm()); if(!c){ el.innerHTML=""; return; }
+  if(c.esLista){ el.innerHTML=c.items.map(it=>`<span>${htmlEsc(nombreItem(it))}</span><b>${fmtPesos(it.pu)} ${it.un}</b>`).join("")+(c.desc>0?`<em>-${c.desc}%</em>`:""); return; }
   el.innerHTML=`<span>Lista <s>${fmtPesos(c.lista)}</s> ${c.unidad}</span><b>${fmtPesos(c.promo)} ${c.unidad}</b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}`;
 }
 
@@ -3851,7 +3904,9 @@ function tarjetaPromo(p){
         <div style="min-width:0"><div class="card-title" style="margin-bottom:2px">${htmlEsc(p.nombre)}</div>${p.regla?`<div class="promo-regla">${htmlEsc(p.regla)}</div>`:""}</div>
         <div style="display:flex;gap:10px;flex-shrink:0">${acciones}</div>
       </div>
-      ${c?`<div class="promo-fotos">${fotos}</div>
+      ${c&&c.esLista?`<div class="promo-fotos">${fotos}</div>
+      <div class="promo-regla" style="line-height:1.5">${c.items.map(it=>`${htmlEsc(nombreItem(it))}: <b>${fmtPesos(it.pu)} ${it.un}</b>`).join("<br>")}</div>`
+      :c?`<div class="promo-fotos">${fotos}</div>
       <div class="promo-precio"><span>Lista <s>${fmtPesos(c.lista)}</s></span><b>${fmtPesos(c.promo)} <small>${c.unidad}</small></b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}</div>`
       :`<div style="font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.4;margin:6px 0 8px">${htmlEsc(p.descripcion||"")}</div>`}
       ${c&&p.descripcion?`<div class="promo-regla" style="margin-top:4px">${htmlEsc(p.descripcion)}</div>`:""}
