@@ -3845,8 +3845,8 @@ function formularioPromocion(id){
         <label>Precio
           <select id="pr-modo" onchange="renderItemsPromoForm()">
             <option value="lista" ${modo==="lista"?"selected":""}>Por producto (lista)</option>
-            <option value="descuento" ${modo==="descuento"?"selected":""}>Combo: % sobre total</option>
-            <option value="fijo" ${modo==="fijo"?"selected":""}>Combo: precio fijo</option>
+            ${p&&(p.modo==="descuento"||p.modo==="fijo"||!p.modo)?`<option value="descuento" ${modo==="descuento"?"selected":""}>Combo viejo: % sobre total</option>
+            <option value="fijo" ${modo==="fijo"?"selected":""}>Combo viejo: precio fijo</option>`:""}
             <option value="escalas" ${modo==="escalas"?"selected":""}>Escalas por cantidad</option>
           </select>
         </label>
