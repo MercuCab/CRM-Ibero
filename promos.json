@@ -1,135 +1,284 @@
 {
-  "actualizado": "22/10/2026",
-  "promos": [
+ "actualizado": "2026-10-23",
+ "promos": [
+  {
+   "id": "claude-ofertas-fiambres-2310",
+   "nombre": "Ofertas de fiambres",
+   "regla": "Precios especiales por kg",
+   "items": [
     {
-      "id": "claude-cremoso-tregar-caja4",
-      "nombre": "Cremoso Tregar",
-      "regla": "Llevando la caja de 4 hormas",
-      "items": [
-        {
-          "cod": "2108",
-          "cant": 4,
-          "nombre": "Queso Cremoso Tregar"
-        }
-      ],
-      "modo": "descuento",
-      "descuento": 5,
-      "desde": "2026-10-22"
+     "cod": "1041",
+     "cant": 1,
+     "nombre": "Jamón crudo El Artesano (mitades)",
+     "pf": 13571.25
     },
     {
-      "id": "claude-picada-bocatti",
-      "nombre": "Picada Bocatti",
-      "regla": "Cuatro feteados, uno de cada",
-      "items": [
-        {
-          "cod": "1327",
-          "cant": 1,
-          "nombre": "Salamín Bocatti"
-        },
-        {
-          "cod": "1328",
-          "cant": 1,
-          "nombre": "Salame Milán Bocatti"
-        },
-        {
-          "cod": "1210",
-          "cant": 1,
-          "nombre": "Lomo c/hierbas Bocatti"
-        },
-        {
-          "cod": "1115",
-          "cant": 1,
-          "nombre": "Mortadela c/pistacho Bocatti"
-        }
-      ],
-      "modo": "descuento",
-      "descuento": 5,
-      "desde": "2026-10-22"
+     "cod": "1171",
+     "cant": 1,
+     "nombre": "Jamón cocido barra Cagnoli",
+     "pf": 11031.61
     },
     {
-      "id": "claude-picada-gourmet",
-      "nombre": "Picada Gourmet",
-      "regla": "Crudo, bondiola, camembert y chips",
-      "items": [
-        {
-          "cod": "1034",
-          "cant": 1,
-          "nombre": "Crudo El Artesano 12 meses"
-        },
-        {
-          "cod": "1038",
-          "cant": 1,
-          "nombre": "Bondiola El Artesano"
-        },
-        {
-          "cod": "2458",
-          "cant": 1,
-          "nombre": "Camembert Pre Vert"
-        },
-        {
-          "cod": "5101",
-          "cant": 1,
-          "nombre": "Pita Chips Original"
-        }
-      ],
-      "modo": "descuento",
-      "descuento": 5,
-      "desde": "2026-10-22"
+     "cod": "1172",
+     "cant": 1,
+     "nombre": "Fiambre de pata barra Cagnoli",
+     "pf": 7937.73
     },
     {
-      "id": "claude-aperitivo-norquinco",
-      "nombre": "Aperitivo Ñorquinco",
-      "regla": "Cuatro frascos para armar la picada",
-      "items": [
-        {
-          "cod": "4123",
-          "cant": 1,
-          "nombre": "Aceitunas rellenas c/morrón"
-        },
-        {
-          "cod": "4135",
-          "cant": 1,
-          "nombre": "Pepinitos en vinagre"
-        },
-        {
-          "cod": "4127",
-          "cant": 1,
-          "nombre": "Cebollitas en vinagre"
-        },
-        {
-          "cod": "4126",
-          "cant": 1,
-          "nombre": "Berenjenas en aceite"
-        }
-      ],
-      "modo": "descuento",
-      "descuento": 5,
-      "desde": "2026-10-22"
+     "cod": "1113",
+     "cant": 1,
+     "nombre": "Mortadela c/pistacho Bocatti",
+     "pf": 8993.68
     },
     {
-      "id": "claude-trio-esnaola",
-      "nombre": "Trío Esnaola",
-      "regla": "Batata, membrillo y postre de DDL en lata de 700 g",
-      "items": [
-        {
-          "cod": "3331",
-          "cant": 1,
-          "nombre": "Dulce de batata Esnaola"
-        },
-        {
-          "cod": "3332",
-          "cant": 1,
-          "nombre": "Dulce de membrillo Esnaola"
-        },
-        {
-          "cod": "3334",
-          "cant": 1,
-          "nombre": "Postre de DDL c/chocolate Esnaola"
-        }
-      ],
-      "modo": "descuento",
-      "descuento": 5,
-      "desde": "2026-10-22"
+     "cod": "1201",
+     "cant": 1,
+     "nombre": "Panceta ahumada El Galaico",
+     "pf": 11195.94
+    },
+    {
+     "cod": "1339",
+     "cant": 1,
+     "nombre": "Salame Milán Cagnoli",
+     "pf": 11061.97
     }
-  ]
+   ],
+   "modo": "lista",
+   "descuento": 0,
+   "desde": "2026-10-23"
+  },
+  {
+   "id": "claude-ofertas-feteados-2310",
+   "nombre": "Ofertas en feteados",
+   "regla": "Precio por blister",
+   "items": [
+    {
+     "cod": "1116",
+     "cant": 1,
+     "nombre": "Jamón cocido natural Bocatti feteado",
+     "pf": 2649.31
+    },
+    {
+     "cod": "1210",
+     "cant": 1,
+     "nombre": "Lomo c/hierbas Bocatti feteado",
+     "pf": 1539.09
+    },
+    {
+     "cod": "1115",
+     "cant": 1,
+     "nombre": "Mortadela c/pistacho Bocatti feteada",
+     "pf": 1002.32
+    },
+    {
+     "cod": "1034",
+     "cant": 1,
+     "nombre": "Jamón crudo El Artesano 12 meses feteado",
+     "pf": 4486.12
+    }
+   ],
+   "modo": "lista",
+   "descuento": 0,
+   "desde": "2026-10-23"
+  },
+  {
+   "id": "claude-ofertas-quesos-2310",
+   "nombre": "Ofertas de quesos",
+   "regla": "Precios especiales",
+   "items": [
+    {
+     "cod": "2166",
+     "cant": 1,
+     "nombre": "Mozzarella cilindro Barraza 3 kg",
+     "pf": 8656.86
+    },
+    {
+     "cod": "2102",
+     "cant": 1,
+     "nombre": "Mozzarella cilindro Doña Aurora 500 g",
+     "pf": 4249.94
+    },
+    {
+     "cod": "2026",
+     "cant": 1,
+     "nombre": "Queso barra tybo Lactear",
+     "pf": 8092.0
+    }
+   ],
+   "modo": "lista",
+   "descuento": 0,
+   "desde": "2026-10-23"
+  },
+  {
+   "id": "claude-tregar-cremoso-escalas",
+   "nombre": "Cremoso Tregar",
+   "regla": "Más cajas, más descuento",
+   "items": [
+    {
+     "cod": "2108",
+     "cant": 1,
+     "nombre": "Queso Cremoso Tregar"
+    }
+   ],
+   "modo": "escalas",
+   "escalas": [
+    {
+     "label": "1 caja",
+     "d": 10
+    },
+    {
+     "label": "De 5 a 10 cajas",
+     "d": 15
+    },
+    {
+     "label": "10 o más cajas",
+     "d": 18
+    }
+   ],
+   "desde": "2026-10-23"
+  },
+  {
+   "id": "claude-tregar-danbo-escalas",
+   "nombre": "Barra Danbo Tregar",
+   "regla": "Más cajas, más descuento",
+   "items": [
+    {
+     "cod": "2004",
+     "cant": 1,
+     "nombre": "Queso Barra Danbo Tregar"
+    }
+   ],
+   "modo": "escalas",
+   "escalas": [
+    {
+     "label": "1 caja",
+     "d": 10
+    },
+    {
+     "label": "De 5 a 10 cajas",
+     "d": 18
+    },
+    {
+     "label": "10 o más cajas",
+     "d": 22
+    }
+   ],
+   "desde": "2026-10-23"
+  },
+  {
+   "id": "claude-picada-bocatti",
+   "nombre": "Picada Bocatti",
+   "regla": "Cuatro feteados, uno de cada",
+   "items": [
+    {
+     "cod": "1327",
+     "cant": 1,
+     "nombre": "Salamín Bocatti"
+    },
+    {
+     "cod": "1328",
+     "cant": 1,
+     "nombre": "Salame Milán Bocatti"
+    },
+    {
+     "cod": "1210",
+     "cant": 1,
+     "nombre": "Lomo c/hierbas Bocatti"
+    },
+    {
+     "cod": "1115",
+     "cant": 1,
+     "nombre": "Mortadela c/pistacho Bocatti"
+    }
+   ],
+   "modo": "descuento",
+   "descuento": 5,
+   "desde": "2026-10-22"
+  },
+  {
+   "id": "claude-picada-gourmet",
+   "nombre": "Picada Gourmet",
+   "regla": "Crudo, bondiola, camembert y chips",
+   "items": [
+    {
+     "cod": "1034",
+     "cant": 1,
+     "nombre": "Crudo El Artesano 12 meses"
+    },
+    {
+     "cod": "1038",
+     "cant": 1,
+     "nombre": "Bondiola El Artesano"
+    },
+    {
+     "cod": "2458",
+     "cant": 1,
+     "nombre": "Camembert Pre Vert"
+    },
+    {
+     "cod": "5101",
+     "cant": 1,
+     "nombre": "Pita Chips Original"
+    }
+   ],
+   "modo": "descuento",
+   "descuento": 5,
+   "desde": "2026-10-22"
+  },
+  {
+   "id": "claude-aperitivo-norquinco",
+   "nombre": "Aperitivo Ñorquinco",
+   "regla": "Cuatro frascos para armar la picada",
+   "items": [
+    {
+     "cod": "4123",
+     "cant": 1,
+     "nombre": "Aceitunas rellenas c/morrón"
+    },
+    {
+     "cod": "4135",
+     "cant": 1,
+     "nombre": "Pepinitos en vinagre"
+    },
+    {
+     "cod": "4127",
+     "cant": 1,
+     "nombre": "Cebollitas en vinagre"
+    },
+    {
+     "cod": "4126",
+     "cant": 1,
+     "nombre": "Berenjenas en aceite"
+    }
+   ],
+   "modo": "descuento",
+   "descuento": 5,
+   "desde": "2026-10-22"
+  },
+  {
+   "id": "claude-trio-esnaola",
+   "nombre": "Trío Esnaola",
+   "regla": "Batata, membrillo y postre de DDL en lata de 700 g",
+   "items": [
+    {
+     "cod": "3331",
+     "cant": 1,
+     "nombre": "Dulce de batata Esnaola"
+    },
+    {
+     "cod": "3332",
+     "cant": 1,
+     "nombre": "Dulce de membrillo Esnaola"
+    },
+    {
+     "cod": "3334",
+     "cant": 1,
+     "nombre": "Postre de DDL c/chocolate Esnaola"
+    }
+   ],
+   "modo": "descuento",
+   "descuento": 5,
+   "desde": "2026-10-22"
+  }
+ ]
 }

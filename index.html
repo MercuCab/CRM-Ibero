@@ -3496,7 +3496,7 @@ function nombreLindo(s){
 function presLinda(s){
   return String(s||"").toLowerCase().replace(/\s+/g," ").trim().replace(/grs?\.?\b/g,"g").replace(/kgs?\b/g,"kg").replace(/^./,c=>c.toUpperCase());
 }
-function esPorKilo(prod){ return /HORMA|PIEZA|BARRA|CILINDRO|CUÑA|BOCHA|PLANCHA/i.test(prod?.p||""); }
+function esPorKilo(prod){ const t=prod?.p||""; return /HORMA|PIEZA|BARRA|CILINDRO|CUÑA|BOCHA|PLANCHA/i.test(t) && !/\d\s*GRS?\b/i.test(t); }
 
 // Calcula precios de una promo con la lista vigente del CRM
 function calcularPromo(p){
@@ -3506,10 +3506,18 @@ function calcularPromo(p){
     const d = Number(p.descuento||0);
     const its = items.map(it=>{
       const propio = it.d!==undefined && it.d!==null && it.d!=="" && !isNaN(Number(it.d));
-      const dd = propio ? Math.max(0,Number(it.d)) : d;
-      return {...it, dd, pu: dd>0 ? Math.floor(it.prod.v*(1-dd/100)/10)*10 : Math.round(it.prod.v), un: esPorKilo(it.prod)?"x kg":"c/u"};
+      const fijo = Number(it.pf)>0;
+      let dd = propio ? Math.max(0,Number(it.d)) : d, pu;
+      if(fijo){ pu=Math.round(Number(it.pf)); dd = it.prod.v>pu ? Math.round((1-pu/it.prod.v)*1000)/10 : 0; }
+      else pu = dd>0 ? Math.floor(it.prod.v*(1-dd/100)/10)*10 : Math.round(it.prod.v);
+      return {...it, dd, pu, fijo, un: esPorKilo(it.prod)?"x kg":"c/u"};
     });
     return {items:its, esLista:true, unico:false, unidad:"", lista:its.reduce((s,it)=>s+it.prod.v,0), promo:0, ahorro:0, desc:0};
+  }
+  if(p.modo==="escalas"){
+    const it=items[0], un=esPorKilo(it.prod)?"x kg":"c/u";
+    const tiers=(p.escalas||[]).filter(t=>t&&t.label&&Number(t.d)>=0).map(t=>({label:t.label, d:Number(t.d), pu:Math.floor(it.prod.v*(1-Number(t.d)/100)/10)*10}));
+    return {items:[{...it,un}], esEscalas:true, tiers, unico:true, unidad:un, lista:it.prod.v, promo:0, ahorro:0};
   }
   const unico = items.length===1;
   const unidad = unico ? (esPorKilo(items[0].prod) ? "el kg" : "c/u") : "el combo";
@@ -3528,6 +3536,11 @@ function calcularPromo(p){
 function textoPromo(p){
   if(!promoTieneProductos(p)) return `${p.nombre}\n\n${p.descripcion||""}`.trim();
   const c = calcularPromo(p); if(!c) return p.nombre;
+  if(c.esEscalas){
+    const it=c.items[0]; const ls=c.tiers.map(t=>`• ${t.label}: *${fmtPesos(t.pu)} ${it.un}* (-${fmtPct(t.d)}%)`).join("\n");
+    const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
+    return `*${p.nombre}*\n${nombreItem(it)}${p.regla?`\n${p.regla}`:""}\n\n${ls}${p.descripcion?`\n\n${p.descripcion}`:""}${hasta}`;
+  }
   if(c.esLista){
     const ls = c.items.map(it=>`• ${nombreItem(it)}: *${fmtPesos(it.pu)} ${it.un}*${it.dd>0?` (-${fmtPct(it.dd)}%)`:""}`).join("\n");
     const hasta = p.hasta ? `\nVálido hasta el ${fechaDisplay(p.hasta)}.` : "";
@@ -3559,16 +3572,56 @@ function lineasQueEntran(ctx, texto, maxW){
 const F_DISPLAY = '"Big Shoulders Display", Impact, "Arial Narrow", sans-serif';
 const F_BODY = '"Instrument Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
 
+// Flyer de escalas por cantidad: un producto, varios tramos con su descuento y precio
+async function flyerEscalas(ctx,cv,c,p,tema,y,W,H,M){
+  const it=c.items[0], tiers=c.tiers.slice(0,4), n=Math.max(tiers.length,1);
+  const plY=y+30, plH=H-plY-200;
+  ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
+  await cargarFotosCatalogo();
+  const im=await cargarImagen(fotoPromo(it.cod));
+  const colL=380, xL=M+4, xR0=M+colL+50, xR1=W-M+4;
+  // columna izquierda: foto y nombre
+  const boxH=Math.min(460,plH-190), boxY=plY+(plH-boxH-150)/2;
+  if(im){ const s=Math.min(colL/im.width,boxH/im.height), w=im.width*s, h=im.height*s; ctx.drawImage(im,xL+(colL-w)/2,boxY+(boxH-h)/2,w,h); }
+  ctx.textBaseline="alphabetic"; ctx.textAlign="center"; ctx.fillStyle="#1B1B1B"; ctx.font=`700 32px ${F_BODY}`;
+  let yy=boxY+boxH+48; lineasQueEntran(ctx,nombreItem(it),colL).slice(0,2).forEach(l=>{ ctx.fillText(l,xL+colL/2,yy); yy+=38; });
+  ctx.font=`500 26px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),xL+colL/2,yy+4);
+  // separador
+  ctx.fillStyle="#E7E2DA"; ctx.fillRect(M+colL+22,plY+30,2,plH-60);
+  // columna derecha: tramos
+  const rowH=(plH-40)/n;
+  tiers.forEach((t,i)=>{
+    const ry=plY+20+i*rowH;
+    if(i>0){ ctx.fillStyle="#E7E2DA"; ctx.fillRect(xR0,ry,xR1-xR0,2); }
+    ctx.textAlign="left"; ctx.fillStyle="#1B1B1B"; ctx.font=`700 ${rowH>170?40:34}px ${F_BODY}`;
+    ctx.fillText(t.label,xR0,ry+54);
+    const pf=Math.min(100,Math.round(rowH*0.42)), pby=ry+rowH-58;
+    const tx="-"+fmtPct(t.d)+"%"; const cf=34; ctx.font=`800 ${cf}px ${F_BODY}`; const cw=ctx.measureText(tx).width+28;
+    ctx.fillStyle="#FFDD3C"; rrect(ctx,xR0,pby-cf-4,cw,cf+16,(cf+16)/2); ctx.fill();
+    ctx.fillStyle="#000"; ctx.textAlign="center"; ctx.fillText(tx,xR0+cw/2,pby-4);
+    ctx.textAlign="right"; ctx.fillStyle=tema.fondo; ctx.font=`800 ${pf}px ${F_DISPLAY}`;
+    ctx.fillText(fmtPesos(t.pu),xR1,pby+pf*0.12);
+    ctx.fillStyle="#6A6A6A"; ctx.font=`700 26px ${F_BODY}`; ctx.fillText(it.un,xR1,pby+pf*0.12+36);
+  });
+  ctx.textBaseline="top"; ctx.textAlign="left"; ctx.fillStyle=tema.papel;
+  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.9;
+  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
+  ctx.fillText("Descuento sobre precio de lista · Precios mayoristas", M, H-108);
+  ctx.globalAlpha=1;
+  return cv;
+}
+
 // Flyer en formato lista: cada producto con su propio precio (ej. por kg)
 async function flyerLista(ctx,cv,c,p,tema,y,W,H,M){
   const items=c.items.slice(0,10), n=items.length;
   const plY=y+30, plMax=H-plY-200, pad=14;
-  const rowH=Math.min(170,(plMax-2*pad)/n), plH=Math.min(plMax, rowH*n+2*pad);
+  const rowH=Math.min(n<=3?230:170,(plMax-2*pad)/n), plH=Math.min(plMax, rowH*n+2*pad);
   ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
   await cargarFotosCatalogo();
   const imgs=await Promise.all(items.map(it=>cargarImagen(fotoPromo(it.cod))));
   const th=rowH-18, xL=M-4, xR=W-M+4;
-  const big=rowH>=112, nf=big?34:rowH>=88?29:25, pf=Math.min(84,Math.round(rowH*0.58));
+  const big=rowH>=112, nf=rowH>=200?36:big?34:rowH>=88?29:25, pf=Math.min(rowH>=200?104:84,Math.round(rowH*0.58));
   items.forEach((it,i)=>{
     const ry=plY+pad+i*rowH, cy=ry+rowH/2;
     if(i>0){ ctx.fillStyle="#E7E2DA"; ctx.fillRect(xL,ry,xR-xL,2); }
@@ -3592,7 +3645,7 @@ async function flyerLista(ctx,cv,c,p,tema,y,W,H,M){
     // nombre
     ctx.textAlign="left"; ctx.fillStyle="#1B1B1B"; ctx.font=`700 ${nf}px ${F_BODY}`;
     const xN=xL+th+22, maxW=xR-pw-chipW-(chipW?16:0)-xN-24;
-    const ls=lineasQueEntran(ctx,nombreItem(it),Math.max(maxW,200)).slice(0,2);
+    const ls=lineasQueEntran(ctx,nombreItem(it),Math.max(maxW,200)).slice(0,rowH>=200?3:2);
     const bloque=ls.length*(nf+4)+(big?30:0); let yy=cy-bloque/2+nf*0.85;
     ls.forEach(l=>{ ctx.fillText(l,xN,yy); yy+=nf+4; });
     if(big){ ctx.font=`500 ${Math.round(nf*0.72)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),xN,yy+2); }
@@ -3631,6 +3684,7 @@ async function dibujarFlyer(p){
   if(p.regla){ ctx.font=`600 38px ${F_BODY}`; ctx.globalAlpha=.9; lineasQueEntran(ctx,p.regla,W-2*M).slice(0,2).forEach(l=>{ ctx.fillText(l,M,y+14); y+=48; }); ctx.globalAlpha=1; y+=14; }
 
   if(c.esLista) return await flyerLista(ctx,cv,c,p,tema,y,W,H,M);
+  if(c.esEscalas) return await flyerEscalas(ctx,cv,c,p,tema,y,W,H,M);
   // Plato blanco con productos
   const plY=y+40, plH=H-plY-330;
   ctx.fillStyle="#FFFFFF"; rrect(ctx,M-24,plY,W-2*M+48,plH,34); ctx.fill();
@@ -3745,14 +3799,14 @@ function abrirPromociones(){
 }
 
 function nuevaPromocion(){
-  promoNueva = true; promoEditando = null; promoItemsForm = [];
+  promoNueva = true; promoEditando = null; promoItemsForm = []; promoEscalasForm = [];
   renderPromocionesForm();
   document.getElementById("promociones-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
 function editarPromocion(id){
   const p=PROMOCIONES.find(x=>x.id===id);
-  promoEditando = id; promoNueva = false; promoItemsForm = p&&p.items ? clonar(p.items) : [];
+  promoEditando = id; promoNueva = false; promoItemsForm = p&&p.items ? clonar(p.items) : []; promoEscalasForm = p&&p.escalas ? clonar(p.escalas) : [];
   renderPromocionesForm();
   document.getElementById("promociones-form").scrollIntoView({block:"start",behavior:"smooth"});
 }
@@ -3776,7 +3830,7 @@ function cancelarFormularioPromocion(){ promoNueva=false; promoEditando=null; pr
 
 function formularioPromocion(id){
   const p = id ? PROMOCIONES.find(x=>x.id===id) : null;
-  const modo = p&&(p.modo==="fijo"||p.modo==="lista") ? p.modo : "descuento";
+  const modo = p&&(p.modo==="fijo"||p.modo==="lista"||p.modo==="escalas") ? p.modo : "descuento";
   return `
     <div class="card" style="border-color:var(--accent)">
       <div class="card-title">${id?"Editar promoción":"Nueva promoción"}</div>
@@ -3792,10 +3846,12 @@ function formularioPromocion(id){
             <option value="descuento" ${modo==="descuento"?"selected":""}>Descuento sobre la lista (%)</option>
             <option value="fijo" ${modo==="fijo"?"selected":""}>Precio final fijo ($)</option>
             <option value="lista" ${modo==="lista"?"selected":""}>Lista por producto</option>
+            <option value="escalas" ${modo==="escalas"?"selected":""}>Escalas por cantidad (1 producto)</option>
           </select>
         </label>
         <label>Valor (en Lista: % para todos)<input type="number" inputmode="decimal" id="pr-valor" value="${p?(modo==="fijo"?(p.precio||""):(p.descuento||"")):""}" placeholder="Ej: 5" oninput="renderItemsPromoForm()"></label>
       </div>
+      <div id="pr-escalas" style="display:none"></div>
       <div id="pr-preview" class="pr-preview"></div>
       <div class="form-row"><label>Detalle extra para WhatsApp (opcional)<textarea id="pr-descripcion" rows="3" placeholder="Si lo dejás vacío, el mensaje se arma solo con productos y precios.">${p?htmlEsc(p.descripcion||''):''}</textarea></label></div>
       <div class="form-row"><label>Vigente desde (opcional)<input type="date" id="pr-desde" value="${p&&p.desde?p.desde:''}"></label></div>
@@ -3824,28 +3880,43 @@ function agregarProductoPromo(cod){
 }
 function quitarProductoPromo(cod){ promoItemsForm=promoItemsForm.filter(i=>i.cod!==cod); renderItemsPromoForm(); }
 function descProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ const n=parseFloat(String(v).replace(',','.')); if(isNaN(n)) delete it.d; else it.d=Math.max(0,n); } actualizarPreviewPromo(); }
+function precioProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ const n=parseFloat(String(v).replace(',','.')); if(!(n>0)) delete it.pf; else it.pf=n; } actualizarPreviewPromo(); }
 function cantProductoPromo(cod,v){ const it=promoItemsForm.find(i=>i.cod===cod); if(it){ it.cant=Math.max(1,parseInt(v)||1); } actualizarPreviewPromo(); }
 
 function renderItemsPromoForm(){
   const el=document.getElementById("pr-items"); if(!el) return;
   el.innerHTML = promoItemsForm.map(it=>{ const p=getProd(it.cod);
     return `<div class="pr-item"><div class="pr-item-n"><b>${htmlEsc(p?nombreLindo(p.n):it.cod)}</b><small>${it.cod} · ${htmlEsc(p?presLinda(p.p):"")} · ${p?fmtPesos(p.v):""}</small></div>
-      ${document.getElementById("pr-modo")?.value==="lista"
-        ? `<label class="pr-cant">Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${it.d===undefined||it.d===null?"":it.d}" placeholder="${document.getElementById("pr-valor")?.value||"0"}" oninput="descProductoPromo('${it.cod}',this.value)"></label>`
+      ${document.getElementById("pr-modo")?.value==="escalas" ? ""
+        : document.getElementById("pr-modo")?.value==="lista"
+        ? `<label class="pr-cant">Precio $<input type="number" min="0" step="any" inputmode="decimal" value="${it.pf>0?it.pf:""}" placeholder="lista" oninput="precioProductoPromo('${it.cod}',this.value)"></label><label class="pr-cant">Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${it.d===undefined||it.d===null?"":it.d}" placeholder="${document.getElementById("pr-valor")?.value||"0"}" oninput="descProductoPromo('${it.cod}',this.value)"></label>`
         : `<label class="pr-cant">Cant.<input type="number" min="1" inputmode="numeric" value="${it.cant||1}" oninput="cantProductoPromo('${it.cod}',this.value)"></label>`}
       <button type="button" class="link-btn link-danger" onclick="quitarProductoPromo('${it.cod}')">Quitar</button></div>`; }).join("");
+  renderEscalasForm();
   actualizarPreviewPromo();
+}
+let promoEscalasForm = [];
+function renderEscalasForm(){
+  const el=document.getElementById("pr-escalas"); if(!el) return;
+  const esc=document.getElementById("pr-modo")?.value==="escalas";
+  const valor=document.getElementById("pr-valor"); if(valor) valor.closest("label").style.display = esc?"none":"";
+  if(!esc){ el.style.display="none"; el.innerHTML=""; return; }
+  while(promoEscalasForm.length<4) promoEscalasForm.push({label:"",d:""});
+  el.style.display="block";
+  el.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--ink-dim);margin:2px 0 6px">Escalas (tramo y % de descuento sobre la lista)</div>`+promoEscalasForm.map((t,i)=>`<div class="form-row pr-precio"><label>Tramo<input type="text" value="${attrEsc(t.label||"")}" placeholder="Ej: De 5 a 10 cajas" oninput="promoEscalasForm[${i}].label=this.value;actualizarPreviewPromo()"></label><label>Desc. %<input type="number" min="0" step="any" inputmode="decimal" value="${t.d===""||t.d===undefined?"":t.d}" oninput="promoEscalasForm[${i}].d=this.value;actualizarPreviewPromo()"></label></div>`).join("");
 }
 
 function promoDesdeForm(){
   const modo=document.getElementById("pr-modo")?.value||"descuento";
   const val=parseFloat(document.getElementById("pr-valor")?.value);
-  return { items:promoItemsForm, modo, descuento: (modo==="descuento"||modo==="lista")&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null };
+  return { items:promoItemsForm, modo, descuento: (modo==="descuento"||modo==="lista")&&!isNaN(val)?val:0, precio: modo==="fijo"&&!isNaN(val)?val:null,
+    escalas: modo==="escalas" ? promoEscalasForm.filter(t=>t.label&&String(t.label).trim()&&t.d!==""&&!isNaN(parseFloat(t.d))).map(t=>({label:String(t.label).trim(), d:parseFloat(t.d)})) : undefined };
 }
 function actualizarPreviewPromo(){
   const el=document.getElementById("pr-preview"); if(!el) return;
   if(!promoItemsForm.length){ el.innerHTML=`<span>Sumá productos para armar el flyer. Sin productos, la promo queda solo como texto.</span>`; return; }
   const c=calcularPromo(promoDesdeForm()); if(!c){ el.innerHTML=""; return; }
+  if(c.esEscalas){ el.innerHTML=c.tiers.length?c.tiers.map(t=>`<div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${htmlEsc(t.label)}</span><b>${fmtPesos(t.pu)} ${c.items[0].un} <em>-${fmtPct(t.d)}%</em></b></div>`).join(""):`<span>Sumá al menos un tramo.</span>`; return; }
   if(c.esLista){ el.innerHTML=c.items.map(it=>`<div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${htmlEsc(nombreItem(it))}</span><b>${fmtPesos(it.pu)} ${it.un}${it.dd>0?` <em>-${fmtPct(it.dd)}%</em>`:""}</b></div>`).join(""); return; }
   el.innerHTML=`<span>Lista <s>${fmtPesos(c.lista)}</s> ${c.unidad}</span><b>${fmtPesos(c.promo)} ${c.unidad}</b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}`;
 }
@@ -3861,7 +3932,9 @@ function guardarPromocion(id){
   if(!nombre){ err.textContent = "Poné un título para la promo."; return; }
   if(!promoItemsForm.length && !descripcion){ err.textContent = "Sumá al menos un producto o escribí el detalle."; return; }
   if(f.modo==="fijo" && promoItemsForm.length && !(f.precio>0)){ err.textContent = "Escribí el precio final de la promo."; return; }
+  if(f.modo==="escalas" && (promoItemsForm.length!==1 || !f.escalas.length)){ err.textContent = "Escalas: elegí un solo producto y completá al menos un tramo."; return; }
   const datos = {nombre, regla, descripcion, desde, hasta, items:clonar(promoItemsForm), modo:f.modo, descuento:f.descuento, precio:f.precio};
+  if(f.modo==="escalas") datos.escalas=f.escalas; else delete datos.escalas;
   if(id){
     const p = PROMOCIONES.find(x=>x.id===id);
     if(p) Object.assign(p, datos);
@@ -3919,7 +3992,9 @@ function tarjetaPromo(p){
         <div style="min-width:0"><div class="card-title" style="margin-bottom:2px">${htmlEsc(p.nombre)}</div>${p.regla?`<div class="promo-regla">${htmlEsc(p.regla)}</div>`:""}</div>
         <div style="display:flex;gap:10px;flex-shrink:0">${acciones}</div>
       </div>
-      ${c&&c.esLista?`<div class="promo-fotos">${fotos}</div>
+      ${c&&c.esEscalas?`<div class="promo-fotos">${fotos}</div>
+      <div class="promo-regla" style="line-height:1.5">${c.tiers.map(t=>`${htmlEsc(t.label)}: <b>${fmtPesos(t.pu)} ${c.items[0].un}</b> (-${fmtPct(t.d)}%)`).join("<br>")}</div>`
+      :c&&c.esLista?`<div class="promo-fotos">${fotos}</div>
       <div class="promo-regla" style="line-height:1.5">${c.items.map(it=>`${htmlEsc(nombreItem(it))}: <b>${fmtPesos(it.pu)} ${it.un}</b>${it.dd>0?` (-${fmtPct(it.dd)}%)`:""}`).join("<br>")}</div>`
       :c?`<div class="promo-fotos">${fotos}</div>
       <div class="promo-precio"><span>Lista <s>${fmtPesos(c.lista)}</s></span><b>${fmtPesos(c.promo)} <small>${c.unidad}</small></b>${c.ahorro>0?`<em>-${c.ahorro}%</em>`:""}</div>`
