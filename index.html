@@ -3604,8 +3604,7 @@ async function flyerEscalas(ctx,cv,c,p,tema,y,W,H,M){
     ctx.fillStyle="#6A6A6A"; ctx.font=`700 26px ${F_BODY}`; ctx.fillText(it.un,xR1,pby+pf*0.12+36);
   });
   ctx.textBaseline="top"; ctx.textAlign="left"; ctx.fillStyle=tema.papel;
-  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.9;
-  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.globalAlpha=.9;
   ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
   ctx.fillText("Descuento sobre precio de lista · Precios mayoristas", M, H-108);
   ctx.globalAlpha=1;
@@ -3651,8 +3650,7 @@ async function flyerLista(ctx,cv,c,p,tema,y,W,H,M){
     if(big){ ctx.font=`500 ${Math.round(nf*0.72)}px ${F_BODY}`; ctx.fillStyle="#6A6A6A"; ctx.fillText(presLinda(it.prod.p),xN,yy+2); }
   });
   ctx.textBaseline="top"; ctx.textAlign="left"; ctx.fillStyle=tema.papel;
-  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.9;
-  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.globalAlpha=.9;
   ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
   ctx.fillText("Precios mayoristas de la lista vigente", M, H-108);
   ctx.globalAlpha=1;
@@ -3747,8 +3745,7 @@ async function dibujarFlyer(p){
   // Pie: ahorro y vendedor
   ctx.textAlign="left"; ctx.fillStyle=tema.papel;
   if(c.ahorro>0){ ctx.font=`800 110px ${F_DISPLAY}`; ctx.fillText(`-${c.ahorro}%`, M, H-285); }
-  ctx.font=`600 30px ${F_BODY}`; ctx.globalAlpha=.85;
-  ctx.fillText(vendedorActual?`Pedilo con ${vendedorActual}`:"Pedilo con tu vendedor", M, H-150);
+  ctx.globalAlpha=.9;
   ctx.font=`500 24px ${F_BODY}`; ctx.globalAlpha=.6;
   ctx.fillText("Precios mayoristas de la lista vigente", M, H-108);
   ctx.globalAlpha=1;
