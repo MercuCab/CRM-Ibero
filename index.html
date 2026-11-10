@@ -255,6 +255,8 @@ body{
 .pi-cod{font-size:14px;font-weight:600;color:var(--ink)}
 .pi-meta{font-size:11.5px;color:var(--ink-dim);margin-top:2px;font-family:var(--font-mono)}
 .pi-del{background:none;border:none;color:var(--ink-faint);font-size:17px;padding:4px 6px;cursor:pointer}
+.pi-acciones{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.pi-add{background:var(--accent);color:#fff;border:none;width:30px;height:30px;border-radius:8px;font-size:17px;font-weight:700;line-height:1;cursor:pointer;flex-shrink:0}
 
 .hist-item{padding:11px 0;border-bottom:1px solid var(--line)}
 .hist-item:last-child{border:none}
@@ -1914,6 +1916,14 @@ function renderTab() {
   else el.innerHTML = renderPedido();
 }
 
+function incrementarItem(i){
+  if(!pedidoActual[i]) return;
+  pedidoActual[i].qty += 1;
+  pedidoSucio = true;
+  guardarBorradorPedido();
+  renderTab();
+}
+
 function eliminarItem(i) {
   const [quitado] = pedidoActual.splice(i,1);
   pedidoSucio = true; editandoItemIndex = null; guardarBorradorPedido(); renderTab();
@@ -2291,7 +2301,10 @@ function renderPedido() {
               <div class="pi-cod">Cód. ${it.cod}${pi?` · ${pi.n}`:""}</div>
               <div class="pi-meta">${it.qty} u.${it.desc?` · -${it.desc}%`:""} · ${money(itemTotal(it))}</div>
             </div>
-            <button class="pi-del" title="Eliminar" onclick="event.stopPropagation();eliminarItem(${i})">🗑️</button>
+            <div class="pi-acciones">
+              <button class="pi-add" title="Agregar 1 unidad" onclick="event.stopPropagation();incrementarItem(${i})">+</button>
+              <button class="pi-del" title="Eliminar" onclick="event.stopPropagation();eliminarItem(${i})">🗑️</button>
+            </div>
           </div>`;
         }).join("")}
         <div style="padding:10px 0 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:13.5px">
