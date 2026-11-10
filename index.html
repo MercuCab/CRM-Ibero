@@ -497,7 +497,7 @@ body{
       </div>
     </div>
     <div class="scroll">
-      <input class="search-box" type="search" placeholder="Buscar por código o nombre..." id="search-precios" oninput="filtrarPrecios(this.value)">
+      <input class="search-box" type="search" placeholder="Buscar por código o nombre..." id="search-precios" oninput="filtrarPreciosDeb(this.value)">
       <button class="btn btn-ghost" style="margin:0 0 12px" onclick="nuevoProducto()">+ Nuevo producto</button>
       <div id="precio-detalle"></div>
       <div id="lista-precios"></div>
@@ -589,7 +589,7 @@ body{
     <div class="scroll">
       <div class="card">
         <div class="form-row"><label>Buscar producto por nombre o código
-          <input type="text" id="desc-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoDescuento(this.value)">
+          <input type="text" id="desc-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoDescuentoDeb(this.value)">
         </label></div>
         <div id="desc-resultados" class="resultados-buscador"></div>
       </div>
@@ -735,6 +735,16 @@ const CAT_EMOJI = {
   "SNACK":"🍟", "VARIOS":"📦"
 };
 function catEmoji(cat){ return CAT_EMOJI[cat] ? CAT_EMOJI[cat]+" " : ""; }
+// Evita re-renderizar la búsqueda (con fotos pesadas) en cada tecla mientras se escribe rápido.
+function debounce(fn, ms){
+  let t;
+  return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); };
+}
+const buscarProductoPedidoDeb = debounce((...a)=>buscarProductoPedido(...a), 180);
+const filtrarPreciosDeb = debounce((...a)=>filtrarPrecios(...a), 180);
+const buscarProductoDevolucionDeb = debounce((...a)=>buscarProductoDevolucion(...a), 180);
+const buscarProductoDescuentoDeb = debounce((...a)=>buscarProductoDescuento(...a), 180);
+const buscarProductoObjetivoDeb = debounce((...a)=>buscarProductoObjetivo(...a), 180);
 
 // Productos Tregar sin la marca en el nombre (se la sacaron en alguna lista
 // pero siguen siendo de la misma línea) para que de todos modos entren en
@@ -2162,7 +2172,9 @@ function buscarProductoPedido(q){
   const el = document.getElementById("ped-resultados");
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
-  const entries = Object.entries(PRECIOS).filter(([cod,p])=>coincideBusqueda(cod,p,q));
+  // Tope de resultados: sin esto, una búsqueda amplia (ej. "tregar") renderiza
+  // de una decenas de fotos pesadas en cada letra tipeada y traba el celular.
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>coincideBusqueda(cod,p,q)).slice(0,40);
   const numCliente = clienteActual?.num;
   const grupos = agruparEntradas(entries);
   const tarjeta = ([cod,p])=>{
@@ -2272,7 +2284,7 @@ function renderPedido() {
   return `
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
-        <input type="text" id="ped-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoPedido(this.value)">
+        <input type="text" id="ped-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoPedidoDeb(this.value)">
       </label></div>
       <div id="ped-resultados" class="resultados-buscador"></div>
     </div>
@@ -2426,7 +2438,7 @@ function renderDevoluciones(){
   return `
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
-        <input type="text" id="dev-buscar" placeholder="Ej: Yogur frutilla" autocomplete="off" oninput="buscarProductoDevolucion(this.value)">
+        <input type="text" id="dev-buscar" placeholder="Ej: Yogur frutilla" autocomplete="off" oninput="buscarProductoDevolucionDeb(this.value)">
       </label></div>
       <div id="dev-resultados" class="resultados-buscador"></div>
     </div>
@@ -2819,7 +2831,7 @@ function abrirPrecios() {
 function filtrarPrecios(q) {
   q = (q||"").toLowerCase().trim();
   const entries = Object.entries(PRECIOS);
-  const filtered = q ? entries.filter(([cod,p])=>coincideBusqueda(cod,p,q)) : entries;
+  const filtered = (q ? entries.filter(([cod,p])=>coincideBusqueda(cod,p,q)) : entries).slice(0,150);
   const grupos = agruparEntradas(filtered);
   document.getElementById("lista-precios").innerHTML = filtered.length ? grupos.map(g=>
     htmlSeccionHeader(g.titulo) + g.items.map(([cod,p])=>`
@@ -3372,7 +3384,7 @@ function formularioObjetivo(id){
       <div class="form-row"><label>Ya vendido (actual, de arranque)<input type="number" id="of-actual" step="any" min="0" value="${o?o.actual:0}" placeholder="Ej: 24"></label></div>
       <div class="form-row">
         <label>Productos que suman a este objetivo
-          <input type="text" id="of-buscar-prod" placeholder="Buscar producto por código o nombre..." oninput="buscarProductoObjetivo(this.value)" autocomplete="off">
+          <input type="text" id="of-buscar-prod" placeholder="Buscar producto por código o nombre..." oninput="buscarProductoObjetivoDeb(this.value)" autocomplete="off">
         </label>
       </div>
       <div id="of-prod-resultados" class="resultados-buscador"></div>
