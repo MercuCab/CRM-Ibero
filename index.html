@@ -414,6 +414,8 @@ body{
 .flyer-cargando{padding:40px 10px;text-align:center;color:var(--ink-dim);font-size:14px}
 .fuera-lista{color:#b45309;font-weight:600}
 .fuera-lista-box{background:#fef3c7;color:#92400e;border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:8px}
+.sec-header{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--ink-dim);padding:14px 4px 6px;margin-top:4px;border-bottom:1px solid var(--line, #e5e7eb)}
+.sec-header:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -731,6 +733,49 @@ const CAT_EMOJI = {
   "SNACK":"🍟", "VARIOS":"📦"
 };
 function catEmoji(cat){ return CAT_EMOJI[cat] ? CAT_EMOJI[cat]+" " : ""; }
+
+// Productos Tregar sin la marca en el nombre (se la sacaron en alguna lista
+// pero siguen siendo de la misma línea) para que de todos modos entren en
+// la sección TREGAR.
+const TREGAR_EXTRA_COD = new Set(["2580","2581","2584","2585","2586","2594","2595","2596","2597","2549","2407"]);
+function esTregar(cod, p){ return /TREGAR/i.test(p.n) || TREGAR_EXTRA_COD.has(cod); }
+const BEBIBLE_COD = new Set(["2521","2522","2523","2524","2580","2581"]);
+function esBebible(cod){ return BEBIBLE_COD.has(cod); }
+// Alias de búsqueda: términos por los que un producto sigue siendo
+// encontrable aunque la lista oficial le haya cambiado el nombre.
+const ALIAS_BUSQUEDA = {"2521":"bebible","2522":"bebible","2523":"bebible","2524":"bebible","2580":"bebible","2581":"bebible"};
+function coincideBusqueda(cod, p, q){
+  if(!q) return true;
+  if(cod.includes(q) || p.n.toLowerCase().includes(q)) return true;
+  const alias = ALIAS_BUSQUEDA[cod];
+  return !!(alias && alias.includes(q));
+}
+function subTregar(cod, p){
+  if(esBebible(cod)) return "Bebibles";
+  const n = p.n.toUpperCase();
+  if(n.startsWith("LECHE")) return "Leches";
+  if(n.startsWith("CREMA")) return "Cremas";
+  if(n.startsWith("YOGUR")) return "Yogures";
+  if(n.startsWith("ARROZ CON LECHE") || n.startsWith("DULCE DE LECHE")) return "Postres";
+  return "Quesos y untables";
+}
+function seccionDe(cod, p){
+  return esTregar(cod, p) ? `TREGAR — ${subTregar(cod, p)}` : p.c;
+}
+function emojiSeccion(titulo){ return titulo.startsWith("TREGAR") ? "🐄 " : catEmoji(titulo); }
+// Agrupa [cod,p] en secciones (Tregar aparte por sub-tipo, el resto por
+// categoría), conservando el orden de primera aparición de cada sección.
+function agruparEntradas(entries){
+  const grupos = [];
+  const indice = new Map();
+  entries.forEach(([cod,p])=>{
+    const key = seccionDe(cod, p);
+    if(!indice.has(key)){ indice.set(key, grupos.length); grupos.push({titulo:key, items:[]}); }
+    grupos[indice.get(key)].items.push([cod,p]);
+  });
+  return grupos;
+}
+function htmlSeccionHeader(titulo){ return `<div class="sec-header">${emojiSeccion(titulo)}${htmlEsc(titulo)}</div>`; }
 const DIAS = ["Lunes","Martes","Miercoles","Jueves","Viernes"];
 const DIA_HOY = ["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"][new Date().getDay()];
 let diaActual = DIAS.includes(DIA_HOY) ? DIA_HOY : "Lunes";
@@ -1755,12 +1800,18 @@ function guardarBorradorPedido(){
   saveBorradores();
 }
 
+// Fecha del último borrador recuperado por borradorPendiente(), para avisar
+// si es de otro día (efecto lateral igual que pedidoEditandoId más abajo).
+let borradorFechaRecuperado = null;
 function borradorPendiente(num){
   const key = `${diaActual}-${num}`;
   const b = BORRADORES[key];
-  if(b && b.fecha===hoy()){ pedidoEditandoId = b.editId ?? null; return b.items.map(it=>({...it})); }
-  if(b){ delete BORRADORES[key]; saveBorradores(); }
-  return null;
+  if(!b) return null;
+  // Un pedido sin guardar nunca se borra solo, aunque haya cambiado el día:
+  // se recupera igual para no perder lo que ya se cargó.
+  pedidoEditandoId = b.editId ?? null;
+  borradorFechaRecuperado = b.fecha;
+  return b.items.map(it=>({...it}));
 }
 
 function selCliente(num, nom) {
@@ -1769,7 +1820,8 @@ function selCliente(num, nom) {
   if(borrador){
     pedidoActual = borrador;
     pedidoSucio = true;
-    setTimeout(()=>mostrarAviso("Recuperamos un pedido sin guardar de hoy"), 300);
+    const esDeHoy = borradorFechaRecuperado===hoy();
+    setTimeout(()=>mostrarAviso(esDeHoy ? "Recuperamos un pedido sin guardar de hoy" : `Recuperamos un pedido sin guardar del ${borradorFechaRecuperado}`), 300);
   } else {
     pedidoActual = cargarPedidoDeHoy(num);
     pedidoSucio = false;
@@ -2085,9 +2137,10 @@ function buscarProductoPedido(q){
   const el = document.getElementById("ped-resultados");
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
-  const entries = Object.entries(PRECIOS).filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q));
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>coincideBusqueda(cod,p,q));
   const numCliente = clienteActual?.num;
-  el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>{
+  const grupos = agruparEntradas(entries);
+  const tarjeta = ([cod,p])=>{
     const descRecordado = descuentoRecordado(numCliente, cod);
     return `
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
@@ -2107,7 +2160,8 @@ function buscarProductoPedido(q){
         <button class="btn btn-accent" style="width:auto;margin-top:0;padding:9px 16px;flex-shrink:0" onclick="agregarDesdeResultado('${esc(cod)}')">+</button>
       </div>
     </div>`;
-  }).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
+  };
+  el.innerHTML = entries.length ? grupos.map(g=>htmlSeccionHeader(g.titulo)+g.items.map(tarjeta).join("")).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
 }
 
 function agregarAlPedido(cod, qty, desc){
@@ -2281,7 +2335,7 @@ function buscarProductoDevolucion(q){
   q = (q||"").toLowerCase().trim();
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
-  const entries = Object.entries(PRECIOS).filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q));
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>coincideBusqueda(cod,p,q));
   el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
       <div style="display:flex;gap:10px">
@@ -2737,15 +2791,18 @@ function abrirPrecios() {
 function filtrarPrecios(q) {
   q = (q||"").toLowerCase().trim();
   const entries = Object.entries(PRECIOS);
-  const filtered = q ? entries.filter(([cod,p])=>cod.includes(q)||p.n.toLowerCase().includes(q)) : entries;
-  document.getElementById("lista-precios").innerHTML = filtered.length ? filtered.slice(0,200).map(([cod,p])=>`
+  const filtered = q ? entries.filter(([cod,p])=>coincideBusqueda(cod,p,q)) : entries;
+  const grupos = agruparEntradas(filtered);
+  document.getElementById("lista-precios").innerHTML = filtered.length ? grupos.map(g=>
+    htmlSeccionHeader(g.titulo) + g.items.map(([cod,p])=>`
     <div class="cli-card">
       <div class="cli-main" onclick="selProducto('${esc(cod)}')">
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
         <div style="flex:1;min-width:0"><div class="cli-nom">${p.n}</div><div class="cli-num">${cod} · ${catEmoji(p.c)}${p.c}${p.x?` · <span class="fuera-lista">no figura en la lista del ${PRECIOS_VERSION_TXT}</span>`:""}</div></div>
         <span class="prod-price">${money(p.v)}</span>
       </div>
-    </div>`).join("") : `<div class="empty">Sin resultados${q?` para "${q}"`:""}.</div>`;
+    </div>`).join("")
+  ).join("") : `<div class="empty">Sin resultados${q?` para "${q}"`:""}.</div>`;
 }
 
 function selProducto(cod) {
@@ -3151,7 +3208,7 @@ function buscarProductoDescuento(q){
   q = (q||"").toLowerCase().trim();
   if(!q){ el.innerHTML = ""; return; }
   const yaAgregados = new Set(DESCUENTOS_MES.map(d=>d.cod));
-  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!yaAgregados.has(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!yaAgregados.has(cod) && coincideBusqueda(cod,p,q));
   el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="obj-prod-result" onclick="agregarDescuentoMes('${esc(cod)}')">
       <span>${htmlEsc(p.n)}</span><span class="obj-prod-cod">${cod} +</span>
@@ -3334,7 +3391,7 @@ function buscarProductoObjetivo(q){
   const el = document.getElementById("of-prod-resultados");
   q = (q||"").toLowerCase().trim();
   if(!q){ el.innerHTML = ""; return; }
-  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!objCodigosPendientes.includes(cod) && (cod.includes(q)||p.n.toLowerCase().includes(q)));
+  const entries = Object.entries(PRECIOS).filter(([cod,p])=>!objCodigosPendientes.includes(cod) && coincideBusqueda(cod,p,q));
   el.innerHTML = entries.length ? entries.slice(0,30).map(([cod,p])=>`
     <div class="obj-prod-result" onclick="agregarCodigoObjetivo('${esc(cod)}')">
       <span>${p.n}</span><span class="obj-prod-cod">${cod} +</span>
