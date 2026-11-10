@@ -1,5 +1,5 @@
 // Service Worker v6 — fuerza actualización siempre
-const CACHE = "crm-ibero-v19";
+const CACHE = "crm-ibero-v20";
 const FILES = ["./", "./index.html", "./manifest.json", "./promos.json", "./fotos/index.json"];
 
 self.addEventListener("install", e => {
