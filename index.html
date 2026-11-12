@@ -1779,12 +1779,9 @@ function buscarProductoPedido(q){
   const el = document.getElementById("ped-resultados");
   if(!el) return;
   if(!q){ el.innerHTML = ""; return; }
-  // Tope de resultados: sin esto, una búsqueda amplia (ej. "tregar") renderiza
-  // de una decenas de fotos pesadas en cada letra tipeada y traba el celular.
   const entries = Object.entries(PRECIOS).filter(([cod,p])=>coincideBusqueda(cod,p,q)).slice(0,150);
   const numCliente = clienteActual?.num;
-  const grupos = agruparEntradas(entries);
-  const tarjeta = ([cod,p])=>{
+  el.innerHTML = entries.length ? entries.map(([cod,p])=>{
     const descRecordado = descuentoRecordado(numCliente, cod);
     return `
     <div class="card" style="margin-bottom:8px;padding:10px 12px">
@@ -1792,7 +1789,7 @@ function buscarProductoPedido(q){
         ${FOTOS[cod]?`<img class="prod-thumb" src="${FOTOS[cod]}" alt="">`:`<div class="prod-thumb prod-thumb-empty"></div>`}
         <div style="flex:1;min-width:0">
           <div class="cli-nom">${p.n}</div>
-          <div class="cli-num">${cod} · ${catEmoji(p.c)}${p.c}</div>
+          <div class="cli-num">${cod}</div>
           <span class="prod-price" style="margin-left:0">${money(p.v)}</span>
           ${p.k?`<div style="font-size:11px;color:var(--info)">≈ ${money(p.v*p.k)} la pieza (${p.k}kg aprox.)</div>`:""}
           ${descRecordado?`<div style="font-size:11px;color:var(--accent)">% recordado para este cliente: ${descRecordado}%</div>`:""}
@@ -1804,8 +1801,7 @@ function buscarProductoPedido(q){
         <button class="btn btn-accent" style="width:auto;margin-top:0;padding:9px 16px;flex-shrink:0" onclick="agregarDesdeResultado('${esc(cod)}')">+</button>
       </div>
     </div>`;
-  };
-  el.innerHTML = entries.length ? grupos.map(g=>htmlSeccionHeader(g.titulo)+g.items.map(tarjeta).join("")).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
+  }).join("") : `<div class="empty" style="padding:14px 4px">Sin resultados para "${q}".</div>`;
 }
 
 function agregarAlPedido(cod, qty, desc){
