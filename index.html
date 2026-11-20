@@ -1814,6 +1814,97 @@ function agregarAlPedido(cod, qty, desc){
   return true;
 }
 
+// ===== Pegar pedido de WhatsApp =====
+// El texto se manda a n8n, que usa Claude para separar productos y cantidades.
+// Después la app busca cada producto en la lista de precios (priorizando lo que
+// el cliente ya compró) y Eduardo revisa todo antes de agregarlo al pedido.
+const WA_WEBHOOK = "https://merucab.app.n8n.cloud/webhook/pedido-whatsapp";
+let waAbierto = false, waCargando = false, waItems = [], waTexto = "", waExtra = "";
+function waNorm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
+const WA_STOP = new Set(["de","del","la","el","los","las","con","sin","y","x","por","kg","kilo","kilos","gr","grs","g","caja","cajas","horma","hormas","pieza","piezas","unidad","unidades","u","un","una","unos","media","medio","paquete","paquetes"]);
+function waCandidatos(texto){
+  const toks = waNorm(texto).split(" ").filter(t=>t.length>1 && !WA_STOP.has(t));
+  if(!toks.length) return [];
+  const hist = new Set();
+  if(clienteActual){ (DATA[`${diaActual}-${clienteActual.num}`]||[]).forEach(v=>(v.items||[]).forEach(it=>hist.add(it.cod))); }
+  const out = [];
+  Object.entries(PRECIOS).forEach(([cod,p])=>{
+    const n = waNorm(p.n);
+    let hits = 0;
+    toks.forEach(t=>{ if(n.includes(t)) hits++; else if(t.length>4 && n.includes(t.slice(0,t.length-1))) hits+=0.7; });
+    if(!hits) return;
+    let score = hits/toks.length*10;
+    if(hist.has(cod)) score += 3;
+    out.push({cod, score});
+  });
+  return out.sort((a,b)=>b.score-a.score).slice(0,6);
+}
+function renderWhatsAppCard(){
+  if(!waAbierto) return `<div class="card"><button class="btn btn-ghost" style="margin-top:0" onclick="waToggle()">💬 Pegar pedido de WhatsApp</button></div>`;
+  const filas = waItems.map((it,i)=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+      <div style="font-size:12px;color:var(--ink-dim);margin-bottom:6px">Pidió: <b>${htmlEsc(it.cantidad??"")} ${htmlEsc(it.unidad||"")} ${htmlEsc(it.producto||"")}</b></div>
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <div class="form-row" style="flex:3;margin-bottom:0"><select id="wa-cod-${i}">
+          ${it.cands.map(c=>`<option value="${attrEsc(c.cod)}">${htmlEsc(c.cod)} · ${htmlEsc(PRECIOS[c.cod]?.n||"")}</option>`).join("")}
+          <option value="">— No agregar —</option>
+        </select></div>
+        <div class="form-row" style="flex:1;margin-bottom:0"><input type="number" id="wa-qty-${i}" inputmode="numeric" min="1" value="${Math.max(1,Math.round(Number(it.cantidad)||1))}"></div>
+      </div>
+      ${it.cands.length?"":`<div style="font-size:11px;color:var(--pending);margin-top:4px">No encontré este producto en la lista. Buscalo a mano abajo.</div>`}
+    </div>`).join("");
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="card-title" style="margin:0">💬 Pedido de WhatsApp</div>
+        <button class="link-btn" onclick="waToggle()">Cerrar</button>
+      </div>
+      ${waItems.length?`
+        ${filas}
+        ${waExtra?`<div style="font-size:12px;color:var(--info);margin-top:8px">${htmlEsc(waExtra)}</div>`:""}
+        <button class="btn btn-accent" onclick="waAgregarTodo()">Agregar al pedido</button>
+        <button class="btn btn-ghost" onclick="waItems=[];renderTab()">Volver a pegar</button>
+      `:`
+        <div class="form-row"><textarea id="wa-texto" placeholder="Pegá acá el mensaje del cliente" oninput="waTexto=this.value">${htmlEsc(waTexto)}</textarea></div>
+        <button class="btn btn-accent" ${waCargando?"disabled":""} onclick="waInterpretar()">${waCargando?"Leyendo el pedido…":"Interpretar con Claude"}</button>
+      `}
+    </div>`;
+}
+function waToggle(){ waAbierto = !waAbierto; if(!waAbierto){ waItems=[]; waTexto=""; waExtra=""; } renderTab(); }
+async function waInterpretar(){
+  const txt = (document.getElementById("wa-texto")?.value||"").trim();
+  waTexto = txt;
+  if(!txt){ mostrarAviso("Pegá primero el mensaje del cliente."); return; }
+  waCargando = true; renderTab();
+  try{
+    const r = await fetch(WA_WEBHOOK, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({mensaje: txt})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    let d = await r.json();
+    if(Array.isArray(d)) d = d[0]||{};
+    const o = d.output || d;
+    const items = Array.isArray(o.items) ? o.items : [];
+    if(!items.length){ mostrarAviso("No encontré productos en el mensaje."); }
+    waItems = items.map(it=>({...it, cands: waCandidatos(it.producto)}));
+    waExtra = [o.entrega?`Entrega: ${o.entrega}`:"", o.notas?`Notas: ${o.notas}`:""].filter(Boolean).join(" · ");
+  }catch(e){
+    mostrarAviso("No pude conectar con n8n. Revisá tu conexión o que el flujo esté publicado.");
+  }
+  waCargando = false; renderTab();
+}
+function waAgregarTodo(){
+  let n = 0;
+  waItems.forEach((it,i)=>{
+    const cod = document.getElementById(`wa-cod-${i}`)?.value;
+    const qty = parseInt(document.getElementById(`wa-qty-${i}`)?.value)||0;
+    if(!cod || qty<=0) return;
+    const desc = descuentoRecordado(clienteActual?.num, cod) || 0;
+    if(agregarAlPedido(cod, qty, desc)) n++;
+  });
+  waAbierto = false; waItems = []; waTexto = ""; waExtra = "";
+  renderTab();
+  mostrarAviso(n ? `Agregué ${n} producto${n>1?"s":""} al pedido. Revisalo antes de guardar.` : "No se agregó ningún producto.");
+}
+
 function agregarDesdeResultado(cod){
   const qtyInput = document.getElementById(`sr-qty-${cod}`);
   const qty = parseInt(qtyInput?.value)||0;
@@ -1885,6 +1976,7 @@ function renderPedido() {
   const historial = clienteActual ? historialCompletoProductos(clienteActual.num) : [];
   const visitasHoyCount = clienteActual ? visitasDeHoy(clienteActual.num).length : 0;
   return `
+    ${renderWhatsAppCard()}
     <div class="card">
       <div class="form-row"><label>Buscar producto por nombre o código
         <input type="text" id="ped-buscar" placeholder="Ej: Jamon bocatti" autocomplete="off" oninput="buscarProductoPedidoDeb(this.value)">
